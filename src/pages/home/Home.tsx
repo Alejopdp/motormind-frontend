@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import axios from 'axios'
+import { useEffect, useState } from 'react'
 import { Form, InputGroup } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
@@ -8,8 +9,18 @@ const Home = () => {
     const navigate = useNavigate()
     const [vinCode, setVinCode] = useState('')
 
+    useEffect(() => {
+        const wakeUpServer = async () => {
+            try {
+                await axios.get(`${import.meta.env.VITE_API_URL}`)
+            } catch (error) {
+                console.error('Error pinging the server', error)
+            }
+        }
+        wakeUpServer()
+    }, [])
+
     const redirectToCarDetails = (vinCode: string) => {
-        // Redirect to /car/:carId
         navigate(`/car/${vinCode}`)
     }
 
