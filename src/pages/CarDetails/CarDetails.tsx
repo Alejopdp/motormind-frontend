@@ -1,14 +1,16 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
-import { Col, Container, Row } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import VehicleInformation from '../../components/molecules/VehicleInformation/VehicleInformation'
+import { useCar } from '../../context/Car.context'
 
 const CarDetails = () => {
     const [isLoading, setIsLoading] = useState(true)
-    const [car, setCar] = useState<any>({})
+    const { car, setCar } = useCar()
     const params = useParams()
+    const navigate = useNavigate()
 
     useEffect(() => {
         const carId = params.carId
@@ -26,6 +28,10 @@ const CarDetails = () => {
         fectchCarById()
     }, [])
 
+    const redirectToCreateDiagnostic = () => {
+        navigate(`/car/${params.carId}/create`)
+    }
+
     if (!car || isLoading) return <p>Cargando...</p>
 
     return (
@@ -34,56 +40,10 @@ const CarDetails = () => {
                 <Card.Title as="h3" className="mb-2">
                     {car.vinCode}
                 </Card.Title>
-                <Button>+ Crear nuevo diagnóstico</Button>
-                <Card className="mt-4">
-                    <Card.Body>
-                        <Card.Title className="mb-2">
-                            Información del vehículo
-                        </Card.Title>
-                        <Container>
-                            <Row className="p-0">
-                                <Col className="p-0">
-                                    <p
-                                        className="mb-0 text-muted"
-                                        style={{ fontSize: 14 }}
-                                    >
-                                        Marca
-                                    </p>
-                                    <p>{car.brand}</p>
-                                </Col>
-                                <Col className="p-0">
-                                    <p
-                                        className="mb-0 text-muted"
-                                        style={{ fontSize: 14 }}
-                                    >
-                                        Modelo
-                                    </p>
-                                    <p>{car.model}</p>
-                                </Col>
-                            </Row>
-                            <Row className="p-0">
-                                <Col className="p-0">
-                                    <p
-                                        className="mb-0 text-muted"
-                                        style={{ fontSize: 14 }}
-                                    >
-                                        Año
-                                    </p>
-                                    <p>{car.year}</p>
-                                </Col>
-                                <Col className="p-0">
-                                    <p
-                                        className="mb-0 text-muted"
-                                        style={{ fontSize: 14 }}
-                                    >
-                                        VIN
-                                    </p>
-                                    <p>{car.vinCode}</p>
-                                </Col>
-                            </Row>
-                        </Container>
-                    </Card.Body>
-                </Card>
+                <Button onClick={redirectToCreateDiagnostic}>
+                    + Crear nuevo diagnóstico
+                </Button>
+                <VehicleInformation car={car} />
             </Card.Body>
         </Card>
     )
