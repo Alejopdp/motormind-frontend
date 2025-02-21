@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Form, InputGroup } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
@@ -9,19 +9,18 @@ const Home = () => {
     const navigate = useNavigate()
     const [vinCode, setVinCode] = useState('')
 
-    useEffect(() => {
-        const wakeUpServer = async () => {
-            try {
-                await axios.get(`${import.meta.env.VITE_API_URL}`)
-            } catch (error) {
-                console.error('Error pinging the server', error)
-            }
-        }
-        wakeUpServer()
-    }, [])
+    const redirectToCarDetails = (id: string) => {
+        navigate(`/car/${id}`)
+    }
 
-    const redirectToCarDetails = (vinCode: string) => {
-        navigate(`/car/${vinCode}`)
+    const getCarByVinCode = async () => {
+        const res = await axios.get(
+            import.meta.env.VITE_API_URL + '/car/vin/' + vinCode
+        )
+
+        if (res.status === 200) {
+            redirectToCarDetails(res.data._id)
+        }
     }
 
     return (
@@ -33,7 +32,7 @@ const Home = () => {
                 <Form
                     onSubmit={(e) => {
                         e.preventDefault()
-                        redirectToCarDetails(vinCode)
+                        getCarByVinCode()
                     }}
                 >
                     <Form.Label className="fw-medium">
@@ -53,7 +52,7 @@ const Home = () => {
                             size="lg"
                             disabled={!vinCode}
                             onClick={() => {
-                                redirectToCarDetails(vinCode)
+                                getCarByVinCode()
                             }}
                         >
                             Buscar diágnosticos

@@ -1,13 +1,38 @@
+import axios from 'axios'
+import { useEffect, useState } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
+import { useParams } from 'react-router-dom'
 
 const CarDetails = () => {
+    const [isLoading, setIsLoading] = useState(true)
+    const [car, setCar] = useState<any>({})
+    const params = useParams()
+
+    useEffect(() => {
+        const carId = params.carId
+
+        const fectchCarById = async () => {
+            const res = await axios.get(
+                import.meta.env.VITE_API_URL + '/car/' + carId
+            )
+            if (res.status === 200) {
+                setCar(res.data)
+                setIsLoading(false)
+            }
+        }
+
+        fectchCarById()
+    }, [])
+
+    if (!car || isLoading) return <p>Cargando...</p>
+
     return (
         <Card>
             <Card.Body>
                 <Card.Title as="h3" className="mb-2">
-                    1HGCM826633A123456
+                    {car.vinCode}
                 </Card.Title>
                 <Button>+ Crear nuevo diagnóstico</Button>
                 <Card className="mt-4">
@@ -24,7 +49,7 @@ const CarDetails = () => {
                                     >
                                         Marca
                                     </p>
-                                    <p>Toyota</p>
+                                    <p>{car.brand}</p>
                                 </Col>
                                 <Col className="p-0">
                                     <p
@@ -33,7 +58,7 @@ const CarDetails = () => {
                                     >
                                         Modelo
                                     </p>
-                                    <p>Corolla</p>
+                                    <p>{car.model}</p>
                                 </Col>
                             </Row>
                             <Row className="p-0">
@@ -44,7 +69,7 @@ const CarDetails = () => {
                                     >
                                         Año
                                     </p>
-                                    <p>2020</p>
+                                    <p>{car.year}</p>
                                 </Col>
                                 <Col className="p-0">
                                     <p
@@ -53,7 +78,7 @@ const CarDetails = () => {
                                     >
                                         VIN
                                     </p>
-                                    <p>1HGCM826633A123456</p>
+                                    <p>{car.vinCode}</p>
                                 </Col>
                             </Row>
                         </Container>
