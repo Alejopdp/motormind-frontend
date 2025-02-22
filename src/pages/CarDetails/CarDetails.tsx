@@ -15,6 +15,8 @@ const CarDetails = () => {
     useEffect(() => {
         const carId = params.carId
 
+        if (car && carId === car._id) return
+
         const fectchCarById = async () => {
             const res = await axios.get(
                 import.meta.env.VITE_API_URL + '/car/' + carId

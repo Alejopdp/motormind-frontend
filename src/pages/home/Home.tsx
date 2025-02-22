@@ -4,8 +4,10 @@ import { Form, InputGroup } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import { useNavigate } from 'react-router-dom'
+import { useCar } from '../../context/Car.context'
 
 const Home = () => {
+    const { setCar } = useCar()
     const navigate = useNavigate()
     const [vinCode, setVinCode] = useState('')
 
@@ -19,6 +21,7 @@ const Home = () => {
         )
 
         if (res.status === 200) {
+            setCar(res.data)
             redirectToCarDetails(res.data._id)
         }
     }
