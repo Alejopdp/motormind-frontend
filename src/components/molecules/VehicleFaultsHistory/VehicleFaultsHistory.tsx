@@ -4,6 +4,7 @@ import { Diagnosis } from '../../../pages/Diagnosis/Diagnosis'
 
 const VehicleFaultsHistory = () => {
     const { diagnoses, isLoadingDiagnoses } = useCar()
+    console.log({ diagnoses })
 
     return (
         <div>
