@@ -5,6 +5,8 @@ export default defineConfig({
   plugins: [react()],
   define: {
     'process.env': {}
-  }
+  },
+  base: '/motormind-frontend/' // Asegúrate de usar el nombre de tu repositorio aquí
+
 })
 
