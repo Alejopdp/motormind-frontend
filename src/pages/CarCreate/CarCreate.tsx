@@ -1,7 +1,7 @@
 import { Button, Form, Spinner } from 'react-bootstrap'
 import VehicleInformation from '../../components/molecules/VehicleInformation/VehicleInformation'
 import { useCar } from '../../context/Car.context'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 
@@ -19,7 +19,9 @@ const CarCreate = () => {
         useState(false)
     const [questions, setQuestions] = useState([])
     const [secondStepNotes, setSecondStepNotes] = useState('')
+    const [isCreatingDiagnosis, setIsCreatingDiagnosis] = useState(false)
     const step = searchParams.get('step')
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (!searchParams.get('step')) {
@@ -29,6 +31,7 @@ const CarCreate = () => {
     }, [])
 
     const createQuestions = async () => {
+        if (isCreatingQuestions) return
         setIsCreatingQuestions(true)
         const carId = car._id
 
@@ -51,6 +54,7 @@ const CarCreate = () => {
     }
 
     const createMoreQuestions = async () => {
+        if (isCreatingMoreQuestions || isCreatingDiagnosis) return
         setIsCreatingMoreQuestions(true)
         const carId = car._id
 
@@ -67,6 +71,26 @@ const CarCreate = () => {
             setQuestions(res.data)
         }
         setIsCreatingMoreQuestions(false)
+    }
+
+    const createDiagnosis = async () => {
+        if (isCreatingDiagnosis || isCreatingMoreQuestions) return
+        setIsCreatingDiagnosis(true)
+        const carId = car._id
+
+        const res = await axios.post(
+            import.meta.env.VITE_API_URL + '/car/' + carId + '/diagnosis',
+            {
+                fault,
+                notes: secondStepNotes,
+            }
+        )
+
+        if (res.status === 200) {
+            navigate(`/car/${carId}/diagnosis/${res.data._id}`)
+        }
+
+        setIsCreatingDiagnosis(false)
     }
 
     if (!car) return null
@@ -179,12 +203,14 @@ const CarCreate = () => {
                     </Button>
                     <Button
                         className="d-flex"
-                        style={{ minWidth: '205px' }}
+                        style={{ minWidth: '210px' }}
                         variant="primary"
                         size="lg"
-                        onClick={isCreatingMoreQuestions ? () => '' : () => ''}
+                        onClick={
+                            isCreatingDiagnosis ? () => '' : createDiagnosis
+                        }
                     >
-                        {isCreatingQuestions ? (
+                        {isCreatingDiagnosis ? (
                             <Spinner
                                 className="mx-auto"
                                 style={{
