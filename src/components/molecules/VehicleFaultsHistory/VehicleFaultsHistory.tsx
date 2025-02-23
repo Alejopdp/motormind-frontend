@@ -67,6 +67,7 @@ const VehicleFaultsHistory = () => {
                                     style={{
                                         marginLeft: 'auto',
                                         textDecoration: 'none',
+                                        flexShrink: 0,
                                     }}
                                     onClick={() =>
                                         navigateToDiagnosis(diagnosis)

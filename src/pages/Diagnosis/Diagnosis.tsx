@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import VehicleInformation from '../../components/molecules/VehicleInformation/VehicleInformation'
 import { useCar } from '../../context/Car.context'
-import { Button, Form } from 'react-bootstrap'
+import { Button, Form, Container, Row, Col } from 'react-bootstrap'
 import axios from 'axios'
 import { useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
@@ -35,7 +35,7 @@ const DiagnosisPage = () => {
     const params = useParams()
     const [isLoadingDiagnosis, setIsLoadingDiagnosis] = useState(true)
     const [diagnosis, setDiagnosis] = useState<Diagnosis | undefined>(undefined)
-    const [techincalNotes, setTechnicalNotes] = useState('')
+    const [technicalNotes, setTechnicalNotes] = useState('')
     const [isCreatingFinalDiagnosis, setIsCreatingFinalDiagnosis] =
         useState(false)
     const [isUpdatingDiagnosis, setIsUpdatingDiagnosis] = useState(false)
@@ -44,7 +44,6 @@ const DiagnosisPage = () => {
 
     useEffect(() => {
         const diagnosisId = params.diagnosisId
-
         if (!diagnosisId) return
 
         const getDiagnosis = async () => {
@@ -55,7 +54,6 @@ const DiagnosisPage = () => {
                 setDiagnosis(res.data)
                 setIsLoadingDiagnosis(false)
             }
-            setIsLoadingDiagnosis(false)
         }
 
         getDiagnosis()
@@ -70,21 +68,14 @@ const DiagnosisPage = () => {
         const carId = car._id
         const res = await axios.post(
             import.meta.env.VITE_API_URL +
-                '/car/' +
-                carId +
-                '/diagnosis/' +
-                diagnosis?._id +
-                '/final',
-            {
-                techincalNotes,
-            }
+                `/car/${carId}/diagnosis/${diagnosis?._id}/final`,
+            { technicalNotes }
         )
 
         if (res.status === 200) {
             setDiagnosis(res.data)
             setDiagnoses([...diagnoses, res.data])
         }
-
         setIsCreatingFinalDiagnosis(false)
     }
 
@@ -93,13 +84,8 @@ const DiagnosisPage = () => {
         setIsUpdatingDiagnosis(true)
         const res = await axios.put(
             import.meta.env.VITE_API_URL +
-                '/car/' +
-                car._id +
-                '/diagnosis/' +
-                diagnosis?._id,
-            {
-                finalNotes,
-            }
+                `/car/${car._id}/diagnosis/${diagnosis?._id}`,
+            { finalNotes }
         )
 
         if (res.status === 200) {
@@ -108,7 +94,6 @@ const DiagnosisPage = () => {
                 diagnoses.map((d) => (d._id === diagnosis?._id ? res.data : d))
             )
         }
-
         setIsUpdatingDiagnosis(false)
     }
 
@@ -122,9 +107,8 @@ const DiagnosisPage = () => {
     if (!car) return null
 
     return (
-        <>
+        <Container>
             <VehicleInformation car={car} />
-
             {isLoadingDiagnosis || !diagnosis ? (
                 <Spinner className="d-flex mx-auto mt-4" />
             ) : !diagnosis.diagnosis ? (
@@ -171,17 +155,13 @@ const DiagnosisPage = () => {
                             </ul>
                         </div>
                     ))}
-
                     <Form>
-                        <Form.Group
-                            className="mb-4"
-                            controlId="exampleForm.ControlTextarea1"
-                        >
+                        <Form.Group className="mb-4">
                             <Form.Label className="fw-medium">
                                 Información del técnico
                             </Form.Label>
                             <Form.Control
-                                value={techincalNotes}
+                                value={technicalNotes}
                                 onChange={(e) =>
                                     setTechnicalNotes(e.target.value)
                                 }
@@ -190,28 +170,22 @@ const DiagnosisPage = () => {
                                 placeholder="Ingrese notas adicionales y relevantes sobre el diagnóstico"
                             />
                         </Form.Group>
-                        <div
-                            className="d-flex justify-content-end gap-4"
-                            style={{ marginLeft: 'auto' }}
-                        >
-                            <Button
-                                className="d-flex"
-                                style={{ minWidth: '210px', minHeight: 48 }}
-                                variant="primary"
-                                size="lg"
-                                onClick={
-                                    isCreatingFinalDiagnosis
-                                        ? () => ''
-                                        : createFinalDiagnosis
-                                }
-                            >
-                                {isCreatingFinalDiagnosis ? (
-                                    <Spinner />
-                                ) : (
-                                    'Crear diagnóstico final'
-                                )}
-                            </Button>
-                        </div>
+                        <Row className="d-flex justify-content-end text-center">
+                            <Col xs={12} lg={4}>
+                                <Button
+                                    className="w-100"
+                                    variant="primary"
+                                    size="lg"
+                                    onClick={createFinalDiagnosis}
+                                >
+                                    {isCreatingFinalDiagnosis ? (
+                                        <Spinner />
+                                    ) : (
+                                        'Crear diagnóstico final'
+                                    )}
+                                </Button>
+                            </Col>
+                        </Row>
                     </Form>
                 </>
             ) : (
@@ -220,12 +194,8 @@ const DiagnosisPage = () => {
                     <div className="prose lg:prose-lg">
                         <ReactMarkdown>{diagnosis.diagnosis}</ReactMarkdown>
                     </div>
-
                     <Form>
-                        <Form.Group
-                            className="mb-4"
-                            controlId="exampleForm.ControlTextarea1"
-                        >
+                        <Form.Group className="mb-4">
                             <Form.Label className="fw-medium">
                                 Información relevante
                             </Form.Label>
@@ -237,37 +207,36 @@ const DiagnosisPage = () => {
                                 placeholder="Incluir más información"
                             />
                         </Form.Group>
-                        <div
-                            className="d-flex justify-content-end gap-4"
-                            style={{ marginLeft: 'auto' }}
-                        >
-                            <Button
-                                className="d-flex"
-                                style={{ minWidth: '210px' }}
-                                variant="secondary"
-                                size="lg"
-                                onClick={copyDiagnosis}
-                            >
-                                Copiar diagnóstico
-                            </Button>
-                            <Button
-                                className="d-flex"
-                                style={{ minWidth: '210px' }}
-                                variant="primary"
-                                size="lg"
-                                onClick={updateDiagnosis}
-                            >
-                                {isUpdatingDiagnosis ? (
-                                    <Spinner />
-                                ) : (
-                                    'Actualizar diagnóstico'
-                                )}
-                            </Button>
-                        </div>
+                        <Row className="d-flex justify-content-end text-center">
+                            <Col xs={12} lg={4} className="mb-3">
+                                <Button
+                                    className="w-100"
+                                    variant="secondary"
+                                    size="lg"
+                                    onClick={copyDiagnosis}
+                                >
+                                    Copiar diagnóstico
+                                </Button>
+                            </Col>
+                            <Col xs={12} lg={4}>
+                                <Button
+                                    className="w-100"
+                                    variant="primary"
+                                    size="lg"
+                                    onClick={updateDiagnosis}
+                                >
+                                    {isUpdatingDiagnosis ? (
+                                        <Spinner />
+                                    ) : (
+                                        'Actualizar diagnóstico'
+                                    )}
+                                </Button>
+                            </Col>
+                        </Row>
                     </Form>
                 </>
             )}
-        </>
+        </Container>
     )
 }
 

@@ -69,6 +69,7 @@ const Home = () => {
                                 onChange={(e) => setVinCode(e.target.value)}
                             />
                             <Button
+                                className="d-none d-md-block"
                                 variant="primary"
                                 id="button-addon2"
                                 size="lg"
@@ -85,6 +86,17 @@ const Home = () => {
                                 )}
                             </Button>
                         </InputGroup>
+                        <Button
+                            className="d-md-none w-100"
+                            variant="primary"
+                            size="lg"
+                            disabled={!vinCode}
+                            onClick={() => {
+                                getCarByVinCode()
+                            }}
+                        >
+                            {isSearching ? <Spinner /> : 'Buscar diagnósticos'}
+                        </Button>
                     </Form>
                 </Card.Body>
             </Card>
