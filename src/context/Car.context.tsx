@@ -53,10 +53,12 @@ export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     useEffect(() => {
         if (car) setIsLoadingCar(false)
+
         const fetchDiagnosesByCarId = async () => {
             setIsLoadingDiagnoses(true)
+            console.log({ car })
             const res = await axios.get(
-                import.meta.env.VITE_API_URL + '/car/' + carId + '/diagnosis'
+                import.meta.env.VITE_API_URL + '/car/' + car._id + '/diagnosis'
             )
             if (res.status === 200) {
                 setDiagnoses(res.data)
@@ -64,7 +66,7 @@ export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
             setIsLoadingDiagnoses(false)
         }
-        fetchDiagnosesByCarId()
+        if (car?._id) fetchDiagnosesByCarId()
     }, [car])
 
     return (
