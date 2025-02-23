@@ -56,7 +56,6 @@ export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
         const fetchDiagnosesByCarId = async () => {
             setIsLoadingDiagnoses(true)
-            console.log({ car })
             const res = await axios.get(
                 import.meta.env.VITE_API_URL + '/car/' + car._id + '/diagnosis'
             )
