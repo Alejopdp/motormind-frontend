@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import VehicleInformation from '../../components/molecules/VehicleInformation/VehicleInformation'
 import { useCar } from '../../context/Car.context'
 import VehicleFaultsHistory from '../../components/molecules/VehicleFaultsHistory/VehicleFaultsHistory'
+import { Spinner } from 'react-bootstrap'
 
 const CarDetails = () => {
     const { car, isLoadingCar } = useCar()
@@ -11,10 +12,10 @@ const CarDetails = () => {
     const navigate = useNavigate()
 
     const redirectToCreateDiagnostic = () => {
-        navigate(`/car/${params.carId}/create`)
+        navigate(`/car/${params.carId}/create?step=1`)
     }
-
-    if (!car || isLoadingCar) return <p>Cargando...</p>
+    if (!car || isLoadingCar)
+        return <Spinner className="d-flex position-absolute top-50 start-50" />
 
     return (
         <>

@@ -1,19 +1,16 @@
-import { Button, Form, Spinner } from 'react-bootstrap'
+import { Button, Form } from 'react-bootstrap'
 import VehicleInformation from '../../components/molecules/VehicleInformation/VehicleInformation'
 import { useCar } from '../../context/Car.context'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import Spinner from '../../components/atoms/Spinner/Spinner'
 
 const CarCreate = () => {
     const { car } = useCar()
     const [searchParams, setSearchParams] = useSearchParams()
-    const [fault, setFault] = useState(
-        'Se ha parado en carretera y lo arranca y se para.'
-    )
-    const [notes, setNotes] = useState(
-        'El cliente indica que hace un mes se cambió la batería, ya que la anterior fallaba al encender por las mañanas. No ha hecho ningún otro mantenimiento reseñable en los últimos seis meses.El cliente asegura que no notó pérdida de potencia significativa ni tirones antes de que empezara a apagarse. Señala que todo sucedió de forma repentina hace unos días.El cliente dice que no percibe ningún ruido metálico ni vibraciones fuertes; simplemente el motor “baja de revoluciones” muy rápido y se detiene. El único sonido que escucha es el normal del motor al arrancar.'
-    )
+    const [fault, setFault] = useState('')
+    const [notes, setNotes] = useState('')
     const [isCreatingQuestions, setIsCreatingQuestions] = useState(false)
     const [isCreatingMoreQuestions, setIsCreatingMoreQuestions] =
         useState(false)
@@ -26,13 +23,14 @@ const CarCreate = () => {
     useEffect(() => {
         if (!searchParams.get('step')) {
             searchParams.set('step', '1')
-            setSearchParams(searchParams)
+            setSearchParams(searchParams, { replace: true })
         }
     }, [])
 
     const createQuestions = async () => {
         if (isCreatingQuestions) return
         setIsCreatingQuestions(true)
+
         const carId = car._id
 
         const res = await axios.post(
@@ -55,7 +53,9 @@ const CarCreate = () => {
 
     const createMoreQuestions = async () => {
         if (isCreatingMoreQuestions || isCreatingDiagnosis) return
+
         setIsCreatingMoreQuestions(true)
+
         const carId = car._id
 
         const res = await axios.post(
@@ -76,6 +76,7 @@ const CarCreate = () => {
     const createDiagnosis = async () => {
         if (isCreatingDiagnosis || isCreatingMoreQuestions) return
         setIsCreatingDiagnosis(true)
+
         const carId = car._id
 
         const res = await axios.post(
@@ -136,20 +137,14 @@ const CarCreate = () => {
                 />
             </Form.Group>
             <Button
-                className="d-flex"
-                style={{ marginLeft: 'auto', minWidth: '205px' }}
+                className="d-flex align-items-center"
+                style={{ marginLeft: 'auto', minWidth: '205px', minHeight: 48 }}
                 variant="primary"
                 type="submit"
                 size="lg"
+                disabled={!fault}
             >
-                {isCreatingQuestions ? (
-                    <Spinner
-                        className="mx-auto"
-                        style={{ width: 20, height: 20, borderWidth: 2 }}
-                    />
-                ) : (
-                    'Generar preguntas'
-                )}
+                {isCreatingQuestions ? <Spinner /> : 'Generar preguntas'}
             </Button>
         </Form>
     )
@@ -189,14 +184,7 @@ const CarCreate = () => {
                         onClick={createMoreQuestions}
                     >
                         {isCreatingMoreQuestions ? (
-                            <Spinner
-                                className="mx-auto"
-                                style={{
-                                    width: 20,
-                                    height: 20,
-                                    borderWidth: 2,
-                                }}
-                            />
+                            <Spinner />
                         ) : (
                             '+ Generar más preguntas'
                         )}
@@ -211,14 +199,7 @@ const CarCreate = () => {
                         }
                     >
                         {isCreatingDiagnosis ? (
-                            <Spinner
-                                className="mx-auto"
-                                style={{
-                                    width: 20,
-                                    height: 20,
-                                    borderWidth: 2,
-                                }}
-                            />
+                            <Spinner />
                         ) : (
                             'Ver / Crear informe'
                         )}

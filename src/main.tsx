@@ -5,11 +5,14 @@ import { RouterProvider } from 'react-router-dom'
 import './index.css'
 import router from './routes.tsx'
 import { CarProvider } from './context/Car.context.tsx'
+import { SnackbarProvider } from 'notistack'
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
-        <CarProvider>
-            <RouterProvider router={router} />
-        </CarProvider>
+        <SnackbarProvider>
+            <CarProvider>
+                <RouterProvider router={router} />
+            </CarProvider>
+        </SnackbarProvider>
     </StrictMode>
 )

@@ -16,6 +16,7 @@ interface CarContextType {
     isLoadingCar: boolean
     diagnoses: Diagnosis[]
     isLoadingDiagnoses: boolean
+    setDiagnoses: (diagnoses: Diagnosis[]) => void
 }
 
 const CarContext = createContext<CarContextType>({
@@ -24,6 +25,7 @@ const CarContext = createContext<CarContextType>({
     isLoadingCar: true,
     diagnoses: [],
     isLoadingDiagnoses: true,
+    setDiagnoses: () => {},
 })
 
 export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -46,6 +48,11 @@ export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
             }
         }
 
+        fectchCarById()
+    }, [carId])
+
+    useEffect(() => {
+        if (car) setIsLoadingCar(false)
         const fetchDiagnosesByCarId = async () => {
             setIsLoadingDiagnoses(true)
             const res = await axios.get(
@@ -57,14 +64,19 @@ export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
             setIsLoadingDiagnoses(false)
         }
-
-        fectchCarById()
         fetchDiagnosesByCarId()
-    }, [carId])
+    }, [car])
 
     return (
         <CarContext.Provider
-            value={{ car, setCar, diagnoses, isLoadingCar, isLoadingDiagnoses }}
+            value={{
+                car,
+                setCar,
+                diagnoses,
+                isLoadingCar,
+                isLoadingDiagnoses,
+                setDiagnoses,
+            }}
         >
             {children}
         </CarContext.Provider>
