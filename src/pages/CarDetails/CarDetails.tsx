@@ -21,12 +21,14 @@ const CarDetails = () => {
         <>
             <Card className="mb-4">
                 <Card.Body>
-                    <Card.Title as="h3" className="mb-2">
-                        {car.vinCode}
-                    </Card.Title>
-                    <Button onClick={redirectToCreateDiagnostic}>
-                        + Crear nuevo diagnóstico
-                    </Button>
+                    <div className="d-flex justify-content-between">
+                        <Card.Title as="h3" className="mb-2">
+                            {car.vinCode}
+                        </Card.Title>
+                        <Button onClick={redirectToCreateDiagnostic}>
+                            + Crear nuevo diagnóstico
+                        </Button>
+                    </div>
                     <VehicleInformation car={car} />
                 </Card.Body>
             </Card>

@@ -9,6 +9,7 @@ import React, {
     useState,
 } from 'react'
 import { Diagnosis } from '../pages/Diagnosis/Diagnosis'
+import { useParams } from 'react-router-dom'
 
 interface CarContextType {
     car: any
@@ -33,14 +34,14 @@ export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([])
     const [isLoadingCar, setIsLoadingCar] = useState(true)
     const [isLoadingDiagnoses, setIsLoadingDiagnoses] = useState(true)
-    const carId = window.location.pathname.split('/')[2]
+    const params = useParams()
 
     useEffect(() => {
-        if (carId === car?._id) return
+        if (params.carId === car?._id || !params.carId) return
 
         const fectchCarById = async () => {
             const res = await axios.get(
-                import.meta.env.VITE_API_URL + '/car/' + carId
+                import.meta.env.VITE_API_URL + '/car/' + params.carId
             )
             if (res.status === 200) {
                 setCar(res.data)
@@ -49,7 +50,7 @@ export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
         }
 
         fectchCarById()
-    }, [carId])
+    }, [params.carId])
 
     useEffect(() => {
         if (car) setIsLoadingCar(false)

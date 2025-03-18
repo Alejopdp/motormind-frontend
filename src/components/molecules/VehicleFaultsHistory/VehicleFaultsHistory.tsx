@@ -1,7 +1,8 @@
-import { Button, ListGroup, ListGroupItem, Spinner } from 'react-bootstrap'
+import { Button, ListGroup, ListGroupItem } from 'react-bootstrap'
 import { useCar } from '../../../context/Car.context'
 import { Diagnosis } from '../../../pages/Diagnosis/Diagnosis'
 import { useNavigate } from 'react-router-dom'
+import Spinner from '../../atoms/Spinner/Spinner'
 
 const VehicleFaultsHistory = () => {
     const { diagnoses, isLoadingDiagnoses } = useCar()
@@ -27,7 +28,9 @@ const VehicleFaultsHistory = () => {
             <h3 className="mb-4">Historial de averías</h3>
 
             {isLoadingDiagnoses ? (
-                <Spinner className="d-flex mx-auto" />
+                <div className="d-flex justify-content-center align-items-center">
+                    <Spinner />
+                </div>
             ) : (
                 <ListGroup>
                     {diagnoses.length === 0 && (

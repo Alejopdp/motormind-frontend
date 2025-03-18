@@ -4,11 +4,16 @@ import Layout from './Layout'
 import CarDetails from './pages/CarDetails/CarDetails'
 import CarCreate from './pages/CarCreate/CarCreate'
 import DiagnosisPage from './pages/Diagnosis/Diagnosis'
+import { CarProvider } from './context/Car.context'
 
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <Layout />,
+        element: (
+            <CarProvider>
+                <Layout />
+            </CarProvider>
+        ),
         children: [
             { index: true, element: <Home /> },
             { path: '/car/:carId', element: <CarDetails /> },
