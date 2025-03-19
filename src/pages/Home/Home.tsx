@@ -1,10 +1,11 @@
 import { useSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
-import { Form, InputGroup, Table } from 'react-bootstrap'
+import { Form, InputGroup } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import { useNavigate } from 'react-router-dom'
 import Spinner from '../../components/atoms/Spinner/Spinner'
+import VehicleList from '../../components/molecules/VehiceList/VehicleList'
 import { useCar } from '../../context/Car.context'
 import { useApi } from '../../hooks/useApi'
 import { Car } from '../../types/Car'
@@ -65,7 +66,7 @@ const Home = () => {
     }, [])
 
     return (
-        <>
+        <div style={{ paddingBottom: 48 }}>
             <h3 className="mt-5">Búsqueda de diagnósticos</h3>
             <Card>
                 <Card.Body>
@@ -124,45 +125,9 @@ const Home = () => {
                     <Spinner />
                 </div>
             ) : (
-                <Card>
-                    <Card.Body>
-                        <Table>
-                            <thead>
-                                <tr>
-                                    <th>VIN</th>
-                                    <th>Marca</th>
-                                    <th>Modelo</th>
-                                    <th>Año</th>
-                                    <th className="text-end">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {cars.map((car) => (
-                                    <tr key={car._id}>
-                                        <td>{car.vinCode}</td>
-                                        <td>{car.brand}</td>
-                                        <td>{car.model}</td>
-                                        <td>{car.year}</td>
-                                        <td className="d-flex justify-content-end">
-                                            <Button
-                                                variant="primary"
-                                                onClick={() =>
-                                                    redirectToCarDetails(
-                                                        car._id
-                                                    )
-                                                }
-                                            >
-                                                Ver diagnósticos
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </Card.Body>
-                </Card>
+                <VehicleList cars={cars} />
             )}
-        </>
+        </div>
     )
 }
 
