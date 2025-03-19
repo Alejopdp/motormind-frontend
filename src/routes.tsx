@@ -1,10 +1,12 @@
 import { createBrowserRouter } from 'react-router-dom'
-import Home from './pages/home/Home'
-import Layout from './Layout'
-import CarDetails from './pages/CarDetails/CarDetails'
-import CarCreate from './pages/CarCreate/CarCreate'
-import DiagnosisPage from './pages/Diagnosis/Diagnosis'
 import { CarProvider } from './context/Car.context'
+import Layout from './Layout'
+import CarCreate from './pages/CarCreate/CarCreate'
+import CarDetails from './pages/CarDetails/CarDetails'
+import DiagnosisPage from './pages/Diagnosis/Diagnosis'
+import Home from './pages/Home/Home'
+import Login from './pages/Login/Login'
+import VerifyMagicLink from './pages/VerifyMagicLink/VerifyMagicLink'
 
 const router = createBrowserRouter([
     {
@@ -24,6 +26,14 @@ const router = createBrowserRouter([
             },
             //   { path: "*", element: <NotFound /> },
         ],
+    },
+    {
+        path: '/login',
+        element: <Login />,
+    },
+    {
+        path: '/login/verify',
+        element: <VerifyMagicLink />,
     },
 ])
 

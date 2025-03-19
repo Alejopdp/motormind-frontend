@@ -1,15 +1,15 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { SnackbarProvider } from 'notistack'
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
+import { AuthContextProvider } from './context/Auth.context'
 import './index.css'
 import router from './routes.tsx'
 
 createRoot(document.getElementById('root')!).render(
-    <StrictMode>
+    <AuthContextProvider>
         <SnackbarProvider>
             <RouterProvider router={router} />
         </SnackbarProvider>
-    </StrictMode>
+    </AuthContextProvider>
 )

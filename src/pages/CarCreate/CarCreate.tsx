@@ -1,11 +1,11 @@
-import { Button, Form, Container, Row, Col } from 'react-bootstrap'
+import { useEffect, useState } from 'react'
+import { Button, Col, Container, Form, Row } from 'react-bootstrap'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import Spinner from '../../components/atoms/Spinner/Spinner'
 import VehicleInformation from '../../components/molecules/VehicleInformation/VehicleInformation'
 import { useCar } from '../../context/Car.context'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import Spinner from '../../components/atoms/Spinner/Spinner'
-
+import { useApi } from '../../hooks/useApi'
+import { Diagnosis } from '../Diagnosis/Diagnosis'
 const CarCreate = () => {
     const { car } = useCar()
     const [searchParams, setSearchParams] = useSearchParams()
@@ -14,9 +14,17 @@ const CarCreate = () => {
     const [isCreatingQuestions, setIsCreatingQuestions] = useState(false)
     const [isCreatingMoreQuestions, setIsCreatingMoreQuestions] =
         useState(false)
-    const [questions, setQuestions] = useState([])
+    const [questions, setQuestions] = useState<string[]>([])
     const [secondStepNotes, setSecondStepNotes] = useState('')
     const [isCreatingDiagnosis, setIsCreatingDiagnosis] = useState(false)
+    const { execute: generateQuestions } = useApi<string[]>(
+        'post',
+        '/car/:carId/questions'
+    )
+    const { execute: createDiagnosisRequest } = useApi<Diagnosis>(
+        'post',
+        '/car/:carId/diagnosis'
+    )
     const step = searchParams.get('step')
     const navigate = useNavigate()
 
@@ -31,15 +39,18 @@ const CarCreate = () => {
         if (isCreatingQuestions) return
         setIsCreatingQuestions(true)
 
-        const carId = car._id
+        const carId = car?._id
 
-        const res = await axios.post(
-            import.meta.env.VITE_API_URL + '/car/' + carId + '/questions',
+        if (!carId) return
+
+        const res = await generateQuestions(
             {
                 fault,
                 notes,
                 questionsToAvoid: questions,
-            }
+            },
+            undefined,
+            { carId }
         )
 
         if (res.status === 200) {
@@ -55,15 +66,18 @@ const CarCreate = () => {
         if (isCreatingMoreQuestions || isCreatingDiagnosis) return
         setIsCreatingMoreQuestions(true)
 
-        const carId = car._id
+        const carId = car?._id
 
-        const res = await axios.post(
-            import.meta.env.VITE_API_URL + '/car/' + carId + '/questions',
+        if (!carId) return
+
+        const res = await generateQuestions(
             {
                 fault,
                 notes,
                 questionsToAvoid: questions,
-            }
+            },
+            undefined,
+            { carId }
         )
 
         if (res.status === 200) {
@@ -76,14 +90,17 @@ const CarCreate = () => {
         if (isCreatingDiagnosis || isCreatingMoreQuestions) return
         setIsCreatingDiagnosis(true)
 
-        const carId = car._id
+        const carId = car?._id
 
-        const res = await axios.post(
-            import.meta.env.VITE_API_URL + '/car/' + carId + '/diagnosis',
+        if (!carId) return
+
+        const res = await createDiagnosisRequest(
             {
                 fault,
                 notes: secondStepNotes,
-            }
+            },
+            undefined,
+            { carId }
         )
 
         if (res.status === 200) {

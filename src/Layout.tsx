@@ -1,7 +1,14 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { Outlet } from 'react-router-dom'
+import { useAuth } from './context/Auth.context'
 
 const Layout = () => {
+    const { isAuthenticated } = useAuth()
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" />
+    }
+
     return (
         <div>
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3">

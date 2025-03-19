@@ -1,12 +1,12 @@
-import axios from 'axios'
 import { useSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { Form, InputGroup, Table } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import { useNavigate } from 'react-router-dom'
-import { useCar } from '../../context/Car.context'
 import Spinner from '../../components/atoms/Spinner/Spinner'
+import { useCar } from '../../context/Car.context'
+import { useApi } from '../../hooks/useApi'
 import { Car } from '../../types/Car'
 
 const Home = () => {
@@ -17,6 +17,8 @@ const Home = () => {
     const [cars, setCars] = useState<Car[]>([])
     const [isLoadingCars, setIsLoadingCars] = useState(true)
     const { enqueueSnackbar } = useSnackbar()
+    const { execute } = useApi<Car>('get', '/car/vin/:vinCode')
+    const { execute: getCarsRequest } = useApi<Car[]>('get', '/car')
 
     const redirectToCarDetails = (id: string) => {
         navigate(`/car/${id}`)
@@ -27,15 +29,15 @@ const Home = () => {
 
         setIsSearching(true)
         try {
-            const res = await axios.get(
-                import.meta.env.VITE_API_URL + '/car/vin/' + vinCode
-            )
+            const res = await execute(undefined, undefined, {
+                vinCode,
+            })
 
             if (res.status === 200) {
                 setCar(res.data)
                 redirectToCarDetails(res.data._id)
             }
-        } catch (error) {
+        } catch {
             enqueueSnackbar(
                 'Error al buscar el coche por el VIN. Asegúrese que el número de VIN sea correcto.',
                 {
@@ -49,7 +51,7 @@ const Home = () => {
 
     const getCars = async () => {
         setIsLoadingCars(true)
-        const res = await axios.get(import.meta.env.VITE_API_URL + '/car')
+        const res = await getCarsRequest()
 
         if (res.status === 200) {
             setCars(res.data)
