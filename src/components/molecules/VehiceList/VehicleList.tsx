@@ -47,7 +47,9 @@ const VehicleList = ({ cars }: VehicleListProps) => {
                                 <Card.Subtitle className="mb-2 text-muted">
                                     Año: {car.year}
                                 </Card.Subtitle>
-                                <Card.Text>VIN: {car.vinCode}</Card.Text>
+                                <Card.Text>
+                                    Matrícula o VIN: {car.vinCode}
+                                </Card.Text>
                                 <Button
                                     variant="primary"
                                     className="w-100"
@@ -65,7 +67,7 @@ const VehicleList = ({ cars }: VehicleListProps) => {
                 <Table>
                     <thead>
                         <tr>
-                            <th>VIN</th>
+                            <th>Matrícula o VIN</th>
                             <th>Marca</th>
                             <th>Modelo</th>
                             <th>Año</th>
@@ -75,7 +77,7 @@ const VehicleList = ({ cars }: VehicleListProps) => {
                     <tbody>
                         {cars.map((car) => (
                             <tr key={car._id}>
-                                <td>{car.vinCode}</td>
+                                <td>{car.plate ? car.plate : car.vinCode}</td>
                                 <td>{car.brand}</td>
                                 <td>{car.model}</td>
                                 <td>{car.year}</td>

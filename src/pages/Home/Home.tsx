@@ -18,7 +18,7 @@ const Home = () => {
     const [cars, setCars] = useState<Car[]>([])
     const [isLoadingCars, setIsLoadingCars] = useState(true)
     const { enqueueSnackbar } = useSnackbar()
-    const { execute } = useApi<Car>('get', '/car/vin/:vinCode')
+    const { execute } = useApi<Car>('get', '/car/vin-or-plate/:vinCodeOrPlate')
     const { execute: getCarsRequest } = useApi<Car[]>('get', '/car')
 
     const redirectToCarDetails = (id: string) => {
@@ -31,7 +31,7 @@ const Home = () => {
         setIsSearching(true)
         try {
             const res = await execute(undefined, undefined, {
-                vinCode,
+                vinCodeOrPlate: vinCode,
             })
 
             if (res.status === 200) {
@@ -40,7 +40,7 @@ const Home = () => {
             }
         } catch {
             enqueueSnackbar(
-                'Error al buscar el coche por el VIN. Asegúrese que el número de VIN sea correcto.',
+                'Error al buscar el coche. Asegúrese que la matrícula o el VIN sean correctos.',
                 {
                     variant: 'error',
                 }
@@ -77,12 +77,12 @@ const Home = () => {
                         }}
                     >
                         <Form.Label className="fw-medium">
-                            Número de Bastidor (VIN)
+                            Matrícula o Número de Bastidor (VIN)
                         </Form.Label>
                         <InputGroup className="mb-3">
                             <Form.Control
-                                placeholder="Ingrese el VIN"
-                                aria-label="Ingrese el VIN"
+                                placeholder="Ingrese la matrícula o el VIN"
+                                aria-label="Ingrese la matrícula o el VIN"
                                 aria-describedby="basic-addon2"
                                 value={vinCode}
                                 onChange={(e) => setVinCode(e.target.value)}

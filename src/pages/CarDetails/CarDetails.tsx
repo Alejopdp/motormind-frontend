@@ -23,7 +23,7 @@ const CarDetails = () => {
                 <Card.Body>
                     <div className="d-flex justify-content-between">
                         <Card.Title as="h3" className="mb-2">
-                            {car.vinCode}
+                            {car.plate ? car.plate : car.vinCode}
                         </Card.Title>
                         <Button onClick={redirectToCreateDiagnostic}>
                             + Crear nuevo diagnóstico
