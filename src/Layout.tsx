@@ -13,9 +13,13 @@ const Layout = () => {
     return (
         <div>
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-                <div className="d-flex justify-content-between w-100">
+                <div className="d-flex justify-content-between align-items-center w-100">
                     <Link className="navbar-brand" to="/">
-                        Motormind
+                        <img
+                            src="/logo_motormind.png"
+                            alt="Motormind"
+                            style={{ width: '150px' }}
+                        />
                     </Link>
                     <div>
                         {(user.role === UserRole.ADMIN ||

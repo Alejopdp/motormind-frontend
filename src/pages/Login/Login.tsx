@@ -115,6 +115,12 @@ const Login: React.FC = () => {
         <div className="d-flex align-items-center justify-content-center vh-100 bg-light px-5 overflow-hidden">
             <div className="">
                 <div className="text-center mb-4">
+                    <img
+                        src="/logo_motormind.png"
+                        alt="Motormind"
+                        className="mb-5"
+                        style={{ width: '200px' }}
+                    />
                     <h1 className="h2 fw-semibold mb-2">{title}</h1>
                     <p className="text-muted">{subtitle}</p>
                 </div>
