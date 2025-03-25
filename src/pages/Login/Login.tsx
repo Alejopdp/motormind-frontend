@@ -52,15 +52,19 @@ const Login: React.FC = () => {
         : 'Te enviaremos un enlace a tu correo para iniciar sesión'
     const content = linkSent ? (
         <>
-            <div className="d-flex flex-column gap-4 w-sm-25 mx-auto">
+            <div
+                className="d-flex flex-column gap-4 w-sm-25 mx-auto"
+                style={{ maxWidth: '600px' }}
+            >
                 <div className="d-flex align-items-start gap-2 bg-success bg-opacity-10 p-4">
                     <div className="me-2">
                         <CircleCheckBig size={16} color="#4ADE80" />
                     </div>
                     <p className="fw-medium text-sm text-success mb-0">
-                        Hemos enviado un enlace mágico a tu correo electrónico.
-                        Por favor, revisa tu bandeja de entrada y sigue las
-                        instrucciones para acceder a tu cuenta.
+                        Hemos enviado un enlace a tu correo electrónico para que
+                        puedas acceder a tu cuenta. Por favor, revisa tu bandeja
+                        de entrada y sigue las instrucciones para acceder a tu
+                        cuenta.
                     </p>
                 </div>
 
@@ -102,7 +106,7 @@ const Login: React.FC = () => {
                 className="w-full py-2 rounded-lg w-100"
                 disabled={isSendingMagicLink}
             >
-                {isSendingMagicLink ? 'Enviando...' : 'Enviar enlace mágico'}
+                {isSendingMagicLink ? 'Enviando...' : 'Enviar enlace'}
             </Button>
         </Form>
     )

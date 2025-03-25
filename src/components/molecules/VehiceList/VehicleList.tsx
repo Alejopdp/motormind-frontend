@@ -84,9 +84,7 @@ const VehicleList = ({ cars }: VehicleListProps) => {
                                 <td className="d-flex justify-content-end">
                                     <Button
                                         variant="primary"
-                                        className={
-                                            isMediumScreen ? 'me-2' : 'w-100'
-                                        }
+                                        className={'me-2'}
                                         onClick={() =>
                                             redirectToCarDetails(car._id)
                                         }

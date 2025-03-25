@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import apiService from '../service/api.service';
 
-interface UseApiResponse<T, D = unknown> {
+export interface UseApiResponse<T, D = unknown> {
     data: T | null;
     error: Error | null;
     loading: boolean;

@@ -7,14 +7,17 @@ import DiagnosisPage from './pages/Diagnosis/Diagnosis'
 import Home from './pages/Home/Home'
 import Login from './pages/Login/Login'
 import VerifyMagicLink from './pages/VerifyMagicLink/VerifyMagicLink'
-
+import { MechanicProvider } from './context/Mechanic.context'
+import Configuration from './pages/Configuration/Configuration'
 const router = createBrowserRouter([
     {
         path: '/',
         element: (
-            <CarProvider>
-                <Layout />
-            </CarProvider>
+            <MechanicProvider>
+                <CarProvider>
+                    <Layout />
+                </CarProvider>
+            </MechanicProvider>
         ),
         children: [
             { index: true, element: <Home /> },
@@ -24,6 +27,7 @@ const router = createBrowserRouter([
                 path: '/car/:carId/diagnosis/:diagnosisId',
                 element: <DiagnosisPage />,
             },
+            { path: '/configuration', element: <Configuration /> },
             //   { path: "*", element: <NotFound /> },
         ],
     },

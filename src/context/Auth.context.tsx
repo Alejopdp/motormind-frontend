@@ -9,7 +9,7 @@ import React, {
     useState,
 } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { User } from '../types/User'
+import { User, UserRole } from '../types/User'
 import { apiUrl } from '../constants/env'
 
 interface AuthContextType {
@@ -29,6 +29,7 @@ const AuthContext = createContext<AuthContextType>({
         _id: '',
         name: '',
         mechanicId: '',
+        role: UserRole.USER,
     },
     setUser: () => {},
 })
@@ -45,6 +46,7 @@ export const AuthContextProvider: React.FC<PropsWithChildren> = ({
         _id: '',
         name: '',
         mechanicId: '',
+        role: UserRole.USER,
     })
 
     useEffect(() => {
