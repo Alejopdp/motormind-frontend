@@ -9,9 +9,8 @@ import React, {
 } from 'react'
 import { useParams } from 'react-router-dom'
 import { useApi } from '../hooks/useApi'
-import { Diagnosis } from '../pages/Diagnosis/Diagnosis'
 import { Car } from '../types/Car'
-
+import { Diagnosis } from '../types/Diagnosis'
 interface CarContextType {
     car: Car | null
     setCar: (car: Car | null) => void

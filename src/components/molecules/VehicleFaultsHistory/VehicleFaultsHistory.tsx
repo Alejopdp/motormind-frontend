@@ -1,9 +1,8 @@
 import { Button, ListGroup, ListGroupItem } from 'react-bootstrap'
 import { useCar } from '../../../context/Car.context'
-import { Diagnosis } from '../../../pages/Diagnosis/Diagnosis'
 import { useNavigate } from 'react-router-dom'
 import Spinner from '../../atoms/Spinner/Spinner'
-
+import { Diagnosis } from '../../../types/Diagnosis'
 const VehicleFaultsHistory = () => {
     const { diagnoses, isLoadingDiagnoses } = useCar()
     const navigate = useNavigate()

@@ -5,7 +5,8 @@ import Spinner from '../../components/atoms/Spinner/Spinner'
 import VehicleInformation from '../../components/molecules/VehicleInformation/VehicleInformation'
 import { useCar } from '../../context/Car.context'
 import { useApi } from '../../hooks/useApi'
-import { Diagnosis } from '../Diagnosis/Diagnosis'
+import { Diagnosis } from '../../types/Diagnosis'
+
 const CarCreate = () => {
     const { car } = useCar()
     const [searchParams, setSearchParams] = useSearchParams()

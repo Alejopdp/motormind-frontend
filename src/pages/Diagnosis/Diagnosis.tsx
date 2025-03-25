@@ -4,33 +4,11 @@ import { Button, Col, Container, Form, Row } from 'react-bootstrap'
 import ReactMarkdown from 'react-markdown'
 import { useParams } from 'react-router-dom'
 import Spinner from '../../components/atoms/Spinner/Spinner'
+import { RateDiagnosis } from '../../components/molecules/RateDiagnosis/RateDiagnosis'
 import VehicleInformation from '../../components/molecules/VehicleInformation/VehicleInformation'
 import { useCar } from '../../context/Car.context'
 import { useApi } from '../../hooks/useApi'
-
-export interface Diagnosis {
-    _id?: string
-    carId: string
-    fault: string
-    notes: string
-    preliminary: {
-        possibleReasons: {
-            title: string
-            probability: string
-            reasonDetails: string
-        }[]
-        fixSteps: {
-            title: string
-            procedure: string
-            tools: string
-        }[]
-    }
-    finalNotes: string
-    diagnosis: string
-    createdAt: Date
-    updatedAt: Date
-}
-
+import { Diagnosis } from '../../types/Diagnosis'
 const DiagnosisPage = () => {
     const params = useParams()
     const [isLoadingDiagnosis, setIsLoadingDiagnosis] = useState(true)
@@ -112,6 +90,27 @@ const DiagnosisPage = () => {
         setIsUpdatingDiagnosis(false)
     }
 
+    const rateDiagnosis = async (wasUseful: boolean) => {
+        const carId = car?._id ?? ''
+        const diagnosisId = diagnosis?._id ?? ''
+
+        const res = await updateDiagnosisRequest({ wasUseful }, undefined, {
+            carId,
+            diagnosisId,
+        })
+
+        if (res.status === 200) {
+            setDiagnosis(res.data)
+            enqueueSnackbar('Gracias por responder!', {
+                variant: 'success',
+            })
+        } else {
+            enqueueSnackbar('Ocurrió un error al calificar el diagnóstico', {
+                variant: 'error',
+            })
+        }
+    }
+
     const copyDiagnosis = () => {
         navigator.clipboard.writeText(diagnosis?.diagnosis ?? '')
         enqueueSnackbar('Diagnóstico copiado al portapapeles', {
@@ -123,7 +122,12 @@ const DiagnosisPage = () => {
 
     return (
         <Container style={{ paddingBottom: 48 }}>
+            {diagnosis && diagnosis.wasUseful === undefined && (
+                <RateDiagnosis rateDiagnosis={rateDiagnosis} />
+            )}
+
             <VehicleInformation car={car} />
+
             {isLoadingDiagnosis || !diagnosis ? (
                 <Spinner className="d-flex mx-auto mt-4" />
             ) : !diagnosis.diagnosis ? (

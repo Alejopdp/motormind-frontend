@@ -1,20 +1,28 @@
 type BodyTextProps = {
     children: React.ReactNode
     className?: string
-    fontWeight?: 'regular' | 'medium' | 'bold'
+    fontWeight?: 'normal' | 'medium' | 'bold'
     fontSize?: number
+    fontStyle?: 'normal' | 'italic'
 }
 
 const BodyText = ({
     children,
     className,
-    fontWeight = 'regular',
+    fontWeight = 'normal',
     fontSize = 14,
+    fontStyle = 'normal',
 }: BodyTextProps) => {
     return (
         <p
+            style={{
+                color: '#4B5563',
+                fontSize,
+                fontWeight,
+                marginBottom: 0,
+                fontStyle,
+            }}
             className={className}
-            style={{ color: '#4B5563', fontSize, fontWeight }}
         >
             {children}
         </p>
