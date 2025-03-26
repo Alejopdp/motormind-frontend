@@ -119,7 +119,15 @@ const Home = () => {
                     </Form>
                 </Card.Body>
             </Card>
-            <h3 className="mt-5">Lista de vehículos</h3>
+            <div className="d-flex align-items-center gap-4 mt-5 mb-3">
+                <h3 className="mb-0">Lista de vehículos</h3>
+                <Button
+                    variant="primary"
+                    onClick={() => navigate('/car/create')}
+                >
+                    + Crear vehículo
+                </Button>
+            </div>
             {isLoadingCars ? (
                 <div className="d-flex justify-content-center align-items-center">
                     <Spinner />

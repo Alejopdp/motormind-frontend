@@ -7,7 +7,7 @@ import { useCar } from '../../context/Car.context'
 import { useApi } from '../../hooks/useApi'
 import { Diagnosis } from '../../types/Diagnosis'
 
-const CarCreate = () => {
+const CreateCarDiagnosis = () => {
     const { car } = useCar()
     const [searchParams, setSearchParams] = useSearchParams()
     const [fault, setFault] = useState('')
@@ -251,4 +251,4 @@ const CarCreate = () => {
     )
 }
 
-export default CarCreate
+export default CreateCarDiagnosis
