@@ -1,36 +1,14 @@
+import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
+import { Button, Col, Container, Form, Row } from 'react-bootstrap'
+import ReactMarkdown from 'react-markdown'
+import { useParams } from 'react-router-dom'
+import Spinner from '../../components/atoms/Spinner/Spinner'
+import { RateDiagnosis } from '../../components/molecules/RateDiagnosis/RateDiagnosis'
 import VehicleInformation from '../../components/molecules/VehicleInformation/VehicleInformation'
 import { useCar } from '../../context/Car.context'
-import { Button, Form, Container, Row, Col } from 'react-bootstrap'
-import axios from 'axios'
-import { useParams } from 'react-router-dom'
-import ReactMarkdown from 'react-markdown'
-import { enqueueSnackbar } from 'notistack'
-import Spinner from '../../components/atoms/Spinner/Spinner'
-
-export interface Diagnosis {
-    _id?: string
-    carId: string
-    fault: string
-    notes: string
-    preliminary: {
-        possibleReasons: {
-            title: string
-            probability: string
-            reasonDetails: string
-        }[]
-        fixSteps: {
-            title: string
-            procedure: string
-            tools: string
-        }[]
-    }
-    finalNotes: string
-    diagnosis: string
-    createdAt: Date
-    updatedAt: Date
-}
-
+import { useApi } from '../../hooks/useApi'
+import { Diagnosis } from '../../types/Diagnosis'
 const DiagnosisPage = () => {
     const params = useParams()
     const [isLoadingDiagnosis, setIsLoadingDiagnosis] = useState(true)
@@ -41,15 +19,26 @@ const DiagnosisPage = () => {
     const [isUpdatingDiagnosis, setIsUpdatingDiagnosis] = useState(false)
     const { car, diagnoses, setDiagnoses } = useCar()
     const [finalNotes, setFinalNotes] = useState(diagnosis?.finalNotes ?? '')
-
+    const { execute: getDiagnosisById } = useApi<Diagnosis>(
+        'get',
+        '/car/diagnosis/:diagnosisId'
+    )
+    const { execute: createDiagnosis } = useApi<Diagnosis>(
+        'post',
+        '/car/:carId/diagnosis/:diagnosisId/final'
+    )
+    const { execute: updateDiagnosisRequest } = useApi<Diagnosis>(
+        'put',
+        '/car/:carId/diagnosis/:diagnosisId'
+    )
     useEffect(() => {
         const diagnosisId = params.diagnosisId
         if (!diagnosisId) return
 
         const getDiagnosis = async () => {
-            const res = await axios.get(
-                import.meta.env.VITE_API_URL + '/car/diagnosis/' + diagnosisId
-            )
+            const res = await getDiagnosisById(undefined, undefined, {
+                diagnosisId,
+            })
             if (res.status === 200) {
                 setDiagnosis(res.data)
                 setIsLoadingDiagnosis(false)
@@ -65,12 +54,13 @@ const DiagnosisPage = () => {
 
     const createFinalDiagnosis = async () => {
         setIsCreatingFinalDiagnosis(true)
-        const carId = car._id
-        const res = await axios.post(
-            import.meta.env.VITE_API_URL +
-                `/car/${carId}/diagnosis/${diagnosis?._id}/final`,
-            { technicalNotes }
-        )
+        const carId = car?._id ?? ''
+        const diagnosisId = diagnosis?._id ?? ''
+
+        const res = await createDiagnosis({ technicalNotes }, undefined, {
+            carId,
+            diagnosisId,
+        })
 
         if (res.status === 200) {
             setDiagnosis(res.data)
@@ -81,12 +71,15 @@ const DiagnosisPage = () => {
 
     const updateDiagnosis = async () => {
         if (isUpdatingDiagnosis) return
+        const carId = car?._id ?? ''
+        const diagnosisId = diagnosis?._id ?? ''
+
         setIsUpdatingDiagnosis(true)
-        const res = await axios.put(
-            import.meta.env.VITE_API_URL +
-                `/car/${car._id}/diagnosis/${diagnosis?._id}`,
-            { finalNotes }
-        )
+
+        const res = await updateDiagnosisRequest({ finalNotes }, undefined, {
+            carId,
+            diagnosisId,
+        })
 
         if (res.status === 200) {
             setDiagnosis(res.data)
@@ -95,6 +88,27 @@ const DiagnosisPage = () => {
             )
         }
         setIsUpdatingDiagnosis(false)
+    }
+
+    const rateDiagnosis = async (wasUseful: boolean) => {
+        const carId = car?._id ?? ''
+        const diagnosisId = diagnosis?._id ?? ''
+
+        const res = await updateDiagnosisRequest({ wasUseful }, undefined, {
+            carId,
+            diagnosisId,
+        })
+
+        if (res.status === 200) {
+            setDiagnosis(res.data)
+            enqueueSnackbar('Gracias por responder!', {
+                variant: 'success',
+            })
+        } else {
+            enqueueSnackbar('Ocurrió un error al calificar el diagnóstico', {
+                variant: 'error',
+            })
+        }
     }
 
     const copyDiagnosis = () => {
@@ -107,8 +121,13 @@ const DiagnosisPage = () => {
     if (!car) return null
 
     return (
-        <Container>
+        <Container style={{ paddingBottom: 48 }}>
+            {diagnosis && diagnosis.wasUseful === undefined && (
+                <RateDiagnosis rateDiagnosis={rateDiagnosis} />
+            )}
+
             <VehicleInformation car={car} />
+
             {isLoadingDiagnosis || !diagnosis ? (
                 <Spinner className="d-flex mx-auto mt-4" />
             ) : !diagnosis.diagnosis ? (

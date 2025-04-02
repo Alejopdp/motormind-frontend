@@ -1,7 +1,13 @@
 import { Card, Col, Container, Row } from 'react-bootstrap'
 
 type VehicleInformationProps = {
-    car: { brand: string; model: string; year: number; vinCode: string }
+    car: {
+        brand: string
+        model: string
+        year: number
+        vinCode: string
+        plate: string
+    }
 }
 
 const VehicleInformation: React.FC<VehicleInformationProps> = ({ car }) => {
@@ -47,9 +53,11 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({ car }) => {
                                 className="mb-0 text-muted"
                                 style={{ fontSize: 14 }}
                             >
-                                VIN
+                                {car.plate ? 'Matrícula' : 'VIN'}
                             </p>
-                            <p className="fw-medium">{car.vinCode}</p>
+                            <p className="fw-medium">
+                                {car.plate ? car.plate : car.vinCode}
+                            </p>
                         </Col>
                     </Row>
                 </Container>

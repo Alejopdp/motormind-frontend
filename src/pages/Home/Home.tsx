@@ -1,19 +1,25 @@
-import axios from 'axios'
 import { useSnackbar } from 'notistack'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Form, InputGroup } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import { useNavigate } from 'react-router-dom'
-import { useCar } from '../../context/Car.context'
 import Spinner from '../../components/atoms/Spinner/Spinner'
+import VehicleList from '../../components/molecules/VehiceList/VehicleList'
+import { useCar } from '../../context/Car.context'
+import { useApi } from '../../hooks/useApi'
+import { Car } from '../../types/Car'
 
 const Home = () => {
     const { setCar } = useCar()
     const navigate = useNavigate()
     const [vinCode, setVinCode] = useState('')
     const [isSearching, setIsSearching] = useState(false)
+    const [cars, setCars] = useState<Car[]>([])
+    const [isLoadingCars, setIsLoadingCars] = useState(true)
     const { enqueueSnackbar } = useSnackbar()
+    const { execute } = useApi<Car>('get', '/car/vin-or-plate/:vinCodeOrPlate')
+    const { execute: getCarsRequest } = useApi<Car[]>('get', '/car')
 
     const redirectToCarDetails = (id: string) => {
         navigate(`/car/${id}`)
@@ -24,17 +30,17 @@ const Home = () => {
 
         setIsSearching(true)
         try {
-            const res = await axios.get(
-                import.meta.env.VITE_API_URL + '/car/vin/' + vinCode
-            )
+            const res = await execute(undefined, undefined, {
+                vinCodeOrPlate: vinCode,
+            })
 
             if (res.status === 200) {
                 setCar(res.data)
                 redirectToCarDetails(res.data._id)
             }
-        } catch (error) {
+        } catch {
             enqueueSnackbar(
-                'Error al buscar el coche por el VIN. Asegúrese que el número de VIN sea correcto.',
+                'Error al buscar el coche. Asegúrese que la matrícula o el VIN sean correctos.',
                 {
                     variant: 'error',
                 }
@@ -44,13 +50,26 @@ const Home = () => {
         setIsSearching(false)
     }
 
+    const getCars = async () => {
+        setIsLoadingCars(true)
+        const res = await getCarsRequest()
+
+        if (res.status === 200) {
+            setCars(res.data)
+        }
+
+        setIsLoadingCars(false)
+    }
+
+    useEffect(() => {
+        getCars()
+    }, [])
+
     return (
-        <>
+        <div style={{ paddingBottom: 48 }}>
+            <h3 className="mt-5">Búsqueda de diagnósticos</h3>
             <Card>
                 <Card.Body>
-                    <Card.Title as="h3" className="mb-2">
-                        Búsqueda de diagnósticos
-                    </Card.Title>
                     <Form
                         onSubmit={(e) => {
                             e.preventDefault()
@@ -58,12 +77,12 @@ const Home = () => {
                         }}
                     >
                         <Form.Label className="fw-medium">
-                            Número de Bastidor (VIN)
+                            Matrícula o Número de Bastidor (VIN)
                         </Form.Label>
                         <InputGroup className="mb-3">
                             <Form.Control
-                                placeholder="Ingrese el VIN"
-                                aria-label="Ingrese el VIN"
+                                placeholder="Ingrese la matrícula o el VIN"
+                                aria-label="Ingrese la matrícula o el VIN"
                                 aria-describedby="basic-addon2"
                                 value={vinCode}
                                 onChange={(e) => setVinCode(e.target.value)}
@@ -100,7 +119,23 @@ const Home = () => {
                     </Form>
                 </Card.Body>
             </Card>
-        </>
+            <div className="d-flex align-items-center gap-4 mt-5 mb-3">
+                <h3 className="mb-0">Lista de vehículos</h3>
+                <Button
+                    variant="primary"
+                    onClick={() => navigate('/car/create')}
+                >
+                    + Crear vehículo
+                </Button>
+            </div>
+            {isLoadingCars ? (
+                <div className="d-flex justify-content-center align-items-center">
+                    <Spinner />
+                </div>
+            ) : (
+                <VehicleList cars={cars} />
+            )}
+        </div>
     )
 }
 

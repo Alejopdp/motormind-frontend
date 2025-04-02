@@ -1,18 +1,15 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { StrictMode } from 'react'
+import { SnackbarProvider } from 'notistack'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
+import { AuthContextProvider } from './context/Auth.context'
 import './index.css'
 import router from './routes.tsx'
-import { CarProvider } from './context/Car.context.tsx'
-import { SnackbarProvider } from 'notistack'
 
 createRoot(document.getElementById('root')!).render(
-    <StrictMode>
+    <AuthContextProvider>
         <SnackbarProvider>
-            <CarProvider>
-                <RouterProvider router={router} />
-            </CarProvider>
+            <RouterProvider router={router} />
         </SnackbarProvider>
-    </StrictMode>
+    </AuthContextProvider>
 )

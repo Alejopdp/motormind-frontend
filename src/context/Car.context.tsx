@@ -1,6 +1,5 @@
 // Create a context for the car
 
-import axios from 'axios'
 import React, {
     createContext,
     PropsWithChildren,
@@ -8,11 +7,13 @@ import React, {
     useEffect,
     useState,
 } from 'react'
-import { Diagnosis } from '../pages/Diagnosis/Diagnosis'
-
+import { useParams } from 'react-router-dom'
+import { useApi } from '../hooks/useApi'
+import { Car } from '../types/Car'
+import { Diagnosis } from '../types/Diagnosis'
 interface CarContextType {
-    car: any
-    setCar: (car: any) => void
+    car: Car | null
+    setCar: (car: Car | null) => void
     isLoadingCar: boolean
     diagnoses: Diagnosis[]
     isLoadingDiagnoses: boolean
@@ -20,7 +21,7 @@ interface CarContextType {
 }
 
 const CarContext = createContext<CarContextType>({
-    car: {},
+    car: null,
     setCar: () => {},
     isLoadingCar: true,
     diagnoses: [],
@@ -29,19 +30,24 @@ const CarContext = createContext<CarContextType>({
 })
 
 export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
-    const [car, setCar] = useState<any>({})
+    const [car, setCar] = useState<Car | null>(null)
     const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([])
     const [isLoadingCar, setIsLoadingCar] = useState(true)
     const [isLoadingDiagnoses, setIsLoadingDiagnoses] = useState(true)
-    const carId = window.location.pathname.split('/')[2]
+    const { execute: getCarById } = useApi<Car>('get', '/car/:carId')
+    const { execute: getDiagnosesByCarId } = useApi<Diagnosis[]>(
+        'get',
+        '/car/:carId/diagnosis'
+    )
+    const params = useParams()
 
     useEffect(() => {
-        if (carId === car?._id) return
+        if (params.carId === car?._id || !params.carId) return
 
         const fectchCarById = async () => {
-            const res = await axios.get(
-                import.meta.env.VITE_API_URL + '/car/' + carId
-            )
+            const res = await getCarById(undefined, undefined, {
+                carId: params.carId as string,
+            })
             if (res.status === 200) {
                 setCar(res.data)
                 setIsLoadingCar(false)
@@ -49,16 +55,16 @@ export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
         }
 
         fectchCarById()
-    }, [carId])
+    }, [params.carId])
 
     useEffect(() => {
         if (car) setIsLoadingCar(false)
 
         const fetchDiagnosesByCarId = async () => {
             setIsLoadingDiagnoses(true)
-            const res = await axios.get(
-                import.meta.env.VITE_API_URL + '/car/' + car._id + '/diagnosis'
-            )
+            const res = await getDiagnosesByCarId(undefined, undefined, {
+                carId: car?._id as string,
+            })
             if (res.status === 200) {
                 setDiagnoses(res.data)
             }
