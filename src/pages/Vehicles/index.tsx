@@ -1,61 +1,75 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { PlusIcon, SearchIcon } from 'lucide-react';
+import { Button } from '@/components/atoms/Button';
+import { Input } from '@/components/atoms/Input';
+import { debounce } from 'lodash';
 
-import { useCar } from '@/context/Car.context';
 import { useApi } from '@/hooks/useApi';
 import { Car } from '@/types/Car';
 import Spinner from '@/components/atoms/Spinner';
 import { VehicleListTable } from '@/components/molecules/VehiceList/VehicleListTable';
-import { VehicleListHeader } from '@/components/molecules/VehiceList/VehicleListHeader';
 import { Sidebar } from '@/components/organisms/Sidebar';
 
+const LIMIT = 5;
+
 const Vehicles = () => {
-  const { setCar } = useCar();
-  const navigate = useNavigate();
-  const [vinCode] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const { enqueueSnackbar } = useSnackbar();
-  const { execute: getCarByVinRequest } = useApi<Car>('get', '/car/vin-or-plate/:vinCodeOrPlate');
-  const { execute: getCarsRequest } = useApi<Car[]>('get', '/car');
+  const { execute: getCarsRequest } = useApi<{ cars: Car[]; total: number }>('get', '/car');
 
-  const { data: cars = [], isLoading: isLoadingCars } = useQuery({
-    queryKey: ['cars'],
+  useEffect(() => {
+    const handler = debounce(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset page when search changes
+    }, 800);
+
+    handler();
+    return () => {
+      handler.cancel();
+    };
+  }, [searchTerm]);
+
+  const {
+    data: { cars = [], total = 0 } = { cars: [], total: 0 },
+    isLoading: isLoadingCars,
+    isError,
+    error,
+  } = useQuery<{ cars: Car[]; total: number }>({
+    queryKey: ['search', debouncedSearchTerm, currentPage],
     queryFn: async () => {
-      const res = await getCarsRequest();
-      if (res.status === 200) {
-        return res.data;
-      }
-      throw new Error('Failed to fetch cars');
-    },
-  });
-
-  const searchCarMutation = useMutation({
-    mutationFn: async (vinCodeOrPlate: string) => {
-      const res = await getCarByVinRequest(undefined, undefined, {
-        vinCodeOrPlate,
-      });
-      if (res.status === 200) {
-        return res.data;
-      }
-      throw new Error('Failed to fetch car');
-    },
-    onSuccess: (data) => {
-      setCar(data);
-      navigate(`/car/${data._id}`);
-    },
-    onError: () => {
-      enqueueSnackbar(
-        'Error al buscar el coche. Asegúrese que la matrícula o el VIN sean correctos.',
-        { variant: 'error' },
+      const response = await getCarsRequest(
+        undefined,
+        {
+          ...(debouncedSearchTerm.trim() ? { search: debouncedSearchTerm } : {}),
+          limit: LIMIT.toString(),
+          page: currentPage.toString(),
+        },
+        undefined,
       );
+      return response.data;
     },
+    enabled: true,
+    staleTime: 60000,
   });
 
-  const handleSearch = () => {
-    if (vinCode) {
-      searchCarMutation.mutate(vinCode);
+  useEffect(() => {
+    if (isError && error) {
+      enqueueSnackbar('Error al buscar vehículos', { variant: 'error' });
     }
+  }, [isError, error, enqueueSnackbar]);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(currentPage + 1);
   };
 
   return (
@@ -63,14 +77,42 @@ const Vehicles = () => {
       <Sidebar />
 
       <div className="flex flex-grow flex-col overflow-auto p-12">
-        <VehicleListHeader onSearch={handleSearch} onAddVehicle={() => {}} />
+        <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <h1 className="text-2xl font-bold">Vehículos Registrados</h1>
+
+          <div className="flex w-full flex-col space-y-2 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-2">
+            <div className="relative flex-grow sm:max-w-md">
+              <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+              <Input
+                className="h-10 w-full min-w-[340px] rounded-md py-2 pr-4 pl-9"
+                placeholder="Buscar por Matrícula, VIN, Marca, Modelo..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button onClick={() => {}} className="h-10">
+              <PlusIcon className="h-4 w-4" />
+              Añadir Vehículo
+            </Button>
+          </div>
+        </div>
 
         {isLoadingCars ? (
           <div className="flex items-center justify-center">
             <Spinner />
           </div>
         ) : (
-          <VehicleListTable vehicles={cars} isLoading={isLoadingCars} />
+          <>
+            <VehicleListTable
+              vehicles={cars}
+              isLoading={isLoadingCars}
+              previousPage={handlePreviousPage}
+              nextPage={handleNextPage}
+              total={total}
+              currentPage={currentPage}
+              limit={LIMIT}
+            />
+          </>
         )}
       </div>
     </div>

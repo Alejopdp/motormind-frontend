@@ -15,9 +15,22 @@ import { Car } from '@/types/Car';
 interface VehicleListTableProps {
   vehicles: Car[];
   isLoading?: boolean;
+  previousPage: () => void;
+  nextPage: () => void;
+  total: number;
+  currentPage: number;
+  limit: number;
 }
 
-export const VehicleListTable = ({ vehicles, isLoading = false }: VehicleListTableProps) => {
+export const VehicleListTable = ({
+  vehicles,
+  isLoading = false,
+  previousPage,
+  nextPage,
+  total,
+  currentPage,
+  limit,
+}: VehicleListTableProps) => {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -87,16 +100,31 @@ export const VehicleListTable = ({ vehicles, isLoading = false }: VehicleListTab
 
       <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3">
         <div className="text-sm text-gray-500">
-          Mostrando <span className="font-medium">1</span> a{' '}
-          <span className="font-medium">{vehicles.length}</span> de{' '}
-          <span className="font-medium">{vehicles.length}</span> vehículos
+          {total <= limit ? (
+            <>
+              Mostrando <span className="font-medium">1</span> a{' '}
+              <span className="font-medium">{total}</span> de{' '}
+              <span className="font-medium">{total}</span> vehículo{total !== 1 ? 's' : ''}
+            </>
+          ) : (
+            <>
+              Mostrando <span className="font-medium">{(currentPage - 1) * limit + 1}</span> a{' '}
+              <span className="font-medium">{Math.min(currentPage * limit, total)}</span> de{' '}
+              <span className="font-medium">{total}</span> vehículos
+            </>
+          )}
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" disabled>
+          <Button variant="outline" size="sm" onClick={previousPage} disabled={currentPage === 1}>
             <ChevronLeftIcon className="h-4 w-4" />
             Anterior
           </Button>
-          <Button variant="outline" size="sm" disabled>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={nextPage}
+            disabled={currentPage >= Math.ceil(total / limit)}
+          >
             Siguiente
             <ChevronRightIcon className="h-4 w-4" />
           </Button>

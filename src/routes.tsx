@@ -6,7 +6,6 @@ import Dashboard from '@/pages/Dashboard';
 import CreateCarDiagnosis from '@/pages/CreateCarDiagnosis';
 import CarDetails from '@/pages/CarDetails';
 import DiagnosisPage from '@/pages/Diagnosis';
-import Home from '@/pages/Home';
 import Login from '@/pages/Login';
 import VerifyMagicLink from '@/pages/VerifyMagicLink';
 import Configuration from '@/pages/Configuration';
@@ -25,7 +24,7 @@ const router = createBrowserRouter([
       </MechanicProvider>
     ),
     children: [
-      { index: true, element: <Home /> },
+      { index: true, element: <Dashboard /> },
       { path: '/car/create', element: <CreateCar /> },
       { path: '/car/:carId', element: <CarDetails /> },
       { path: '/car/:carId/create', element: <CreateCarDiagnosis /> },
@@ -34,7 +33,6 @@ const router = createBrowserRouter([
         element: <DiagnosisPage />,
       },
       { path: '/configuration', element: <Configuration /> },
-      //   { path: "*", element: <NotFound /> },
     ],
   },
   {
