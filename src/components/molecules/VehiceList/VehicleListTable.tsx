@@ -1,4 +1,4 @@
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, FileSearch } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import {
@@ -43,20 +43,7 @@ export const VehicleListTable = ({
     return (
       <div className="flex h-64 flex-col items-center justify-center text-center">
         <div className="mb-4 rounded-full bg-gray-100 p-4">
-          <svg
-            className="h-10 w-10 text-gray-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M3 12h.01M7 12h.01M11 12h.01M15 12h.01M19 12h.01"
-            />
-          </svg>
+          <FileSearch className="h-10 w-10 text-gray-500" />
         </div>
         <h3 className="mb-1 text-lg font-medium">No se encontraron vehículos</h3>
         <p className="mb-4 text-gray-500">
@@ -71,7 +58,7 @@ export const VehicleListTable = ({
     <div className="rounded-lg border-2 border-gray-100">
       <Table>
         <TableHeader>
-          <TableRow className="bg-gray-50">
+          <TableRow className="bg-gray-50 hover:bg-gray-50">
             <TableHead>Matrícula o VIN</TableHead>
             <TableHead>Marca</TableHead>
             <TableHead>Modelo</TableHead>
@@ -98,7 +85,7 @@ export const VehicleListTable = ({
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between border-t border-gray-300 px-4 py-3">
         <div className="text-sm text-gray-500">
           {total <= limit ? (
             <>

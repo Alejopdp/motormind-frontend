@@ -76,7 +76,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
         })}
       </nav>
 
-      <div className="mt-auto border-t border-gray-200 pt-4">
+      <div className="mt-auto border-t border-gray-300 pt-4">
         <div className="flex items-center gap-3 px-3 py-3">
           <Avatar>
             <AvatarImage alt={user?.name || 'Unknown'} />
