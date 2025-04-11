@@ -18,7 +18,7 @@ interface NavItem {
 }
 
 export const Sidebar = ({ className }: SidebarNavigationProps) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -97,7 +97,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
             </Link>
           )}
 
-          <Button variant="ghost" size="sm" className="flex-1 justify-start">
+          <Button variant="ghost" size="sm" onClick={logout} className="flex-1 justify-start">
             <LogOutIcon className="mr-2 h-4 w-4" />
             Salir
           </Button>

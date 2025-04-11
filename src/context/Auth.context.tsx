@@ -13,6 +13,7 @@ interface AuthContextType {
   isVeryfiyingToken: boolean;
   user: User;
   setUser: (user: User) => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
     role: UserRole.USER,
   },
   setUser: () => {},
+  logout: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -41,6 +43,28 @@ export const AuthContextProvider: React.FC<PropsWithChildren> = ({ children }) =
     mechanicId: '',
     role: UserRole.USER,
   });
+
+  const logout = async () => {
+    try {
+      await axios.post(`${apiUrl}/auth/logout`, undefined, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      localStorage.removeItem('token');
+      setIsAuthenticated(false);
+      setUser({
+        email: '',
+        _id: '',
+        name: '',
+        mechanicId: '',
+        role: UserRole.USER,
+      });
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
 
   useEffect(() => {
     const verifyAuthentication = async () => {
@@ -79,6 +103,7 @@ export const AuthContextProvider: React.FC<PropsWithChildren> = ({ children }) =
         isVeryfiyingToken,
         user,
         setUser,
+        logout,
       }}
     >
       {isVeryfiyingToken ? (
