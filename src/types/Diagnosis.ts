@@ -20,4 +20,16 @@ export type Diagnosis = {
   wasUseful?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  car?: {
+    _id: string;
+    model: string;
+    brand: string;
+    plate: string;
+    vinCode: string;
+    mechanicId: string;
+  };
+  mechanic?: {
+    name: string;
+    avatar?: string;
+  };
 };

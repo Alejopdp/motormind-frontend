@@ -1,13 +1,20 @@
-import { CarIcon, MoreVerticalIcon } from 'lucide-react';
+import { CarIcon, MoreVerticalIcon, EyeIcon, CopyIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/atoms/Avatar';
-import { Button } from '@/components/atoms/Button';
+import { Dropdown } from '@/components/atoms/Dropdown';
 import { cn } from '@/utils/cn';
 
 interface DiagnosticListItemProps {
-  vehicle: {
-    make: string;
+  id: string;
+  carId: string;
+  vehicle?: {
+    _id: string;
+    brand: string;
     model: string;
     plate: string;
+    vinCode: string;
   };
   problems: string[];
   technician?: {
@@ -18,24 +25,38 @@ interface DiagnosticListItemProps {
   // priority?: 'Baja' | 'Media' | 'Alta';
   timestamp: string;
   className?: string;
-  onClick?: () => void;
+  diagnosis: string;
 }
 
 export const DiagnosticListItem = ({
+  id,
+  carId,
   vehicle,
   problems,
   technician,
   timestamp,
   className,
-  onClick,
+  diagnosis,
 }: DiagnosticListItemProps) => {
+  const navigate = useNavigate();
+
+  const handleViewDetails = () => {
+    navigate(`/car/${carId}/diagnosis/${id}`);
+  };
+
+  const copyDiagnosis = (diagnoses: string) => {
+    navigator.clipboard.writeText(diagnoses ?? '');
+    enqueueSnackbar('Diagnóstico copiado al portapapeles', {
+      variant: 'success',
+    });
+  };
+
   return (
     <div
       className={cn(
-        'cursor-pointer rounded-lg border border-gray-300 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]',
+        'cursor-default rounded-lg border border-gray-300 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]',
         className,
       )}
-      onClick={onClick}
     >
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -44,9 +65,9 @@ export const DiagnosticListItem = ({
           </div>
           <div>
             <h3 className="font-medium">
-              {vehicle.make} {vehicle.model}
+              {vehicle?.brand} {vehicle?.model}
             </h3>
-            <p className="text-sm text-gray-500">{vehicle.plate}</p>
+            <p className="text-sm text-gray-500">{vehicle?.plate || vehicle?.vinCode}</p>
           </div>
         </div>
 
@@ -57,16 +78,31 @@ export const DiagnosticListItem = ({
               {priority}
             </Badge>
           )} */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            // onClick={(e) => {
-            //   e.stopPropagation();
-            // }}
-          >
-            <MoreVerticalIcon className="h-4 w-4" />
-          </Button>
+          <Dropdown.Root>
+            <Dropdown.Trigger asChild>
+              <MoreVerticalIcon className="h-4 w-4" />
+            </Dropdown.Trigger>
+            <Dropdown.Content>
+              <Dropdown.Item
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewDetails();
+                }}
+              >
+                <EyeIcon className="text-primary mr-2 h-4 w-4" />
+                Ver detalle
+              </Dropdown.Item>
+              <Dropdown.Item
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyDiagnosis(diagnosis);
+                }}
+              >
+                <CopyIcon className="text-primary mr-2 h-4 w-4" />
+                Copiar diagnóstico
+              </Dropdown.Item>
+            </Dropdown.Content>
+          </Dropdown.Root>
         </div>
       </div>
 

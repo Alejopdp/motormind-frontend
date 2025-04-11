@@ -12,14 +12,14 @@ import Spinner from '@/components/atoms/Spinner';
 import { VehicleListTable } from '@/components/molecules/VehiceList/VehicleListTable';
 import { Sidebar } from '@/components/organisms/Sidebar';
 
-const LIMIT = 5;
+const LIMIT = 7;
 
 const Vehicles = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { enqueueSnackbar } = useSnackbar();
-  const { execute: getCarsRequest } = useApi<{ cars: Car[]; total: number }>('get', '/car');
+  const { execute: getCarsRequest } = useApi<{ data: Car[]; total: number }>('get', '/car');
 
   useEffect(() => {
     const handler = debounce(() => {
@@ -34,12 +34,12 @@ const Vehicles = () => {
   }, [searchTerm]);
 
   const {
-    data: { cars = [], total = 0 } = { cars: [], total: 0 },
+    data: { data: cars = [], total = 0 } = { cars: [], total: 0 },
     isLoading: isLoadingCars,
     isError,
     error,
-  } = useQuery<{ cars: Car[]; total: number }>({
-    queryKey: ['search', debouncedSearchTerm, currentPage],
+  } = useQuery<{ data: Car[]; total: number }>({
+    queryKey: ['vehicles', debouncedSearchTerm, currentPage],
     queryFn: async () => {
       const response = await getCarsRequest(
         undefined,
