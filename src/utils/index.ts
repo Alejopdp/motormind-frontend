@@ -15,3 +15,12 @@ export const formatDate = (dateString: string | Date) => {
     return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 };
+
+export const formatToddmmyyyy = (date: Date) => {
+  if (!date) return '';
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
+};

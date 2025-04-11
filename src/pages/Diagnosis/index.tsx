@@ -19,14 +19,14 @@ const DiagnosisPage = () => {
   const [isUpdatingDiagnosis, setIsUpdatingDiagnosis] = useState(false);
   const { car, diagnoses, setDiagnoses } = useCar();
   const [finalNotes, setFinalNotes] = useState(diagnosis?.finalNotes ?? '');
-  const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/car/diagnosis/:diagnosisId');
+  const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: createDiagnosis } = useApi<Diagnosis>(
     'post',
-    '/car/:carId/diagnosis/:diagnosisId/final',
+    '/cars/:carId/diagnosis/:diagnosisId/final',
   );
   const { execute: updateDiagnosisRequest } = useApi<Diagnosis>(
     'put',
-    '/car/:carId/diagnosis/:diagnosisId',
+    '/cars/:carId/diagnosis/:diagnosisId',
   );
 
   useEffect(() => {

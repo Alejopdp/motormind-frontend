@@ -76,7 +76,7 @@ export const VehicleListTable = ({
               <TableCell>{vehicle.year || '—'}</TableCell>
               <TableCell>{'—'}</TableCell>
               <TableCell className="text-right">
-                <Link to={`/vehicle/${vehicle.plate || vehicle.vinCode}`}>
+                <Link to={`/cars/${vehicle._id}`}>
                   <Button size="sm">Ver Detalles</Button>
                 </Link>
               </TableCell>

@@ -18,7 +18,7 @@ const Vehicles = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { enqueueSnackbar } = useSnackbar();
-  const { execute: getCarsRequest } = useApi<{ data: Car[]; total: number }>('get', '/car');
+  const { execute: getCarsRequest } = useApi<{ data: Car[]; total: number }>('get', '/cars');
 
   useEffect(() => {
     const handler = debounce(() => {

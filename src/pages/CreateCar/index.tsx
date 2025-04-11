@@ -14,7 +14,7 @@ const CreateCar = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const { execute } = useApi<Car>('post', '/car');
+  const { execute } = useApi<Car>('post', '/cars');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +32,7 @@ const CreateCar = () => {
         enqueueSnackbar('Vehículo creado correctamente', {
           variant: 'success',
         });
-        navigate(`/car/${response.data._id}`);
+        navigate(`/cars/${response.data._id}`);
       }
     } catch (error) {
       console.log(error);
