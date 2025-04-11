@@ -1,31 +1,25 @@
-import { useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
-import { PlusIcon, FileSearch } from 'lucide-react';
+import { FileSearch } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 import { useAuth } from '@/context/Auth.context';
-import { Button } from '@/components/atoms/Button';
 import { Sidebar } from '@/components/organisms/Sidebar';
-import { CreateNewDiagnosticModal } from '@/components/organisms/CreateNewDiagnosticModal';
 import { DiagnosticListItem } from '@/components/molecules/DiagnosticListItem';
 import { Diagnosis } from '@/types/Diagnosis';
 import { useApi } from '@/hooks/useApi';
 import Spinner from '@/components/atoms/Spinner';
+import { formatDate } from '@/utils';
 
 const Dashboard = () => {
   const { isAuthenticated, user } = useAuth();
-  const [modalOpen, setModalOpen] = useState(false);
-  const { execute: getDiagnosesRequest } = useApi<{ diagnoses: Diagnosis[]; total: number }>(
-    'get',
-    '/diagnoses',
-  );
+  const { execute: getDiagnosesRequest } = useApi<{ data: Diagnosis[] }>('get', '/diagnoses');
 
   const {
-    data: { diagnoses = [], total = 0 } = { diagnoses: [], total: 0 },
+    data: { data: diagnoses = [] } = { data: [] },
     isLoading: isLoadingDiagnoses,
     isError,
     error,
-  } = useQuery<{ diagnoses: Diagnosis[]; total: number }>({
+  } = useQuery<{ data: Diagnosis[] }>({
     queryKey: ['diagnoses'],
     queryFn: async () => {
       const response = await getDiagnosesRequest(undefined, { totalLimit: 5 }, undefined);
@@ -35,19 +29,8 @@ const Dashboard = () => {
     staleTime: 60000,
   });
 
-  console.log(diagnoses, total);
-
-  const handleSubmit = () => {
-    // TODO: Implement submit handler
-    console.log('Submit handler');
-  };
-
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
-  }
-
-  if (isError) {
-    return <div>Error: {error.message}</div>;
   }
 
   return (
@@ -56,23 +39,10 @@ const Dashboard = () => {
 
       {/* Main content */}
       <div className="flex flex-grow flex-col overflow-auto">
-        <div className={'flex h-16 items-center justify-between bg-white px-6 shadow-xs'}>
+        <div className={'flex h-16 items-center justify-between bg-white px-8 py-6 shadow-xs'}>
           <div className="flex items-center justify-center gap-2">
             <h1 className="!text-2xl !font-bold">Dashboard</h1>
             <p className="text-sm text-gray-500">Bienvenido de nuevo, {user?.name || 'NN'}</p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Button onClick={() => setModalOpen(true)}>
-              <PlusIcon className="h-4 w-4" />
-              Nuevo Diagnóstico
-            </Button>
-
-            <CreateNewDiagnosticModal
-              open={modalOpen}
-              onOpenChange={setModalOpen}
-              onSubmit={handleSubmit}
-            />
           </div>
         </div>
 
@@ -86,23 +56,29 @@ const Dashboard = () => {
               </Link>
             </div>
 
+            {isError && (
+              <h5 className="text-destructive mb-2 font-semibold">Error: {error?.message}</h5>
+            )}
+
             {isLoadingDiagnoses ? (
               <div className="flex items-center justify-center">
-                <Spinner />
+                <Spinner className="mt-5" />
               </div>
-            ) : total > 0 ? (
-              <>
-                <DiagnosticListItem
-                  vehicle={{
-                    make: 'Toyota',
-                    model: 'Corolla',
-                    plate: 'ABC123',
-                  }}
-                  problems={['Problema 1', 'Problema 2', 'Problema 3']}
-                  technician={{ name: 'Juan Perez', avatar: 'https://via.placeholder.com/150' }}
-                  timestamp="2021-01-01"
-                />
-              </>
+            ) : diagnoses.length > 0 ? (
+              <div className="space-y-4">
+                {diagnoses.map((diagnosis, index) => (
+                  <DiagnosticListItem
+                    id={diagnosis._id || ''}
+                    carId={diagnosis.carId || ''}
+                    diagnosis={diagnosis.diagnosis || ''}
+                    key={index}
+                    vehicle={diagnosis.car}
+                    problems={diagnosis.preliminary.possibleReasons.map(({ title }) => title)}
+                    technician={diagnosis.mechanic}
+                    timestamp={formatDate(diagnosis.createdAt)}
+                  />
+                ))}
+              </div>
             ) : (
               <div className="flex h-64 flex-col items-center justify-center text-center">
                 <div className="mb-4 rounded-full bg-gray-100 p-4">
