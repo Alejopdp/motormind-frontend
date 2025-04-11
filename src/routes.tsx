@@ -1,9 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
-import { CarProvider } from '@/context/Car.context';
-import { MechanicProvider } from '@/context/Mechanic.context';
 import Layout from '@/Layout';
 import Dashboard from '@/pages/Dashboard';
-import CreateCarDiagnosis from '@/pages/CreateCarDiagnosis';
 import CarDetails from '@/pages/CarDetails';
 import DiagnosisPage from '@/pages/Diagnosis';
 import Login from '@/pages/Login';
@@ -16,36 +13,34 @@ import Vehicles from '@/pages/Vehicles';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <MechanicProvider>
-        <CarProvider>
-          <Layout />
-        </CarProvider>
-      </MechanicProvider>
-    ),
+    element: <Layout />,
     children: [
       { index: true, element: <Dashboard /> },
-      { path: '/car/create', element: <CreateCar /> },
-      { path: '/car/:carId', element: <CarDetails /> },
-      { path: '/car/:carId/create', element: <CreateCarDiagnosis /> },
       {
-        path: '/car/:carId/diagnosis/:diagnosisId',
-        element: <DiagnosisPage />,
+        path: '/vehicles',
+        element: <Vehicles />,
       },
-      { path: '/configuration', element: <Configuration /> },
+      {
+        path: '/diagnoses',
+        element: <Diagnoses />,
+      },
     ],
   },
   {
-    path: '/dashboard',
-    element: <Dashboard />,
+    path: '/car/:carId/diagnosis/:diagnosisId',
+    element: <DiagnosisPage />,
   },
   {
-    path: '/vehicles',
-    element: <Vehicles />,
+    path: '/car/:carId',
+    element: <CarDetails />,
   },
   {
-    path: '/diagnoses',
-    element: <Diagnoses />,
+    path: '/car/create',
+    element: <CreateCar />,
+  },
+  {
+    path: '/configuration',
+    element: <Configuration />,
   },
   {
     path: '/login',
