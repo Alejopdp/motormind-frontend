@@ -26,7 +26,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
     {
       icon: BarChartIcon,
       label: 'Dashboard',
-      href: '/dashboard',
+      href: '/',
     },
     {
       icon: CarIcon,
@@ -53,8 +53,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
         {navItems.map((item) => {
           // Check if this item is active
           const isActive =
-            (item.href === '/dashboard' &&
-              (currentPath === '/dashboard' || currentPath === '/dashboard-updated')) ||
+            (item.href === '/' && currentPath === '/') ||
             (item.href === '/vehicles' && currentPath === '/vehicles') ||
             (item.href === '/diagnoses' && currentPath === '/diagnoses');
 
