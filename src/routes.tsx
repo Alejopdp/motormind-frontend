@@ -27,15 +27,15 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: '/car/:carId/diagnosis/:diagnosisId',
+    path: '/cars/:carId/diagnosis/:diagnosisId',
     element: <DiagnosisPage />,
   },
   {
-    path: '/car/:carId',
+    path: '/cars/:carId',
     element: <CarDetails />,
   },
   {
-    path: '/car/create',
+    path: '/cars/create',
     element: <CreateCar />,
   },
   {

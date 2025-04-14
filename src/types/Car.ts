@@ -6,4 +6,5 @@ export type Car = {
   year: number;
   mechanicId: string;
   plate: string;
+  data: [];
 };

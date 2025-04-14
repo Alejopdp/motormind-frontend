@@ -17,8 +17,8 @@ const CreateCarDiagnosis = () => {
   const [questions, setQuestions] = useState<string[]>([]);
   const [secondStepNotes, setSecondStepNotes] = useState('');
   const [isCreatingDiagnosis, setIsCreatingDiagnosis] = useState(false);
-  const { execute: generateQuestions } = useApi<string[]>('post', '/car/:carId/questions');
-  const { execute: createDiagnosisRequest } = useApi<Diagnosis>('post', '/car/:carId/diagnosis');
+  const { execute: generateQuestions } = useApi<string[]>('post', '/cars/:carId/questions');
+  const { execute: createDiagnosisRequest } = useApi<Diagnosis>('post', '/cars/:carId/diagnosis');
   const step = searchParams.get('step');
   const navigate = useNavigate();
 
@@ -98,7 +98,7 @@ const CreateCarDiagnosis = () => {
     );
 
     if (res.status === 200) {
-      navigate(`/car/${carId}/diagnosis/${res.data._id}`);
+      navigate(`/cars/${carId}/diagnosis/${res.data._id}`);
     }
 
     setIsCreatingDiagnosis(false);

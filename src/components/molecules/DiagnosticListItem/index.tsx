@@ -41,7 +41,7 @@ export const DiagnosticListItem = ({
   const navigate = useNavigate();
 
   const handleViewDetails = () => {
-    navigate(`/car/${carId}/diagnosis/${id}`);
+    navigate(`/cars/${carId}/diagnosis/${id}`);
   };
 
   const copyDiagnosis = (diagnoses: string) => {

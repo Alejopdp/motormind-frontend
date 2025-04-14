@@ -28,8 +28,8 @@ export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
   const [isLoadingCar, setIsLoadingCar] = useState(true);
   const [isLoadingDiagnoses, setIsLoadingDiagnoses] = useState(true);
-  const { execute: getCarById } = useApi<Car>('get', '/car/:carId');
-  const { execute: getDiagnosesByCarId } = useApi<Diagnosis[]>('get', '/car/:carId/diagnosis');
+  const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
+  const { execute: getDiagnosesByCarId } = useApi<Diagnosis[]>('get', '/cars/:carId/diagnosis');
   const params = useParams();
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export const CarProvider: React.FC<PropsWithChildren> = ({ children }) => {
     };
 
     fectchCarById();
-  }, [params.carId]);
+  }, [params.carId, getCarById, car]);
 
   useEffect(() => {
     if (car) setIsLoadingCar(false);
