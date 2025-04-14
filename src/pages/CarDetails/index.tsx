@@ -48,7 +48,7 @@ const CarDetails = () => {
   if (isError || !car) {
     return (
       <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
-        Error: {error?.message || 'Failed to load car data'}
+        Error: {error?.message || 'Error al cargar los datos del vehículo'}
       </div>
     );
   }
