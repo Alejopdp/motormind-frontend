@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { PlusIcon, SearchIcon } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
@@ -13,7 +13,7 @@ import Spinner from '@/components/atoms/Spinner';
 import { VehicleListTable } from '@/components/molecules/VehiceList/VehicleListTable';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 
-const LIMIT = 7;
+const LIMIT = 10;
 
 const Vehicles = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -21,7 +21,6 @@ const Vehicles = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
-  const queryClient = useQueryClient();
   const { execute: getCarsRequest } = useApi<{ data: Car[]; total: number }>('get', '/cars');
   const { execute: addVehicleRequest } = useApi<Car>('post', '/cars');
   const navigate = useNavigate();
@@ -64,7 +63,6 @@ const Vehicles = () => {
   const addVehicleMutation = useMutation({
     mutationFn: (carData: CreateCar) => addVehicleRequest(carData),
     onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       enqueueSnackbar('Vehículo creado exitosamente', { variant: 'success' });
       setIsCreateModalOpen(false);
       navigate(`/cars/${response.data._id}`);
@@ -83,6 +81,8 @@ const Vehicles = () => {
       year: string;
       licensePlate?: string;
       kilometers?: string;
+      lastRevision?: string;
+      fuel?: string;
     };
   }) => {
     if (data.manualData) {
@@ -92,7 +92,11 @@ const Vehicles = () => {
         model: data.manualData.model,
         year: parseInt(data.manualData.year),
         plate: data.manualData.licensePlate || '',
-        data: { kilometers: data.manualData.kilometers || 0 },
+        kilometers: Number(data.manualData.kilometers) || 0,
+        lastRevision: data.manualData.lastRevision
+          ? new Date(data.manualData.lastRevision)
+          : new Date(),
+        fuel: data.manualData.fuel || '',
       };
       addVehicleMutation.mutate(carData);
       return;

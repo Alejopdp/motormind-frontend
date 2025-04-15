@@ -1,4 +1,5 @@
 import { Button } from '@/components/atoms/Button';
+import { EditVehicleModal } from '@/components/organisms/EditVehicleModal';
 import {
   CalendarIcon,
   CarIcon,
@@ -7,32 +8,26 @@ import {
   PencilIcon,
   FileSpreadsheet,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Car } from '@/types/Car';
+import { format } from 'date-fns';
 
 type VehicleInformationProps = {
-  car: {
-    _id: string;
-    brand: string;
-    model: string;
-    year: number;
-    vinCode: string;
-    plate: string;
-    data: {
-      kilometers?: number;
-    };
-  };
+  car: Car;
 };
 
 const VehicleInformation: React.FC<VehicleInformationProps> = ({ car }) => {
-  const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
 
   return (
     <div className="mt-4 rounded-lg bg-white p-6 shadow-md">
       <div className="flex items-center justify-between">
         <h5 className="mb-2 text-lg font-medium">Información del vehículo</h5>
-        <Button variant="ghost" onClick={() => navigate(`/cars/${car._id}/edit`)}>
+        <Button variant="ghost" onClick={() => setIsEditing(true)}>
           <PencilIcon className="text-muted !h-4 !w-4" />
         </Button>
+
+        <EditVehicleModal open={isEditing} onOpenChange={setIsEditing} car={car} />
       </div>
 
       <div className="container">
@@ -58,7 +53,7 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({ car }) => {
             <div>
               <p className="mb-0 text-sm text-gray-500">Kilometraje</p>
               <p className="font-medium">
-                {Number(car.data?.kilometers || 0).toLocaleString('es-ES')} km
+                {Number(car.kilometers || 0).toLocaleString('es-ES')} km
               </p>
             </div>
           </div>
@@ -66,7 +61,7 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({ car }) => {
             <FuelIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
               <p className="mb-0 text-sm text-gray-500">Combustible</p>
-              <p className="font-medium">{'-'}</p>
+              <p className="font-medium">{car.fuel || '-'}</p>
             </div>
           </div>
         </div>
@@ -75,7 +70,9 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({ car }) => {
             <CalendarIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
               <p className="mb-0 text-sm text-gray-500">Última revisión</p>
-              <p className="font-medium">{'-'}</p>
+              <p className="font-medium">
+                {car.lastRevision ? format(new Date(car.lastRevision), 'dd/MM/yyyy') : '-'}
+              </p>
             </div>
           </div>
         </div>

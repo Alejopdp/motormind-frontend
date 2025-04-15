@@ -79,7 +79,9 @@ export const VehicleListTable = ({
               <TableCell>{'—'}</TableCell>
               <TableCell className="text-right">
                 <Link to={`/cars/${vehicle._id}`}>
-                  <Button size="sm">Ver Detalles</Button>
+                  <Button variant="link" size="sm">
+                    Ver Detalles
+                  </Button>
                 </Link>
               </TableCell>
             </TableRow>

@@ -6,7 +6,10 @@ export type Car = {
   year: number;
   mechanicId: string;
   plate: string;
-  data: Record<string, any>;
+  kilometers: number;
+  fuel: string;
+  lastRevision: string;
+  data: Record<string, string>;
 };
 
 export type CreateCar = {
@@ -15,5 +18,7 @@ export type CreateCar = {
   model?: string;
   year?: number;
   plate?: string;
-  data?: Record<string, any>;
+  kilometers?: number;
+  fuel?: string;
+  lastRevision?: Date;
 };
