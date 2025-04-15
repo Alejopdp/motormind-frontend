@@ -17,6 +17,9 @@ type VehicleInformationProps = {
     year: number;
     vinCode: string;
     plate: string;
+    data: {
+      kilometers?: number;
+    };
   };
 };
 
@@ -54,7 +57,9 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({ car }) => {
             <GaugeIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
               <p className="mb-0 text-sm text-gray-500">Kilometraje</p>
-              <p className="font-medium">{0} km</p>
+              <p className="font-medium">
+                {Number(car.data?.kilometers || 0).toLocaleString('es-ES')} km
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">

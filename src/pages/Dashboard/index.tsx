@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileSearch } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -7,9 +8,11 @@ import { Diagnosis } from '@/types/Diagnosis';
 import { useApi } from '@/hooks/useApi';
 import { DiagnosticListItem } from '@/components/molecules/DiagnosticListItem';
 import Spinner from '@/components/atoms/Spinner';
+import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 import { Button } from '@/components/atoms/Button';
 
 const Dashboard = () => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { execute: getDiagnosesRequest } = useApi<{ data: Diagnosis[] }>('get', '/diagnoses');
 
   const {
@@ -31,7 +34,7 @@ const Dashboard = () => {
     <div className="flex flex-grow flex-col overflow-auto">
       <div className={'flex h-16 items-center justify-between bg-white px-8 py-6 shadow-xs'}>
         <h1 className="!text-2xl !font-bold">Dashboard</h1>
-        <Button>+ Crear nuevo diagnóstico</Button>
+        <Button onClick={() => setIsCreateModalOpen(true)}>+ Crear nuevo diagnóstico</Button>
       </div>
 
       {/* Dashboard content */}
@@ -78,6 +81,8 @@ const Dashboard = () => {
           )}
         </div>
       </main>
+
+      <CreateDiagnosticModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
     </div>
   );
 };

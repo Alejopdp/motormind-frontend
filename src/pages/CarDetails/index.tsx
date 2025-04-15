@@ -1,6 +1,6 @@
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
 
 import { Car } from '@/types/Car';
 import { useApi } from '@/hooks/useApi';
@@ -9,11 +9,13 @@ import VehicleFaultsHistory from '@/components/molecules/VehicleFaultsHistory/Ve
 import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
+import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 
 const CarDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
 
   useEffect(() => {
@@ -61,12 +63,16 @@ const CarDetails = () => {
           title: 'Detalles del Vehículo',
           description: `Matricula: ${car.plate || car.vinCode}`,
         }}
-        headerActions={<Button onClick={() => {}}>+ Crear nuevo diagnóstico</Button>}
+        headerActions={
+          <Button onClick={() => setIsCreateModalOpen(true)}>+ Crear nuevo diagnóstico</Button>
+        }
       />
       <div className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6">
         <VehicleInformation car={car} />
         <VehicleFaultsHistory carId={params.carId as string} />
       </div>
+
+      <CreateDiagnosticModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
     </div>
   );
 };
