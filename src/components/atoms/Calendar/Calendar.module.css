@@ -1,0 +1,15 @@
+.wrapper {
+  width: 100%;
+}
+
+.wrapper :global(.react-datepicker-wrapper) {
+  width: 100% !important;
+}
+
+.wrapper :global(.react-datepicker__input-container) {
+  width: 100% !important;
+}
+
+.wrapper :global(.react-datepicker__input-container input) {
+  width: 100% !important;
+}

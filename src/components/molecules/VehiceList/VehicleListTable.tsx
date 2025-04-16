@@ -70,14 +70,18 @@ export const VehicleListTable = ({
         <TableBody>
           {vehicles.map((vehicle) => (
             <TableRow key={vehicle._id} className="transition-colors hover:bg-gray-50">
-              <TableCell className="font-medium">{vehicle.plate || vehicle.vinCode}</TableCell>
-              <TableCell>{vehicle.brand || '-'}</TableCell>
+              <TableCell className="font-medium">
+                {vehicle.plate || vehicle.vinCode || '—'}
+              </TableCell>
+              <TableCell>{vehicle.brand || '—'}</TableCell>
               <TableCell>{vehicle.model || '—'}</TableCell>
               <TableCell>{vehicle.year || '—'}</TableCell>
               <TableCell>{'—'}</TableCell>
               <TableCell className="text-right">
                 <Link to={`/cars/${vehicle._id}`}>
-                  <Button size="sm">Ver Detalles</Button>
+                  <Button variant="link" size="sm">
+                    Ver Detalles
+                  </Button>
                 </Link>
               </TableCell>
             </TableRow>

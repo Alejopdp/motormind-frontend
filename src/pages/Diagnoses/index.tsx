@@ -10,6 +10,8 @@ import Spinner from '@/components/atoms/Spinner';
 import { DiagnosticListItem } from '@/components/molecules/DiagnosticListItem';
 import { Pagination } from '@/components/molecules/Pagination';
 import { Input } from '@/components/atoms/Input';
+import { Button } from '@/components/atoms/Button';
+import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 
 const LIMIT = 5;
 
@@ -17,6 +19,7 @@ const Diagnoses = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { execute: getDiagnosesRequest } = useApi<{ data: Diagnosis[]; total: number }>(
     'get',
     '/diagnoses',
@@ -73,9 +76,12 @@ const Diagnoses = () => {
   return (
     <div className="flex flex-grow flex-col">
       {/* Fixed Header */}
-      <div className="sticky top-0 bg-white px-8 py-4 shadow-xs">
-        <h1 className="text-2xl font-semibold">Diagnósticos</h1>
-        <p className="text-muted">Gestiona y revisa todos los diagnósticos del taller</p>
+      <div className="sticky top-0 flex items-center justify-between bg-white px-8 py-4 shadow-xs">
+        <div className="">
+          <h1 className="text-2xl font-semibold">Diagnósticos</h1>
+          <p className="text-muted">Gestiona y revisa todos los diagnósticos del taller</p>
+        </div>
+        <Button onClick={() => setIsCreateModalOpen(true)}>+ Crear nuevo diagnóstico</Button>
       </div>
 
       <div className="relative mx-8 mt-4 mb-1 sm:max-w-xs">
@@ -137,6 +143,8 @@ const Diagnoses = () => {
           </div>
         )}
       </div>
+
+      <CreateDiagnosticModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
     </div>
   );
 };
