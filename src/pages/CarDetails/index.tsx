@@ -9,13 +9,13 @@ import VehicleFaultsHistory from '@/components/molecules/VehicleFaultsHistory/Ve
 import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
-import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
+import SymptomInputForm from '@/components/molecules/SymptomInputForm';
 
 const CarDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [step, setStep] = useState('carDetails');
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
 
   useEffect(() => {
@@ -55,24 +55,30 @@ const CarDetails = () => {
     );
   }
 
+  const backNavigation = () => {
+    if (step === 'carDetails') return navigate('/cars');
+    if (step === 'newDiagnosis') setStep('carDetails');
+  };
+
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={() => navigate('/vehicles')}
+        onBack={backNavigation}
         data={{
-          title: 'Detalles del Vehículo',
+          title: step === 'carDetails' ? 'Detalles del Vehículo' : 'Nuevo diagnóstico',
           description: `Matricula: ${car.plate || car.vinCode}`,
         }}
         headerActions={
-          <Button onClick={() => setIsCreateModalOpen(true)}>+ Crear nuevo diagnóstico</Button>
+          step === 'carDetails' && (
+            <Button onClick={() => setStep('newDiagnosis')}>+ Crear nuevo diagnóstico</Button>
+          )
         }
       />
       <div className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6">
-        <VehicleInformation car={car} />
-        <VehicleFaultsHistory carId={params.carId as string} />
+        <VehicleInformation car={car} editMode={step === 'carDetails'} />
+        {step === 'carDetails' && <VehicleFaultsHistory carId={params.carId as string} />}
+        {step === 'newDiagnosis' && <SymptomInputForm onSubmit={() => {}} />}
       </div>
-
-      <CreateDiagnosticModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
     </div>
   );
 };

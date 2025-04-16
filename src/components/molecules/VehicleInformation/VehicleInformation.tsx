@@ -14,18 +14,21 @@ import { format } from 'date-fns';
 
 type VehicleInformationProps = {
   car: Car;
+  editMode?: boolean;
 };
 
-const VehicleInformation: React.FC<VehicleInformationProps> = ({ car }) => {
+const VehicleInformation: React.FC<VehicleInformationProps> = ({ car, editMode = true }) => {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
     <div className="mt-4 rounded-lg bg-white p-6 shadow-md">
       <div className="flex items-center justify-between">
         <h5 className="mb-2 text-lg font-medium">Información del vehículo</h5>
-        <Button variant="ghost" onClick={() => setIsEditing(true)}>
-          <PencilIcon className="text-muted !h-4 !w-4" />
-        </Button>
+        {editMode && (
+          <Button variant="ghost" onClick={() => setIsEditing(true)}>
+            <PencilIcon className="text-muted !h-4 !w-4" />
+          </Button>
+        )}
 
         <EditVehicleModal open={isEditing} onOpenChange={setIsEditing} car={car} />
       </div>

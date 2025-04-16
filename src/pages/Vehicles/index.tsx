@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { PlusIcon, SearchIcon } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 import { debounce } from 'lodash';
-import { useNavigate } from 'react-router-dom';
 
 import { useApi } from '@/hooks/useApi';
-import { Car, CreateCar } from '@/types/Car';
+import { Car } from '@/types/Car';
 import Spinner from '@/components/atoms/Spinner';
 import { VehicleListTable } from '@/components/molecules/VehiceList/VehicleListTable';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
@@ -22,8 +21,6 @@ const Vehicles = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
   const { execute: getCarsRequest } = useApi<{ data: Car[]; total: number }>('get', '/cars');
-  const { execute: addVehicleRequest } = useApi<Car>('post', '/cars');
-  const navigate = useNavigate();
 
   useEffect(() => {
     const handler = debounce(() => {
@@ -60,59 +57,6 @@ const Vehicles = () => {
     staleTime: 60000,
   });
 
-  const addVehicleMutation = useMutation({
-    mutationFn: (carData: CreateCar) => addVehicleRequest(carData),
-    onSuccess: (response) => {
-      enqueueSnackbar('Vehículo creado exitosamente', { variant: 'success' });
-      setIsCreateModalOpen(false);
-      navigate(`/cars/${response.data._id}`);
-    },
-    onError: () => {
-      enqueueSnackbar('Error al crear el vehículo', { variant: 'error' });
-    },
-  });
-
-  const handleCreateVehicle = (data: {
-    licensePlate?: string;
-    vin?: string;
-    manualData?: {
-      brand: string;
-      model: string;
-      year: string;
-      licensePlate?: string;
-      kilometers?: string;
-      lastRevision?: string;
-      fuel?: string;
-    };
-  }) => {
-    if (data.manualData) {
-      const carData: CreateCar = {
-        vinCode: data.vin || '',
-        brand: data.manualData.brand,
-        model: data.manualData.model,
-        year: parseInt(data.manualData.year),
-        plate: data.manualData.licensePlate || '',
-        kilometers: Number(data.manualData.kilometers) || 0,
-        lastRevision: data.manualData.lastRevision
-          ? new Date(data.manualData.lastRevision)
-          : new Date(),
-        fuel: data.manualData.fuel || '',
-      };
-      addVehicleMutation.mutate(carData);
-      return;
-    }
-
-    if (data.vin) {
-      addVehicleMutation.mutate({ vinCode: data.vin });
-      return;
-    }
-
-    if (data.licensePlate) {
-      addVehicleMutation.mutate({ plate: data.licensePlate });
-      return;
-    }
-  };
-
   useEffect(() => {
     if (isError && error) {
       enqueueSnackbar('Error al buscar vehículos', { variant: 'error' });
@@ -144,21 +88,15 @@ const Vehicles = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="h-10"
-            disabled={addVehicleMutation.isPending}
-          >
+          <Button onClick={() => setIsCreateModalOpen(true)} className="h-10">
             <PlusIcon className="h-4 w-4" />
-            {addVehicleMutation.isPending ? 'Añadiendo...' : 'Añadir Vehículo'}
+            Añadir Vehículo
           </Button>
 
           <CreateDiagnosticModal
-            onSubmit={handleCreateVehicle}
             open={isCreateModalOpen}
             onOpenChange={setIsCreateModalOpen}
             createOnly
-            isLoading={addVehicleMutation.isPending}
           />
         </div>
       </div>
