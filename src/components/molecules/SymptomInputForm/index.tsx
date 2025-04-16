@@ -93,7 +93,7 @@ export default function SymptomInputForm({
       </div>
 
       <div className="flex justify-end rounded-b-lg border-t border-gray-200 bg-gray-50 px-6 py-4">
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading || symptoms.length === 0}>
           {isLoading ? 'Generando Preguntas...' : 'Continuar a Preguntas Guiadas'}
         </Button>
       </div>
