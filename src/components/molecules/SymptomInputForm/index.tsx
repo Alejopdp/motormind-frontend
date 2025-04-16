@@ -8,6 +8,7 @@ interface SymptomInputFormProps {
   initialSymptoms?: string;
   initialNotes?: string;
   licensePlate?: string;
+  isLoading?: boolean;
   onSubmit: (data: { symptoms: string; notes: string }) => void;
 }
 
@@ -16,6 +17,7 @@ export default function SymptomInputForm({
   initialNotes = '',
   licensePlate,
   onSubmit,
+  isLoading,
 }: SymptomInputFormProps) {
   const [symptoms, setSymptoms] = useState(initialSymptoms);
   const [notes, setNotes] = useState(initialNotes);
@@ -37,39 +39,41 @@ export default function SymptomInputForm({
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white shadow-sm">
       <div className="p-6">
-        <h2 className="mb-4 text-xl font-semibold">Síntomas y Observaciones</h2>
+        <h2 className="mb-3 text-xl font-semibold">Síntomas y Observaciones</h2>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <p className="text-base font-medium">Síntomas Reportados</p>
+            <p className="text-md text-gray-800">Describe los síntomas que presenta el vehículo</p>
             <Textarea
               id="symptoms"
-              placeholder="Describe los síntomas que presenta el vehículo..."
+              placeholder="Síntomas..."
               className="min-h-[120px] resize-none"
               value={symptoms}
               onChange={(e) => setSymptoms(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
 
           <div>
-            <button
+            <Button
               type="button"
-              className="flex items-center text-sm font-medium text-[#2A7DE1] hover:text-[#2468BE]"
+              variant="ghost"
+              className="text-primary h-auto p-0"
               onClick={() => setShowNotes(!showNotes)}
             >
               {showNotes ? (
                 <>
-                  <ChevronUpIcon className="mr-1 h-4 w-4" />
+                  <ChevronUpIcon className="h-4 w-4" />
                   Ocultar notas adicionales
                 </>
               ) : (
                 <>
-                  <ChevronDownIcon className="mr-1 h-4 w-4" />
+                  <ChevronDownIcon className="h-4 w-4" />
                   Añadir notas adicionales
                 </>
               )}
-            </button>
+            </Button>
 
             {showNotes && (
               <div className="mt-4 space-y-2">
@@ -80,6 +84,7 @@ export default function SymptomInputForm({
                   className="min-h-[100px] resize-none"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
             )}
@@ -88,7 +93,9 @@ export default function SymptomInputForm({
       </div>
 
       <div className="flex justify-end rounded-b-lg border-t border-gray-200 bg-gray-50 px-6 py-4">
-        <Button type="submit">Continuar a Preguntas Guiadas</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? 'Generando Preguntas...' : 'Continuar a Preguntas Guiadas'}
+        </Button>
       </div>
     </form>
   );

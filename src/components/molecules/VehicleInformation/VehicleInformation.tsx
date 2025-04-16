@@ -15,10 +15,67 @@ import { format } from 'date-fns';
 type VehicleInformationProps = {
   car: Car;
   editMode?: boolean;
+  minimized?: boolean;
 };
 
-const VehicleInformation: React.FC<VehicleInformationProps> = ({ car, editMode = true }) => {
+const VehicleInformation: React.FC<VehicleInformationProps> = ({
+  car,
+  editMode = true,
+  minimized = false,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
+
+  if (minimized) {
+    return (
+      <div className="mt-4 rounded-lg bg-white p-6 shadow-md">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <div className="rounded-md bg-blue-100 p-2">
+              <CarIcon className="text-primary h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-muted text-sm">Vehículo</p>
+              <p className="font-medium">
+                {car.brand} {car.model} ({car.year})
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="rounded-md bg-blue-100 p-2">
+              <GaugeIcon className="text-primary h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-muted text-sm">Matrícula</p>
+              <p className="font-medium">{car.plate || car.vinCode}</p>
+            </div>
+          </div>
+
+          <div className="hidden items-center gap-3 md:flex">
+            <div className="rounded-md bg-blue-100 p-2">
+              <FuelIcon className="text-primary h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-muted text-sm">Combustible</p>
+              <p className="font-medium">{car.fuel || '-'}</p>
+            </div>
+          </div>
+
+          <div className="hidden items-center gap-3 lg:flex">
+            <div className="rounded-md bg-blue-100 p-2">
+              <CalendarIcon className="text-primary h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-muted text-sm">Última Revisión</p>
+              <p className="font-medium">
+                {car.lastRevision ? format(new Date(car.lastRevision), 'dd/MM/yyyy') : '-'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-4 rounded-lg bg-white p-6 shadow-md">
@@ -38,14 +95,14 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({ car, editMode =
           <div className="flex items-center gap-2">
             <CarIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
-              <p className="mb-0 text-sm text-gray-500">Marca / Modelo</p>
+              <p className="text-muted mb-0 text-sm">Marca / Modelo</p>
               <p className="font-medium">{`${car.brand || ''} ${car.model || ''}`}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="text-muted mr-2 !h-5 !w-5" />
             <div>
-              <p className="mb-0 text-sm text-gray-500">Matrícula</p>
+              <p className="text-muted mb-0 text-sm">Matrícula</p>
               <p className="font-medium">{car.plate || car.vinCode}</p>
             </div>
           </div>
@@ -54,7 +111,7 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({ car, editMode =
           <div className="flex items-center gap-2">
             <GaugeIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
-              <p className="mb-0 text-sm text-gray-500">Kilometraje</p>
+              <p className="text-muted mb-0 text-sm">Kilometraje</p>
               <p className="font-medium">
                 {Number(car.kilometers || 0).toLocaleString('es-ES')} km
               </p>
@@ -63,7 +120,7 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({ car, editMode =
           <div className="flex items-center gap-2">
             <FuelIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
-              <p className="mb-0 text-sm text-gray-500">Combustible</p>
+              <p className="text-muted mb-0 text-sm">Combustible</p>
               <p className="font-medium">{car.fuel || '-'}</p>
             </div>
           </div>
@@ -72,7 +129,7 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({ car, editMode =
           <div className="flex items-center gap-2">
             <CalendarIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
-              <p className="mb-0 text-sm text-gray-500">Última revisión</p>
+              <p className="text-muted mb-0 text-sm">Última revisión</p>
               <p className="font-medium">
                 {car.lastRevision ? format(new Date(car.lastRevision), 'dd/MM/yyyy') : '-'}
               </p>
