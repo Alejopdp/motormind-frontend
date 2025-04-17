@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { CheckIcon, HashIcon, FileTextIcon, XIcon, PlusIcon, ArrowLeftIcon } from 'lucide-react';
 import { Calendar } from '@/components/atoms/Calendar';
+import { useSnackbar } from 'notistack';
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { AxiosResponse } from 'axios';
 
 import { Button } from '@/components/atoms/Button';
 import {
@@ -24,41 +28,31 @@ import {
 import { parseSpanishDate } from '@/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useApi } from '@/hooks/useApi';
+import { CreateCar, Car } from '@/types/Car';
 
 const MIN_YEAR = 1980;
 
 interface CreateDiagnosticModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit?: (data: {
-    licensePlate?: string;
-    vin?: string;
-    manualData?: {
-      brand: string;
-      model: string;
-      year: string;
-      licensePlate?: string;
-      kilometers?: string;
-      fuel?: string;
-      lastRevision?: string;
-    };
-  }) => void;
   createOnly?: boolean;
-  isLoading?: boolean;
 }
 
 export const CreateDiagnosticModal = ({
   open,
   onOpenChange,
-  onSubmit = () => {},
   createOnly = false,
-  isLoading = false,
 }: CreateDiagnosticModalProps) => {
   const [licensePlate, setLicensePlate] = useState('');
   const [vin, setVin] = useState('');
   const [activeTab, setActiveTab] = useState('licensePlate');
   const [isLicensePlateValid, setIsLicensePlateValid] = useState<boolean | null>(null);
   const [isVinValid, setIsVinValid] = useState<boolean | null>(null);
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+  const { execute: addVehicleRequest } = useApi<Car>('post', '/cars');
+  const { execute: getOrCreateVehicleRequest } = useApi<Car>('get', '/cars/vin-or-plate');
 
   // Manual creation form state
   const [isManualMode, setIsManualMode] = useState(false);
@@ -71,6 +65,33 @@ export const CreateDiagnosticModal = ({
     fuel: '',
     lastRevision: '',
     vinCode: '',
+  });
+
+  const addVehicleMutation = useMutation<AxiosResponse<Car>, Error, CreateCar>({
+    mutationFn: (carData: CreateCar) => addVehicleRequest(carData),
+    onSuccess: (response) => {
+      enqueueSnackbar('Vehículo creado exitosamente', { variant: 'success' });
+      onOpenChange(false);
+      navigate(`/cars/${response.data._id}`);
+    },
+    onError: () => {
+      enqueueSnackbar('Error al crear el vehículo', { variant: 'error' });
+    },
+  });
+
+  const getOrCreateVehicleMutation = useMutation<
+    AxiosResponse<Car>,
+    Error,
+    { vinCode?: string; plate?: string }
+  >({
+    mutationFn: (params: { vinCode?: string; plate?: string }) =>
+      getOrCreateVehicleRequest(undefined, params),
+    onSuccess: (response) => {
+      navigate(`/cars/${response.data._id}`);
+    },
+    onError: () => {
+      enqueueSnackbar('Error al obtener el vehículo', { variant: 'error' });
+    },
   });
 
   const validateLicensePlate = (value: string) => {
@@ -111,11 +132,21 @@ export const CreateDiagnosticModal = ({
     e.preventDefault();
 
     if (isManualMode) {
-      onSubmit({ manualData });
+      const carData: CreateCar = {
+        vinCode: manualData.vinCode || '',
+        brand: manualData.brand,
+        model: manualData.model,
+        year: parseInt(manualData.year),
+        plate: manualData.licensePlate || '',
+        kilometers: Number(manualData.kilometers) || 0,
+        lastRevision: manualData.lastRevision ? new Date(manualData.lastRevision) : new Date(),
+        fuel: manualData.fuel || '',
+      };
+      addVehicleMutation.mutate(carData);
     } else if (activeTab === 'licensePlate' && licensePlate.trim()) {
-      onSubmit({ licensePlate });
+      getOrCreateVehicleMutation.mutate({ plate: licensePlate });
     } else if (activeTab === 'vin' && vin.trim()) {
-      onSubmit({ vin });
+      getOrCreateVehicleMutation.mutate({ vinCode: vin });
     }
   };
 
@@ -170,6 +201,8 @@ export const CreateDiagnosticModal = ({
       : (activeTab === 'licensePlate' && !licensePlate.trim()) ||
           (activeTab === 'vin' && !vin.trim()),
   );
+
+  const isLoading = addVehicleMutation.isPending || getOrCreateVehicleMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -280,44 +313,44 @@ export const CreateDiagnosticModal = ({
                 </div>
               </div>
 
-              <div>
-                <p className="text-sm font-medium">VIN</p>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="relative">
-                    <Input
-                      id="vinCode"
-                      value={manualData.vinCode}
-                      onChange={(e) => validateVin(e.target.value)}
-                      className={`${
-                        isVinValid === true
-                          ? 'border-green-500 pr-10'
-                          : isVinValid === false
-                            ? 'border-red-500 pr-10'
-                            : ''
-                      }`}
-                      pattern={VIN_REGEX.source}
-                      placeholder="Ej: 12345678901234567"
-                    />
+                  <p className="text-sm font-medium">VIN</p>
+                  <div>
+                    <div className="relative">
+                      <Input
+                        id="vinCode"
+                        value={manualData.vinCode}
+                        onChange={(e) => validateVin(e.target.value)}
+                        className={`${
+                          isVinValid === true
+                            ? 'border-green-500 pr-10'
+                            : isVinValid === false
+                              ? 'border-red-500 pr-10'
+                              : ''
+                        }`}
+                        pattern={VIN_REGEX.source}
+                        placeholder="Ej: 12345678901234567"
+                      />
 
-                    {isVinValid !== null && (
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                        {isVinValid ? (
-                          <CheckIcon className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <XIcon className="h-5 w-5 text-red-500" />
-                        )}
-                      </div>
+                      {isVinValid !== null && (
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                          {isVinValid ? (
+                            <CheckIcon className="h-5 w-5 text-green-500" />
+                          ) : (
+                            <XIcon className="h-5 w-5 text-red-500" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {isVinValid === false && (
+                      <p className="mt-1 text-xs text-red-500">
+                        VIN inválido. Por favor, introduce un VIN válido.
+                      </p>
                     )}
                   </div>
-                  {isVinValid === false && (
-                    <p className="mt-1 text-xs text-red-500">
-                      VIN inválido. Por favor, introduce un VIN válido.
-                    </p>
-                  )}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium">KMs</p>
                   <Input
@@ -332,7 +365,9 @@ export const CreateDiagnosticModal = ({
                     <p className="mt-1 text-xs text-red-500">Ingrese números mayores que 0</p>
                   )}
                 </div>
+              </div>
 
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium">Combustible</p>
                   <Select
@@ -351,27 +386,27 @@ export const CreateDiagnosticModal = ({
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div>
-                <p className="text-sm font-medium">Última revisión</p>
+                <div>
+                  <p className="text-sm font-medium">Última revisión</p>
 
-                <Calendar
-                  value={
-                    manualData.lastRevision
-                      ? parseSpanishDate(manualData.lastRevision) || null
-                      : null
-                  }
-                  onChange={(date) => {
-                    if (date) {
-                      const formattedDate = format(date, 'dd/MM/yyyy', { locale: es });
-                      handleManualInputChange('lastRevision', formattedDate);
-                    } else {
-                      handleManualInputChange('lastRevision', '');
+                  <Calendar
+                    value={
+                      manualData.lastRevision
+                        ? parseSpanishDate(manualData.lastRevision) || null
+                        : null
                     }
-                  }}
-                  maxDate={new Date()}
-                />
+                    onChange={(date) => {
+                      if (date) {
+                        const formattedDate = format(date, 'dd/MM/yyyy', { locale: es });
+                        handleManualInputChange('lastRevision', formattedDate);
+                      } else {
+                        handleManualInputChange('lastRevision', '');
+                      }
+                    }}
+                    maxDate={new Date()}
+                  />
+                </div>
               </div>
 
               <div className="flex justify-center">

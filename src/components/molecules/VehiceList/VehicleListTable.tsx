@@ -11,6 +11,7 @@ import {
 } from '@/components/atoms/Table';
 import { Button } from '@/components/atoms/Button';
 import { Car } from '@/types/Car';
+import { format } from 'date-fns';
 
 interface VehicleListTableProps {
   vehicles: Car[];
@@ -76,7 +77,9 @@ export const VehicleListTable = ({
               <TableCell>{vehicle.brand || '—'}</TableCell>
               <TableCell>{vehicle.model || '—'}</TableCell>
               <TableCell>{vehicle.year || '—'}</TableCell>
-              <TableCell>{'—'}</TableCell>
+              <TableCell>
+                {vehicle.lastRevision ? format(new Date(vehicle.lastRevision), 'dd/MM/yyyy') : '—'}
+              </TableCell>
               <TableCell className="text-right">
                 <Link to={`/cars/${vehicle._id}`}>
                   <Button variant="link" size="sm">

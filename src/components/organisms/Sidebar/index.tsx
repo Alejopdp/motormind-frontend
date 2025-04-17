@@ -31,7 +31,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
     {
       icon: CarIcon,
       label: 'Vehículos',
-      href: '/vehicles',
+      href: '/cars',
     },
     {
       icon: ClipboardListIcon,
@@ -54,7 +54,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
           // Check if this item is active
           const isActive =
             (item.href === '/' && currentPath === '/') ||
-            (item.href === '/vehicles' && currentPath === '/vehicles') ||
+            (item.href === '/cars' && currentPath === '/cars') ||
             (item.href === '/diagnoses' && currentPath === '/diagnoses');
 
           return (

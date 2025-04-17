@@ -3,9 +3,10 @@ import clsx from 'clsx';
 type SpinnerProps = {
   className?: string;
   style?: React.CSSProperties;
+  label?: string;
 };
 
-const Spinner: React.FC<SpinnerProps> = ({ className, style }) => {
+const Spinner: React.FC<SpinnerProps> = ({ className, style, label = 'Cargando...' }) => {
   return (
     <div className="flex flex-col items-center gap-2">
       <div
@@ -16,7 +17,7 @@ const Spinner: React.FC<SpinnerProps> = ({ className, style }) => {
         style={style}
         role="status"
       ></div>
-      <span className="text-primary">Cargando...</span>
+      <span className="text-primary">{label}</span>
     </div>
   );
 };

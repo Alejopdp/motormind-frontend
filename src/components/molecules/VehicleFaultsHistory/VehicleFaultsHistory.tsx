@@ -28,6 +28,7 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
       return { data: response.data };
     },
     enabled: !!carId,
+    staleTime: 60000,
   });
 
   useEffect(() => {
