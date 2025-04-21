@@ -3,13 +3,13 @@ export type Car = {
   vinCode: string;
   brand: string;
   model: string;
-  year: number;
+  year?: number;
   mechanicId: string;
   plate: string;
-  kilometers: number;
-  fuel: string;
-  lastRevision: string;
-  data: Record<string, string>;
+  kilometers?: number;
+  fuel?: string;
+  lastRevision?: Date;
+  data?: Record<string, string>;
 };
 
 export type CreateCar = {

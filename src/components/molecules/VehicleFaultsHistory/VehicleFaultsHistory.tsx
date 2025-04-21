@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import Spinner from '@/components/atoms/Spinner';
 import { Diagnosis } from '@/types/Diagnosis';
 import { useApi } from '@/hooks/useApi';
@@ -8,9 +7,9 @@ import { enqueueSnackbar } from 'notistack';
 import { useEffect } from 'react';
 import { AlertCircleIcon } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
+import { Link } from 'react-router-dom';
 
 const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { execute: getDiagnosesByCarId } = useApi<Diagnosis[]>('get', '/cars/:carId/diagnosis');
 
@@ -44,12 +43,6 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
     };
   }, [carId, queryClient]);
 
-  const navigateToDiagnosis = (diagnosis: Diagnosis) => {
-    const url = `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}`;
-
-    navigate(url);
-  };
-
   return (
     <div className="mt-4 rounded-lg bg-white p-6 shadow-sm">
       <h3 className="mb-4 text-xl font-bold">Historial de Averías Reciente</h3>
@@ -74,11 +67,7 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
             })
             .map((diagnosis: Diagnosis, index: number) => (
               <div className="overflow-hidden border border-gray-200 first:rounded-t-lg last:rounded-b-lg">
-                <FaultsHistoryItem
-                  breakdown={diagnosis}
-                  index={index}
-                  onViewDetails={navigateToDiagnosis}
-                />
+                <FaultsHistoryItem diagnosis={diagnosis} index={index} />
               </div>
             ))}
         </div>
@@ -89,37 +78,24 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
 
 export default VehicleFaultsHistory;
 
-const FaultsHistoryItem = ({
-  breakdown,
-  index,
-  onViewDetails,
-}: {
-  breakdown: Diagnosis;
-  index: number;
-  onViewDetails: (diagnosis: Diagnosis) => void;
-}) => {
+const FaultsHistoryItem = ({ diagnosis, index }: { diagnosis: Diagnosis; index: number }) => {
   return (
     <div
-      key={breakdown._id}
+      key={diagnosis._id}
       className={`border-b last:border-b-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} transition-colors duration-200 hover:bg-[#EAF2FD]`}
     >
       <div className="p-4">
         <div className="flex items-center justify-between">
           <p className="text-muted text-sm">
-            Fecha: {formatToddmmyyyy(new Date(breakdown.createdAt))}
+            Fecha: {formatToddmmyyyy(new Date(diagnosis.createdAt))}
           </p>
-          <Button
-            variant="ghost"
-            className="text-primary h-6 px-2"
-            onClick={(e) => {
-              e.stopPropagation();
-              onViewDetails(breakdown);
-            }}
-          >
-            Ver detalles
-          </Button>
+          <Link to={`/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}`}>
+            <Button variant="link" size="sm">
+              Ver Detalles
+            </Button>
+          </Link>
         </div>
-        <p className="font-medium">{breakdown.fault}</p>
+        <p className="font-medium">{diagnosis.fault}</p>
       </div>
     </div>
   );

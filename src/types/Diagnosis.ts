@@ -8,11 +8,8 @@ export type Diagnosis = {
       title: string;
       probability: string;
       reasonDetails: string;
-    }[];
-    fixSteps: {
-      title: string;
-      procedure: string;
-      tools: string;
+      diagnosticRecommendations: string[];
+      requiredTools: string[];
     }[];
   };
   finalNotes: string;
@@ -27,6 +24,9 @@ export type Diagnosis = {
     plate: string;
     vinCode: string;
     mechanicId: string;
+    kilometers: number;
+    fuel: string;
+    lastRevision: Date;
   };
   mechanic?: {
     name: string;

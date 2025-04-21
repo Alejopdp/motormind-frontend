@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { enqueueSnackbar } from 'notistack';
 
 import { Car } from '@/types/Car';
 import { useApi } from '@/hooks/useApi';
@@ -12,6 +13,7 @@ import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
 import SymptomInputForm from '@/components/molecules/SymptomInputForm';
 import { TechnicanObservationsInputForm } from '@/components/molecules/TechnicanObservationsInputForm';
 import { QuestionsList } from '@/components/atoms/QuestionsList';
+import { Diagnosis } from '@/types/Diagnosis';
 
 const CarDetails = () => {
   const params = useParams();
@@ -19,6 +21,7 @@ const CarDetails = () => {
   const queryClient = useQueryClient();
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
   const { execute: generateQuestions } = useApi<string[]>('post', '/cars/:carId/questions');
+  const { execute: createDiagnosisRequest } = useApi<Diagnosis>('post', '/cars/:carId/diagnosis');
 
   const [step, setStep] = useState('carDetails');
   const [symptoms, setSymptoms] = useState<string>('');
@@ -76,6 +79,28 @@ const CarDetails = () => {
     },
   });
 
+  const { mutate: createDiagnosisMutation, isPending: isLoadingDiagnosis } = useMutation({
+    mutationFn: async ({ fault, notes }: { fault: string; notes: string }) => {
+      const response = await createDiagnosisRequest(
+        {
+          fault,
+          notes,
+        },
+        undefined,
+        { carId: params.carId as string },
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      navigate(`/cars/${params.carId}/diagnosis/${data._id}`);
+    },
+    onError: () => {
+      enqueueSnackbar('Error al generar el diagnóstico. Por favor, inténtalo de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
+
   if (isLoadingCar)
     return (
       <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
@@ -101,6 +126,10 @@ const CarDetails = () => {
     setSymptoms(symptoms);
     setNotes(notes);
     generateQuestionsMutation({ symptoms, notes });
+  };
+
+  const createDiagnosis = (details: string) => {
+    createDiagnosisMutation({ fault: symptoms, notes: details });
   };
 
   return (
@@ -151,9 +180,10 @@ const CarDetails = () => {
             />
 
             <TechnicanObservationsInputForm
-              onSubmit={() => {}}
+              onSubmit={createDiagnosis}
               onGenerateMoreQuestions={() => generateQuestionsMutation({ symptoms, notes })}
               isLoadingMoreQuestions={isLoadingQuestions}
+              isLoadingDiagnosis={isLoadingDiagnosis}
               disableMoreQuestions={isLoadingQuestions || questions.length > 7}
             />
           </div>
