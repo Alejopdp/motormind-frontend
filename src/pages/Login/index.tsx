@@ -52,12 +52,12 @@ const Login: React.FC = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#2A7DE1]">
               <CarIcon className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-semibold">Motormind</span>
+            <span className="text-lg font-semibold md:text-xl">Motormind</span>
           </div>
-          <h1 className="mb-2 text-2xl font-bold">
+          <h1 className="mb-2 text-xl font-bold md:text-2xl">
             {linkSent ? 'Enlace enviado' : 'Accede a tu cuenta'}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm text-gray-600 md:text-base">
             {linkSent
               ? 'Revisa tu correo electrónico para continuar'
               : 'Te enviaremos un enlace a tu correo para iniciar sesión'}
@@ -71,14 +71,16 @@ const Login: React.FC = () => {
                 <div className="mr-2">
                   <CircleCheckBig size={16} className="text-green-700" />
                 </div>
-                <p className="text-sm font-medium text-green-700">
+                <p className="text-xs font-medium text-green-700 md:text-sm">
                   Hemos enviado un enlace a tu correo electrónico para que puedas acceder a tu
                   cuenta. Por favor, revisa tu bandeja de entrada y sigue las instrucciones para
                   acceder a tu cuenta.
                 </p>
               </div>
 
-              <p className="text-center text-gray-600">¿No encuentras nuestro email?</p>
+              <p className="text-center text-xs text-gray-600 md:text-sm">
+                ¿No encuentras nuestro email?
+              </p>
 
               <Button
                 variant="default"
@@ -96,9 +98,9 @@ const Login: React.FC = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+                <p className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
                   Correo electrónico
-                </label>
+                </p>
                 <Input
                   id="email"
                   type="email"

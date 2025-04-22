@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileSearch } from 'lucide-react';
+import { FileSearch, PlusIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 import { formatDate } from '@/utils';
@@ -32,51 +32,68 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-grow flex-col overflow-auto">
-      <div className={'flex h-16 items-center justify-between bg-white px-8 py-6 shadow-xs'}>
-        <h1 className="!text-2xl !font-bold">Dashboard</h1>
-        <Button onClick={() => setIsCreateModalOpen(true)}>+ Crear nuevo diagnóstico</Button>
+      <div className="fixed top-0 right-0 left-0 z-40 flex h-12 items-center justify-between bg-white px-3 py-2 shadow-xs sm:hidden">
+        <h1 className="ml-12 text-base font-bold">Dashboard</h1>
+        <Button onClick={() => setIsCreateModalOpen(true)} size="sm" className="h-8 w-8 p-0">
+          <PlusIcon className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Dashboard content */}
-      <main className="p-4">
-        <div className="m-4">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="!text-xl !font-bold">Diagnósticos Recientes</h2>
-            <Link to="/diagnoses" className="text-primary font-medium">
-              Ver todos
-            </Link>
-          </div>
+      <main className="flex flex-col">
+        <div className="sticky top-0 z-10 hidden h-12 items-center justify-between bg-white px-4 py-4 shadow-xs sm:flex sm:px-8 sm:py-6 md:h-16">
+          <h1 className="ml-6 text-lg font-bold sm:text-xl md:ml-0 lg:text-2xl">Dashboard</h1>
+          <Button onClick={() => setIsCreateModalOpen(true)} size="lg">
+            <PlusIcon className="!h-5 !w-5" />
+            <span className="hidden sm:inline">Nuevo diagnóstico</span>
+          </Button>
+        </div>
 
-          {isError && (
-            <h5 className="text-destructive mb-2 font-semibold">Error: {error?.message}</h5>
-          )}
+        <div className="p-2 sm:p-4">
+          <div className="m-2 sm:m-4">
+            <div className="mb-3 flex items-center justify-between sm:mb-4">
+              <h2 className="text-base font-bold sm:text-lg lg:text-xl">Diagnósticos Recientes</h2>
+              <Link to="/diagnoses" className="text-primary text-sm font-medium sm:text-base">
+                Ver todos
+              </Link>
+            </div>
 
-          {isLoadingDiagnoses ? (
-            <div className="flex items-center justify-center">
-              <Spinner className="mt-5" />
-            </div>
-          ) : diagnoses.length > 0 ? (
-            <div className="space-y-4">
-              {diagnoses.map((diagnosis, index) => (
-                <DiagnosticListItem
-                  key={index}
-                  diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
-                  vehicle={diagnosis.car}
-                  problems={diagnosis.preliminary.possibleReasons.map(({ title }) => title)}
-                  technician={diagnosis.mechanic}
-                  timestamp={formatDate(diagnosis.createdAt)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex h-64 flex-col items-center justify-center text-center">
-              <div className="mb-4 rounded-full bg-gray-100 p-4">
-                <FileSearch className="h-10 w-10 text-gray-500" />
+            {isError && (
+              <h5 className="text-destructive mb-2 text-sm font-semibold sm:text-base">
+                Error: {error?.message}
+              </h5>
+            )}
+
+            {isLoadingDiagnoses ? (
+              <div className="flex items-center justify-center">
+                <Spinner className="mt-5" />
               </div>
-              <h3 className="mb-1 text-lg font-medium">No se encontraron diagnósticos</h3>
-              <p className="mb-4 text-gray-500">No hay diagnósticos recientes.</p>
-            </div>
-          )}
+            ) : diagnoses.length > 0 ? (
+              <div className="mt-5 space-y-3 sm:mt-0 sm:space-y-4">
+                {diagnoses.map((diagnosis, index) => (
+                  <DiagnosticListItem
+                    key={index}
+                    diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
+                    vehicle={diagnosis.car}
+                    problems={diagnosis.preliminary.possibleReasons.map(({ title }) => title)}
+                    technician={diagnosis.mechanic}
+                    timestamp={formatDate(diagnosis.createdAt)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex h-64 flex-col items-center justify-center text-center">
+                <div className="mb-3 rounded-full bg-gray-100 p-3 sm:mb-4 sm:p-4">
+                  <FileSearch className="h-8 w-8 text-gray-500 sm:h-10 sm:w-10" />
+                </div>
+                <h3 className="mb-1 text-base font-medium sm:text-lg">
+                  No se encontraron diagnósticos
+                </h3>
+                <p className="mb-4 text-sm text-gray-500 sm:text-base">
+                  No hay diagnósticos recientes.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 
