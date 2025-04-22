@@ -59,10 +59,8 @@ const Dashboard = () => {
             <div className="space-y-4">
               {diagnoses.map((diagnosis, index) => (
                 <DiagnosticListItem
-                  id={diagnosis._id || ''}
-                  carId={diagnosis.carId || ''}
-                  diagnosis={diagnosis.diagnosis || ''}
                   key={index}
+                  diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
                   vehicle={diagnosis.car}
                   problems={diagnosis.preliminary.possibleReasons.map(({ title }) => title)}
                   technician={diagnosis.mechanic}

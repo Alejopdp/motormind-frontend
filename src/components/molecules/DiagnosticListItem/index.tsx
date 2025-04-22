@@ -7,8 +7,6 @@ import { Dropdown } from '@/components/atoms/Dropdown';
 import { cn } from '@/utils/cn';
 
 interface DiagnosticListItemProps {
-  id: string;
-  carId: string;
   vehicle?: {
     _id: string;
     brand: string;
@@ -25,27 +23,21 @@ interface DiagnosticListItemProps {
   // priority?: 'Baja' | 'Media' | 'Alta';
   timestamp: string;
   className?: string;
-  diagnosis: string;
+  diagnosisLink: string;
 }
 
 export const DiagnosticListItem = ({
-  id,
-  carId,
   vehicle,
   problems,
   technician,
   timestamp,
   className,
-  diagnosis,
+  diagnosisLink,
 }: DiagnosticListItemProps) => {
   const navigate = useNavigate();
 
-  const handleViewDetails = () => {
-    navigate(`/cars/${carId}/diagnosis/${id}`);
-  };
-
-  const copyDiagnosis = (diagnoses: string) => {
-    navigator.clipboard.writeText(diagnoses ?? '');
+  const copyDiagnosis = (link: string) => {
+    navigator.clipboard.writeText(link ?? '');
     enqueueSnackbar('Diagnóstico copiado al portapapeles', {
       variant: 'success',
     });
@@ -86,7 +78,8 @@ export const DiagnosticListItem = ({
               <Dropdown.Item
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleViewDetails();
+                  const path = diagnosisLink.split('/cars')[1];
+                  navigate(`/cars${path}`);
                 }}
               >
                 <EyeIcon className="text-primary mr-2 h-4 w-4" />
@@ -95,11 +88,11 @@ export const DiagnosticListItem = ({
               <Dropdown.Item
                 onClick={(e) => {
                   e.stopPropagation();
-                  copyDiagnosis(diagnosis);
+                  copyDiagnosis(diagnosisLink);
                 }}
               >
                 <CopyIcon className="text-primary mr-2 h-4 w-4" />
-                Copiar diagnóstico
+                Copiar link del diagnóstico
               </Dropdown.Item>
             </Dropdown.Content>
           </Dropdown.Root>

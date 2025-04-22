@@ -7,7 +7,7 @@ import { ThumbsUp, ThumbsDown } from 'lucide-react';
 interface RatingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (wasUseful: boolean, ratingNotes: string) => void;
+  onSubmit: (wasUseful: boolean, ratingNotes: string, callback: () => void) => void;
   isLoading?: boolean;
 }
 
@@ -17,9 +17,10 @@ export const RatingModal = ({ isOpen, onClose, onSubmit, isLoading }: RatingModa
 
   const handleSubmit = () => {
     if (wasUseful === null) return;
-    onSubmit(wasUseful, ratingNotes);
-    setWasUseful(null);
-    setRatingNotes('');
+    onSubmit(wasUseful, ratingNotes, () => {
+      setWasUseful(null);
+      setRatingNotes('');
+    });
   };
 
   return (
@@ -63,7 +64,7 @@ export const RatingModal = ({ isOpen, onClose, onSubmit, isLoading }: RatingModa
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} disabled={isLoading}>
               Cancelar
             </Button>
             <Button onClick={handleSubmit} disabled={wasUseful === null || isLoading}>

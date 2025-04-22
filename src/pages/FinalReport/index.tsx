@@ -10,7 +10,7 @@ import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
 import { Diagnosis } from '@/types/Diagnosis';
 import { Car } from '@/types/Car';
-import { CheckCircleIcon, Share2Icon, StarIcon } from 'lucide-react';
+import { ArrowLeftIcon, SaveIcon, Share2Icon, StarIcon } from 'lucide-react';
 import { Textarea } from '@/components/atoms/Textarea';
 import { Conclusion } from './Conclusion';
 import { EstimatedResources } from './EstimatedResources';
@@ -47,7 +47,6 @@ const FinalReport = () => {
       const response = await getDiagnosisById(undefined, undefined, {
         diagnosisId: params.diagnosisId as string,
       });
-      console.log('response', response);
       return { data: response.data };
     },
     enabled: !!params.diagnosisId,
@@ -63,6 +62,7 @@ const FinalReport = () => {
       finalNotes?: string;
       ratingNotes?: string;
       wasUseful?: boolean;
+      callback?: () => void;
     }) => {
       const response = await updateFinalReportRequest(
         { finalNotes, ratingNotes, wasUseful },
@@ -74,11 +74,22 @@ const FinalReport = () => {
       );
       return response.data;
     },
-    onSuccess: () => {
-      enqueueSnackbar('Diagnóstico final actualizado correctamente', { variant: 'success' });
+    onSuccess: (_, { finalNotes, ratingNotes, callback }) => {
+      // I am saving the final notes, after that I open the rating modal
+      if (finalNotes) {
+        enqueueSnackbar('Diagnóstico final actualizado correctamente', { variant: 'success' });
+        setIsRatingModalOpen(true);
+      }
+
+      // I am saving the rating notes, after that I close the rating modal
+      if (ratingNotes) {
+        callback?.();
+        enqueueSnackbar('Valoración enviada, Muchas gracias!', { variant: 'success' });
+        setIsRatingModalOpen(false);
+      }
     },
     onError: () => {
-      enqueueSnackbar('Error al generar el diagnóstico final. Por favor, inténtalo de nuevo.', {
+      enqueueSnackbar('Error al guardar. Por favor, inténtalo de nuevo.', {
         variant: 'error',
       });
     },
@@ -99,8 +110,6 @@ const FinalReport = () => {
     );
   }
 
-  const backNavigation = () => navigate(`/cars/${params.carId}/diagnosis/${params.diagnosisId}`);
-
   const onUpdateReport = () => {
     updateFinalReportMutation({ finalNotes });
   };
@@ -115,15 +124,14 @@ const FinalReport = () => {
     enqueueSnackbar('URL del informe copiado', { variant: 'success' });
   };
 
-  const handleRatingSubmit = (wasUseful: boolean, ratingNotes: string) => {
-    updateFinalReportMutation({ ratingNotes, wasUseful });
-    setIsRatingModalOpen(false);
+  const handleRatingSubmit = (wasUseful: boolean, ratingNotes: string, callback: () => void) => {
+    updateFinalReportMutation({ ratingNotes, wasUseful, callback });
   };
 
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={backNavigation}
+        onBack={() => navigate(-1)}
         data={{
           title: 'Informe Final',
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,
@@ -171,10 +179,23 @@ const FinalReport = () => {
           )}
         </div>
 
-        <Button onClick={onUpdateReport} disabled={isLoadingFinalReport || finalNotes.length === 0}>
-          <CheckCircleIcon className="h-4 w-4" />
-          {isLoadingFinalReport ? 'Cargando...' : 'Marcar como Reparación Completa'}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/cars/${params.carId}`)}
+            disabled={isLoadingFinalReport}
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Volver al detalle del Vehículo
+          </Button>
+          <Button
+            onClick={onUpdateReport}
+            disabled={isLoadingFinalReport || finalNotes.length === 0}
+          >
+            <SaveIcon className="h-4 w-4" />
+            {isLoadingFinalReport ? 'Cargando...' : 'Guardar Notas Adicionales'}
+          </Button>
+        </div>
       </div>
 
       <RatingModal
