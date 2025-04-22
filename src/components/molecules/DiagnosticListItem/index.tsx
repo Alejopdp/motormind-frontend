@@ -44,13 +44,9 @@ export const DiagnosticListItem = ({
   return (
     <div
       className={cn(
-        'cursor-pointer rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition-all hover:shadow-md sm:p-4',
+        'rounded-lg border border-gray-300 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]',
         className,
       )}
-      onClick={() => {
-        const path = diagnosisLink.split('/cars')[1];
-        navigate(`/cars${path}`);
-      }}
     >
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
