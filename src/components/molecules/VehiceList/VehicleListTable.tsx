@@ -1,4 +1,4 @@
-import { ChevronLeftIcon, ChevronRightIcon, FileSearch } from 'lucide-react';
+import { FileSearch } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import {
@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/atoms/Button';
 import { Car } from '@/types/Car';
 import { format } from 'date-fns';
+import { Pagination } from '../Pagination';
 
 interface VehicleListTableProps {
   vehicles: Car[];
@@ -92,38 +93,17 @@ export const VehicleListTable = ({
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-between border-t border-gray-300 px-4 py-3">
-        <div className="text-sm text-gray-500">
-          {total <= limit ? (
-            <>
-              Mostrando <span className="font-medium">1</span> a{' '}
-              <span className="font-medium">{total}</span> de{' '}
-              <span className="font-medium">{total}</span> vehículo{total !== 1 ? 's' : ''}
-            </>
-          ) : (
-            <>
-              Mostrando <span className="font-medium">{(currentPage - 1) * limit + 1}</span> a{' '}
-              <span className="font-medium">{Math.min(currentPage * limit, total)}</span> de{' '}
-              <span className="font-medium">{total}</span> vehículos
-            </>
-          )}
+      {vehicles.length > 0 && (
+        <div className="sticky bottom-0">
+          <Pagination
+            total={total}
+            currentPage={currentPage}
+            handlePreviousPage={previousPage}
+            handleNextPage={nextPage}
+            limit={limit}
+          />
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" onClick={previousPage} disabled={currentPage === 1}>
-            <ChevronLeftIcon className="h-4 w-4" />
-            Anterior
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={nextPage}
-            disabled={currentPage >= Math.ceil(total / limit)}
-          >
-            Siguiente
-            <ChevronRightIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
