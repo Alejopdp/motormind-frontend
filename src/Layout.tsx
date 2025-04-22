@@ -14,8 +14,9 @@ const Layout = () => {
   return (
     <div className="flex h-screen">
       <Sidebar />
-
-      <Outlet />
+      <main className="relative flex-1 overflow-auto">
+        <Outlet />
+      </main>
     </div>
   );
 };

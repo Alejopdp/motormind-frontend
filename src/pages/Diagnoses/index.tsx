@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileSearch, SearchIcon } from 'lucide-react';
+import { FileSearch, PlusIcon, SearchIcon } from 'lucide-react';
 import { debounce } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 
@@ -93,7 +93,8 @@ const Diagnoses = () => {
             />
           </div>
           <Button onClick={() => setIsCreateModalOpen(true)} className="h-10">
-            + Crear nuevo diagnóstico
+            <PlusIcon className="!h-5 !w-5" />
+            <span className="hidden sm:inline">Nuevo diagnóstico</span>
           </Button>
         </div>
       </div>

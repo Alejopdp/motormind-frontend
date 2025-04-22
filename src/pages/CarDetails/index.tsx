@@ -14,6 +14,7 @@ import SymptomInputForm from '@/components/molecules/SymptomInputForm';
 import { TechnicanObservationsInputForm } from '@/components/molecules/TechnicanObservationsInputForm';
 import { QuestionsList } from '@/components/atoms/QuestionsList';
 import { Diagnosis } from '@/types/Diagnosis';
+import { PlusIcon } from 'lucide-react';
 
 const CarDetails = () => {
   const params = useParams();
@@ -147,7 +148,10 @@ const CarDetails = () => {
         }}
         headerActions={
           step === 'carDetails' && (
-            <Button onClick={() => setStep('newDiagnosis')}>+ Crear nuevo diagnóstico</Button>
+            <Button onClick={() => setStep('newDiagnosis')}>
+              <PlusIcon className="!h-5 !w-5" />
+              <span className="hidden sm:inline">Nuevo diagnóstico</span>
+            </Button>
           )
         }
       />

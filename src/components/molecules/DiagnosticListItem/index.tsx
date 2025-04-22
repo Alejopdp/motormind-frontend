@@ -37,92 +37,82 @@ export const DiagnosticListItem = ({
   const navigate = useNavigate();
 
   const copyDiagnosis = (link: string) => {
-    navigator.clipboard.writeText(link ?? '');
-    enqueueSnackbar('Diagnóstico copiado al portapapeles', {
-      variant: 'success',
-    });
+    navigator.clipboard.writeText(link);
+    enqueueSnackbar('Link copiado al portapapeles', { variant: 'success' });
   };
 
   return (
     <div
       className={cn(
-        'cursor-default rounded-lg border border-gray-300 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]',
+        'cursor-pointer rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition-all hover:shadow-md sm:p-4',
         className,
       )}
+      onClick={() => {
+        const path = diagnosisLink.split('/cars')[1];
+        navigate(`/cars${path}`);
+      }}
     >
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-blue-100 p-2">
-            <CarIcon className="text-primary h-5 w-5" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-100 sm:h-10 sm:w-10">
+            <CarIcon className="h-5 w-5 text-blue-600" />
           </div>
           <div>
-            <h3 className="font-medium">
+            <p className="text-sm font-medium sm:text-base">
               {vehicle?.brand} {vehicle?.model}
-            </h3>
-            <p className="text-sm text-gray-500">{vehicle?.plate || vehicle?.vinCode}</p>
+            </p>
+            <p className="text-xs text-gray-500 sm:text-sm">{vehicle?.plate || vehicle?.vinCode}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* <Badge className={cn('font-normal', getStatusStyles())}>{status}</Badge>
-          {priority && (
-            <Badge variant="outline" className={cn('font-normal', getPriorityStyles())}>
-              {priority}
-            </Badge>
-          )} */}
-          <Dropdown.Root>
-            <Dropdown.Trigger asChild>
-              <MoreVerticalIcon className="h-4 w-4" />
-            </Dropdown.Trigger>
-            <Dropdown.Content>
-              <Dropdown.Item
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const path = diagnosisLink.split('/cars')[1];
-                  navigate(`/cars${path}`);
-                }}
-              >
-                <EyeIcon className="text-primary mr-2 h-4 w-4" />
-                Ver detalle
-              </Dropdown.Item>
-              <Dropdown.Item
-                onClick={(e) => {
-                  e.stopPropagation();
-                  copyDiagnosis(diagnosisLink);
-                }}
-              >
-                <CopyIcon className="text-primary mr-2 h-4 w-4" />
-                Copiar link del diagnóstico
-              </Dropdown.Item>
-            </Dropdown.Content>
-          </Dropdown.Root>
-        </div>
+        <Dropdown.Root>
+          <Dropdown.Trigger asChild>
+            <MoreVerticalIcon className="h-4 w-4" />
+          </Dropdown.Trigger>
+          <Dropdown.Content>
+            <Dropdown.Item
+              onClick={(e) => {
+                e.stopPropagation();
+                const path = diagnosisLink.split('/cars')[1];
+                navigate(`/cars${path}`);
+              }}
+            >
+              <EyeIcon className="text-primary mr-2 h-4 w-4" />
+              <span className="text-sm">Ver detalle</span>
+            </Dropdown.Item>
+            <Dropdown.Item
+              onClick={(e) => {
+                e.stopPropagation();
+                copyDiagnosis(diagnosisLink);
+              }}
+            >
+              <CopyIcon className="text-primary mr-2 h-4 w-4" />
+              <span className="text-sm">Copiar link del diagnóstico</span>
+            </Dropdown.Item>
+          </Dropdown.Content>
+        </Dropdown.Root>
       </div>
 
-      <div className="mb-4">
-        <p className="mb-1 text-sm text-gray-500">Problemas detectados:</p>
-        <ul className="space-y-1 text-sm">
+      <div className="mb-3">
+        <p className="mb-1 text-xs text-gray-500 sm:text-sm">Problemas detectados:</p>
+        <ul className="space-y-1">
           {problems.map((problem, index) => (
             <li key={index} className="flex items-start">
-              <span className="mr-2">•</span>
-              {problem}
+              <span className="mr-2 text-xs sm:text-sm">•</span>
+              <span className="text-xs sm:text-sm">{problem}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="flex items-center justify-between">
-        {technician ? (
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={technician.avatar} alt={technician.name} />
-              <AvatarFallback>{technician.name[0]}</AvatarFallback>
-            </Avatar>
-            <span className="text-sm">{technician.name}</span>
-          </div>
-        ) : (
-          <div />
-        )}
+      <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+        <div className="flex items-center gap-2">
+          <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+            <AvatarImage alt={technician?.name || 'Unknown'} />
+            <AvatarFallback>{technician?.name?.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <span className="text-xs font-medium sm:text-sm">{technician?.name || 'NN'}</span>
+        </div>
         <span className="text-xs text-gray-500">{timestamp}</span>
       </div>
     </div>
