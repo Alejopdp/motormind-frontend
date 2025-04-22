@@ -13,7 +13,44 @@ export type Diagnosis = {
     }[];
   };
   finalNotes: string;
-  diagnosis: string;
+  diagnosis: {
+    conclusion: {
+      recommendations: string[];
+      nextSteps: string[];
+    };
+    estimatedBudget: {
+      parts: [
+        {
+          name: string;
+          price: number;
+          quality: string;
+        },
+      ];
+      laborHours: number;
+    };
+    confirmedFailures: [
+      {
+        title: string;
+        steps: string[];
+        tools: string[];
+        resources: {
+          label: string;
+          url: string;
+        }[];
+      },
+    ];
+    alternativeFailures: [
+      {
+        title: string;
+        probability: string;
+        tests: string[];
+        resources: {
+          label: string;
+          url: string;
+        }[];
+      },
+    ];
+  };
   wasUseful?: boolean;
   createdAt: Date;
   updatedAt: Date;

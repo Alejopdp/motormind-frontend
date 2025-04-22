@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Badge } from '@/components/atoms/Badge';
 import { LightbulbIcon, ChevronDownIcon, ChevronUpIcon, WrenchIcon, BoxIcon } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
-
-export type ProbabilityLevel = 'Alta' | 'Media' | 'Baja';
+import { PROBABILITY_LEVELS } from '@/constants';
+import { ProbabilityLevel } from '@/types/Probability';
 
 interface FaultCardCollapsibleProps {
   title: string;
@@ -25,11 +25,11 @@ export default function FaultCardCollapsible({
   // Define color based on probability
   const getProbabilityColor = (prob: ProbabilityLevel) => {
     switch (prob) {
-      case 'Alta':
+      case PROBABILITY_LEVELS.HIGH:
         return 'bg-red-100 text-red-800 border-red-200';
-      case 'Media':
+      case PROBABILITY_LEVELS.MEDIUM:
         return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'Baja':
+      case PROBABILITY_LEVELS.LOW:
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       default:
         return 'bg-gray-100 border-gray-200';

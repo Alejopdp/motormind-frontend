@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 
 import { useApi } from '@/hooks/useApi';
@@ -14,13 +14,18 @@ import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContec
 import { ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, SaveIcon } from 'lucide-react';
 import FaultCardCollapsible from '@/components/molecules/FaultCardCollapsible';
 import { Textarea } from '@/components/atoms/Textarea';
+import { ProbabilityLevel } from '@/types/Probability';
 
-const CarDetails = () => {
+const PreliminaryDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [observations, setObservations] = useState('');
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
+  const { execute: createFinalReportRequest } = useApi<Diagnosis>(
+    'post',
+    '/cars/:carId/diagnosis/:diagnosisId/final',
+  );
 
   useEffect(() => {
     return () => {
@@ -45,6 +50,24 @@ const CarDetails = () => {
     staleTime: 60000, // 1 minute
   });
 
+  const { mutate: createFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
+    mutationFn: async ({ observations }: { observations: string }) => {
+      const response = await createFinalReportRequest({ technicalNotes: observations }, undefined, {
+        carId: params.carId as string,
+        diagnosisId: params.diagnosisId as string,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      navigate(`/cars/${params.carId}/diagnosis/${params.diagnosisId}/final-report`);
+    },
+    onError: () => {
+      enqueueSnackbar('Error al generar el diagnóstico final. Por favor, inténtalo de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
+
   if (isLoadingDiagnosis)
     return (
       <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
@@ -63,7 +86,7 @@ const CarDetails = () => {
   const backNavigation = () => navigate(`/cars/${params.carId}`);
 
   const onGenerateReport = () => {
-    console.log('onGenerateReport');
+    createFinalReportMutation({ observations });
   };
 
   const saveDraft = () => {
@@ -74,8 +97,6 @@ const CarDetails = () => {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setObservations(e.target.value);
   };
-
-  const isGeneratingReport = false;
 
   return (
     <div className="bg-background min-h-screen">
@@ -104,7 +125,7 @@ const CarDetails = () => {
               <FaultCardCollapsible
                 key={index}
                 title={fault.title}
-                probability={fault.probability as 'alta' | 'media' | 'baja'}
+                probability={fault.probability as ProbabilityLevel}
                 reasoning={fault.reasonDetails}
                 recommendations={fault.diagnosticRecommendations || []}
                 tools={fault.requiredTools || []}
@@ -121,7 +142,7 @@ const CarDetails = () => {
             onChange={handleChange}
             className="min-h-[150px] resize-y"
             placeholder="Añade tus hallazgos, correcciones, resultados de pruebas o información adicional sobre el diagnóstico..."
-            disabled={isGeneratingReport}
+            disabled={isLoadingFinalReport}
           />
         </div>
       </div>
@@ -140,10 +161,10 @@ const CarDetails = () => {
 
           <Button
             onClick={onGenerateReport}
-            disabled={isGeneratingReport || observations.length === 0}
+            disabled={isLoadingFinalReport || observations.length === 0}
           >
             <FileTextIcon className="h-4 w-4" />
-            {isGeneratingReport ? 'Generando...' : 'Generar Informe Final'}
+            {isLoadingFinalReport ? 'Generando...' : 'Generar Informe Final'}
           </Button>
         </div>
       </div>
@@ -151,4 +172,4 @@ const CarDetails = () => {
   );
 };
 
-export default CarDetails;
+export default PreliminaryDiagnosis;

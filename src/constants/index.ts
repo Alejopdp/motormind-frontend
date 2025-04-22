@@ -22,3 +22,9 @@ export const PLATE_REGEX =
  * No se permiten espacios, guiones, ni caracteres especiales
  */
 export const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/;
+
+export const PROBABILITY_LEVELS = {
+  HIGH: 'Alta',
+  MEDIUM: 'Media',
+  LOW: 'Baja',
+} as const;
