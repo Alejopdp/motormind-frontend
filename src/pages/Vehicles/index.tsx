@@ -74,7 +74,7 @@ const Vehicles = () => {
   };
 
   return (
-    <div className="flex flex-grow flex-col overflow-auto p-12">
+    <div className="flex flex-grow flex-col overflow-auto px-12 py-6">
       <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <h1 className="text-2xl font-bold">Vehículos Registrados</h1>
 

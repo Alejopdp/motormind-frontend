@@ -83,15 +83,13 @@ const PreliminaryDiagnosis = () => {
     );
   }
 
-  const backNavigation = () => navigate(`/cars/${params.carId}`);
-
   const onGenerateReport = () => {
     createFinalReportMutation({ observations });
   };
 
   const saveDraft = () => {
     enqueueSnackbar('Diagnóstico guardado como borrador', { variant: 'success' });
-    backNavigation();
+    navigate(-1); // Go back to the previous page
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -101,7 +99,7 @@ const PreliminaryDiagnosis = () => {
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={backNavigation}
+        onBack={() => navigate(-1)}
         data={{
           title: 'Informe Preliminar IA',
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,
@@ -148,7 +146,7 @@ const PreliminaryDiagnosis = () => {
       </div>
 
       <div className="fixed right-0 bottom-0 left-0 flex justify-between border-t border-gray-200 bg-white p-4">
-        <Button variant="ghost" onClick={backNavigation}>
+        <Button variant="ghost" onClick={() => navigate(-1)}>
           <ArrowLeftIcon className="h-4 w-4" />
           Volver
         </Button>

@@ -77,21 +77,25 @@ const Diagnoses = () => {
     <div className="flex flex-grow flex-col">
       {/* Fixed Header */}
       <div className="sticky top-0 flex items-center justify-between bg-white px-8 py-4 shadow-xs">
-        <div className="">
+        <div className="w-1/3">
           <h1 className="text-2xl font-semibold">Diagnósticos</h1>
           <p className="text-muted">Gestiona y revisa todos los diagnósticos del taller</p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>+ Crear nuevo diagnóstico</Button>
-      </div>
 
-      <div className="relative mx-8 mt-4 mb-1 sm:max-w-xs">
-        <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-        <Input
-          className="h-10 w-full rounded-md py-2 pr-4 pl-9"
-          placeholder="Buscar por vehículo o problema..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <div className="flex w-2/3 flex-col space-y-2 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-2">
+          <div className="relative min-w-[300px] flex-grow">
+            <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+            <Input
+              className="h-10 w-full rounded-md py-2 pr-4 pl-9"
+              placeholder="Buscar por vehículo o problema..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Button onClick={() => setIsCreateModalOpen(true)} className="h-10">
+            + Crear nuevo diagnóstico
+          </Button>
+        </div>
       </div>
 
       {/* Scrollable Content */}
@@ -110,13 +114,11 @@ const Diagnoses = () => {
               {diagnoses.map((diagnosis, index) => (
                 <DiagnosticListItem
                   key={index}
-                  id={diagnosis._id || ''}
-                  carId={diagnosis.carId || ''}
                   vehicle={diagnosis.car}
                   problems={diagnosis.preliminary?.possibleReasons?.map(({ title }) => title) || []}
                   technician={diagnosis.mechanic}
-                  diagnosis={diagnosis.diagnosis}
                   timestamp={formatDate(diagnosis.createdAt)}
+                  diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
                 />
               ))}
             </div>

@@ -89,7 +89,9 @@ const FaultsHistoryItem = ({ diagnosis, index }: { diagnosis: Diagnosis; index: 
           <p className="text-muted text-sm">
             Fecha: {formatToddmmyyyy(new Date(diagnosis.createdAt))}
           </p>
-          <Link to={`/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}`}>
+          <Link
+            to={`/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
+          >
             <Button variant="link" size="sm">
               Ver Detalles
             </Button>
