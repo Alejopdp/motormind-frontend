@@ -8,15 +8,49 @@ export type Diagnosis = {
       title: string;
       probability: string;
       reasonDetails: string;
-    }[];
-    fixSteps: {
-      title: string;
-      procedure: string;
-      tools: string;
+      diagnosticRecommendations: string[];
+      requiredTools: string[];
     }[];
   };
   finalNotes: string;
-  diagnosis: string;
+  diagnosis: {
+    conclusion: {
+      recommendations: string[];
+      nextSteps: string[];
+    };
+    estimatedBudget: {
+      parts: [
+        {
+          name: string;
+          price: number;
+          quality: string;
+        },
+      ];
+      laborHours: number;
+    };
+    confirmedFailures: [
+      {
+        title: string;
+        steps: string[];
+        tools: string[];
+        resources: {
+          label: string;
+          url: string;
+        }[];
+      },
+    ];
+    alternativeFailures: [
+      {
+        title: string;
+        probability: string;
+        tests: string[];
+        resources: {
+          label: string;
+          url: string;
+        }[];
+      },
+    ];
+  };
   wasUseful?: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -27,6 +61,9 @@ export type Diagnosis = {
     plate: string;
     vinCode: string;
     mechanicId: string;
+    kilometers: number;
+    fuel: string;
+    lastRevision: Date;
   };
   mechanic?: {
     name: string;

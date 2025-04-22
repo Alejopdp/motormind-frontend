@@ -2,13 +2,13 @@ import { createBrowserRouter } from 'react-router-dom';
 import Layout from '@/Layout';
 import Dashboard from '@/pages/Dashboard';
 import CarDetails from '@/pages/CarDetails';
-import DiagnosisPage from '@/pages/Diagnosis';
 import Login from '@/pages/Login';
 import VerifyMagicLink from '@/pages/VerifyMagicLink';
 import Configuration from '@/pages/Configuration';
-import CreateCar from '@/pages/CreateCar';
 import Diagnoses from '@/pages/Diagnoses';
 import Vehicles from '@/pages/Vehicles';
+import PreliminaryDiagnosis from '@/pages/PreliminaryDiagnosis';
+import FinalReport from './pages/FinalReport';
 
 const router = createBrowserRouter([
   {
@@ -27,16 +27,16 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: '/cars/:carId/diagnosis/:diagnosisId/final-report',
+    element: <FinalReport />,
+  },
+  {
     path: '/cars/:carId/diagnosis/:diagnosisId',
-    element: <DiagnosisPage />,
+    element: <PreliminaryDiagnosis />,
   },
   {
     path: '/cars/:carId',
     element: <CarDetails />,
-  },
-  {
-    path: '/cars/create',
-    element: <CreateCar />,
   },
   {
     path: '/configuration',

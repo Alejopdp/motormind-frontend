@@ -43,7 +43,7 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({
 
           <div className="flex items-center gap-3">
             <div className="rounded-md bg-blue-100 p-2">
-              <GaugeIcon className="text-primary h-5 w-5" />
+              <FileSpreadsheet className="text-primary h-5 w-5" />
             </div>
             <div>
               <p className="text-muted text-sm">Matrícula</p>

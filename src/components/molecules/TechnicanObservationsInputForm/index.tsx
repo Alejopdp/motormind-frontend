@@ -8,6 +8,7 @@ interface TechnicanObservationsInputFormProps {
   onGenerateMoreQuestions: () => void;
   disableMoreQuestions?: boolean;
   isLoadingMoreQuestions?: boolean;
+  isLoadingDiagnosis?: boolean;
 }
 
 export const TechnicanObservationsInputForm = ({
@@ -16,6 +17,7 @@ export const TechnicanObservationsInputForm = ({
   onGenerateMoreQuestions,
   disableMoreQuestions = false,
   isLoadingMoreQuestions = false,
+  isLoadingDiagnosis = false,
 }: TechnicanObservationsInputFormProps) => {
   const [details, setDetails] = useState(initialDetails);
 
@@ -41,7 +43,7 @@ export const TechnicanObservationsInputForm = ({
               className="min-h-[150px] resize-none"
               value={details}
               onChange={(e) => setDetails(e.target.value)}
-              disabled={isLoadingMoreQuestions}
+              disabled={isLoadingMoreQuestions || isLoadingDiagnosis}
             />
           </div>
         </div>
@@ -56,8 +58,11 @@ export const TechnicanObservationsInputForm = ({
         >
           {isLoadingMoreQuestions ? 'Generando...' : 'Generar Más Preguntas'}
         </Button>
-        <Button disabled={isLoadingMoreQuestions} type="submit">
-          Crear Informe Preliminar
+        <Button
+          disabled={isLoadingMoreQuestions || isLoadingDiagnosis || details.length === 0}
+          type="submit"
+        >
+          {isLoadingDiagnosis ? 'Generando Informe...' : 'Crear Informe Preliminar'}
         </Button>
       </div>
     </form>
