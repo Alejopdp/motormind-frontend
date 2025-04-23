@@ -1,20 +1,21 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { useApi } from '@/hooks/useApi';
-import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
-import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
+import Spinner from '@/components/atoms/Spinner';
 import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
-import { Diagnosis } from '@/types/Diagnosis';
+import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
+import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
+import { VoiceTextInput } from '@/components/VoiceTextInput';
+import { useApi } from '@/hooks/useApi';
 import { Car } from '@/types/Car';
+import { Diagnosis } from '@/types/Diagnosis';
 import { ArrowLeftIcon, SaveIcon, Share2Icon, StarIcon } from 'lucide-react';
-import { Textarea } from '@/components/atoms/Textarea';
+import { AlternativeFailures } from './AlternativeFailures';
 import { Conclusion } from './Conclusion';
 import { EstimatedResources } from './EstimatedResources';
-import { AlternativeFailures } from './AlternativeFailures';
 import { PrimaryRepairSection } from './PrimaryRepairSection';
 import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
 import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';
@@ -114,10 +115,6 @@ const FinalReport = () => {
     updateFinalReportMutation({ finalNotes });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFinalNotes(e.target.value);
-  };
-
   const shareReport = () => {
     const url = `${window.location.origin}/cars/${params.carId}/diagnosis/${params.diagnosisId}/final-report`;
     navigator.clipboard.writeText(url);
@@ -156,9 +153,9 @@ const FinalReport = () => {
         {/* Final Notes */}
         <div className="mb-20 space-y-2">
           <p className="block text-base font-medium">Notas Adicionales del Técnico (Internas)</p>
-          <Textarea
+          <VoiceTextInput
             value={finalNotes}
-            onChange={handleChange}
+            onChange={setFinalNotes}
             className="min-h-[150px] resize-y"
             placeholder="Añade aquí cualquier observación adicional, detalles específicos del vehículo o consideraciones especiales para la reparación..."
             disabled={isLoadingFinalReport}

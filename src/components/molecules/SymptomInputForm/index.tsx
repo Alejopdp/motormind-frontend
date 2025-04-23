@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
-import { Textarea } from '@/components/atoms/Textarea';
 import { VoiceTextInput } from '@/components/VoiceTextInput';
 
 interface SymptomInputFormProps {
@@ -78,12 +77,11 @@ export default function SymptomInputForm({
             {showNotes && (
               <div className="mt-4 space-y-2">
                 <p className="text-base font-medium">Notas Adicionales</p>
-                <Textarea
-                  id="notes"
+                <VoiceTextInput
                   placeholder="Añade cualquier información adicional relevante..."
-                  className="min-h-[100px] resize-none"
+                  className="min-h-[100px]"
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={setNotes}
                   disabled={isLoading}
                 />
               </div>

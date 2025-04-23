@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Check, X } from 'lucide-react';
-import Lottie from 'lottie-react';
+import { Mic, Check, X } from 'lucide-react';
 import { useSpeechRecognition } from 'react-speech-recognition';
 import { enqueueSnackbar } from 'notistack';
 
 import { Button } from '@/components/atoms/Button';
 import { Textarea } from '@/components/atoms/Textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/atoms/Dialog';
-import microphoneAnimation from '@/assets/animations/microphone.json';
+import { RecordingIndicator } from './RecordingIndicator';
 
 interface VoiceTextInputProps {
   value: string;
@@ -103,7 +102,6 @@ export const VoiceTextInput = ({
       noSpeechTimeoutRef.current = null;
     }
 
-    setIsModalOpen(true);
     setHasStartedSpeaking(false);
     setCurrentTranscript('');
     setIsRecording(true);
@@ -128,7 +126,7 @@ export const VoiceTextInput = ({
 
     // Configurar el timeout para el tiempo máximo de grabación
     maxRecordingTimeRef.current = window.setTimeout(() => {
-      if (isModalOpen) {
+      if (isRecording) {
         handleStopRecording();
       }
     }, 60000);
@@ -153,6 +151,11 @@ export const VoiceTextInput = ({
     }
 
     setIsRecording(false);
+
+    // Si hay texto grabado, mostrar el modal de confirmación
+    if (currentTranscript) {
+      setIsModalOpen(true);
+    }
   };
 
   // Manejar la confirmación del texto
@@ -168,11 +171,7 @@ export const VoiceTextInput = ({
 
   // Manejar el cierre del modal
   const handleModalClose = () => {
-    if (isRecording) {
-      handleStopRecording();
-    } else {
-      setIsModalOpen(false);
-    }
+    setIsModalOpen(false);
   };
 
   // Manejar el inicio del habla
@@ -225,6 +224,7 @@ export const VoiceTextInput = ({
   // Manejar volver a grabar
   const handleRerecord = () => {
     setCurrentTranscript('');
+    setIsModalOpen(false);
     handleStartRecording();
   };
 
@@ -247,62 +247,45 @@ export const VoiceTextInput = ({
           onClick={handleStartRecording}
           disabled={disabled || !browserSupportsSpeechRecognition || !isMicrophoneAvailable}
         >
-          <Mic className="h-5 w-5" />
+          <Mic style={{ width: '20px', height: '20px' }} />
         </Button>
       </div>
 
-      {/* Modal de grabación */}
+      {/* Indicador flotante de grabación */}
+      {isRecording && (
+        <RecordingIndicator
+          hasStartedSpeaking={hasStartedSpeaking}
+          onStopRecording={handleStopRecording}
+        />
+      )}
+
+      {/* Modal de confirmación (solo después de detener la grabación) */}
       <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{isRecording ? 'Grabando voz' : 'Confirmar texto'}</DialogTitle>
+            <DialogTitle>Confirmar texto</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center justify-center py-6">
-            {isRecording ? (
-              <>
-                <div className="mb-4 h-32 w-32">
-                  <Lottie
-                    animationData={microphoneAnimation}
-                    loop={true}
-                    autoplay={true}
-                    style={{ width: '100%', height: '100%' }}
-                  />
-                </div>
-                <p className="text-center text-sm text-gray-500">
-                  {hasStartedSpeaking ? 'Hablando...' : 'Esperando a que comiences a hablar...'}
-                </p>
-                <div className="mt-4 min-h-[10rem] w-full overflow-y-auto rounded-md border border-gray-200 bg-gray-50 p-2 text-sm">
-                  <p>{currentTranscript}</p>
-                </div>
-                <Button variant="destructive" className="mt-4" onClick={handleStopRecording}>
-                  <MicOff className="mr-2 h-4 w-4" />
-                  Detener grabación
+            <div className="mb-4 min-h-[10rem] w-full rounded-md border border-gray-200 bg-gray-50 p-4">
+              <p className="text-sm">{currentTranscript || 'No se detectó ningún texto'}</p>
+            </div>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={handleRerecord}>
+                <Mic className="mr-2 h-4 w-4" />
+                Volver a grabar
+              </Button>
+              {currentTranscript ? (
+                <Button variant="default" onClick={handleConfirmText}>
+                  <Check className="mr-2 h-4 w-4" />
+                  Confirmar
                 </Button>
-              </>
-            ) : (
-              <>
-                <div className="mb-4 min-h-[10rem] w-full rounded-md border border-gray-200 bg-gray-50 p-4">
-                  <p className="text-sm">{currentTranscript || 'No se detectó ningún texto'}</p>
-                </div>
-                <div className="flex space-x-2">
-                  <Button variant="outline" onClick={handleRerecord}>
-                    <Mic className="mr-2 h-4 w-4" />
-                    Volver a grabar
-                  </Button>
-                  {currentTranscript ? (
-                    <Button variant="default" onClick={handleConfirmText}>
-                      <Check className="mr-2 h-4 w-4" />
-                      Confirmar
-                    </Button>
-                  ) : (
-                    <Button variant="destructive" onClick={handleModalClose}>
-                      <X className="mr-2 h-4 w-4" />
-                      Cerrar
-                    </Button>
-                  )}
-                </div>
-              </>
-            )}
+              ) : (
+                <Button variant="destructive" onClick={handleModalClose}>
+                  <X className="mr-2 h-4 w-4" />
+                  Cerrar
+                </Button>
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
