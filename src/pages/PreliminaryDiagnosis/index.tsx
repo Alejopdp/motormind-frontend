@@ -105,20 +105,20 @@ const PreliminaryDiagnosis = () => {
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,
         }}
       />
-      <div className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
         <DiagnosticContextSection symptoms={diagnosis.fault} notes={diagnosis.notes} />
 
         {/* AI Detected Faults */}
-        <div className="space-y-4">
+        <div className="space-y-2 sm:space-y-4">
           <div className="flex items-center gap-2">
             <div className="rounded-md bg-blue-100 p-2">
-              <BrainCircuitIcon className="text-primary h-5 w-5" />
+              <BrainCircuitIcon className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <h2 className="text-xl font-semibold">Averías Detectadas por IA</h2>
+            <h2 className="text-md font-semibold sm:text-xl">Averías Detectadas por IA</h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-4">
             {diagnosis.preliminary.possibleReasons?.map((fault, index) => (
               <FaultCardCollapsible
                 key={index}
@@ -132,8 +132,10 @@ const PreliminaryDiagnosis = () => {
           </div>
         </div>
 
-        <div className="mb-20 space-y-2">
-          <p className="block text-base font-medium">Observaciones Adicionales del Técnico</p>
+        <div className="mb-20 space-y-1 sm:space-y-2">
+          <p className="block text-sm font-medium sm:text-base">
+            Observaciones Adicionales del Técnico
+          </p>
 
           <Textarea
             value={observations}
@@ -148,7 +150,7 @@ const PreliminaryDiagnosis = () => {
       <div className="fixed right-0 bottom-0 left-0 flex justify-between border-t border-gray-200 bg-white p-4">
         <Button variant="ghost" onClick={() => navigate(-1)}>
           <ArrowLeftIcon className="h-4 w-4" />
-          Volver
+          <span className="hidden sm:block">Volver</span>
         </Button>
 
         <div className="flex gap-3">
@@ -162,7 +164,10 @@ const PreliminaryDiagnosis = () => {
             disabled={isLoadingFinalReport || observations.length === 0}
           >
             <FileTextIcon className="h-4 w-4" />
-            {isLoadingFinalReport ? 'Generando...' : 'Generar Informe Final'}
+            <span className="sm:hidden">{isLoadingFinalReport ? 'Generando...' : 'Generar'}</span>
+            <span className="hidden sm:inline">
+              {isLoadingFinalReport ? 'Generando...' : 'Generar Informe Final'}
+            </span>
           </Button>
         </div>
       </div>

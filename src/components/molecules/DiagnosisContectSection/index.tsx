@@ -30,29 +30,33 @@ export const DiagnosticContextSection = ({
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center">
           <div className="mr-3 rounded-md bg-blue-100 p-2">
-            <InfoIcon className="text-primary h-5 w-5" />
+            <InfoIcon className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
           </div>
-          <h2 className="text-lg font-medium">Contexto del Diagnóstico</h2>
+          <h2 className="text-sm font-medium sm:text-lg">
+            Contexto <span className="hidden sm:inline">del Diagnóstico</span>
+          </h2>
         </div>
 
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="link">Ver detalles</Button>
+            <Button variant="link" className="sm:pr-auto pr-1">
+              Ver detalles
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Contexto del Diagnóstico</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-2">
+            <div className="space-y-4 sm:py-2">
               <div>
-                <h3 className="mb-2 text-base font-medium">Síntomas Reportados</h3>
-                <p className="text-muted">{symptoms}</p>
+                <h3 className="mb-2 text-sm font-medium sm:text-base">Síntomas Reportados</h3>
+                <p className="text-muted text-xs sm:text-base">{symptoms}</p>
               </div>
 
               {notes && (
                 <div>
-                  <h3 className="mb-2 text-base font-medium">Notas Adicionales</h3>
-                  <p className="text-muted">{notes}</p>
+                  <h3 className="mb-2 text-sm font-medium sm:text-base">Notas Adicionales</h3>
+                  <p className="text-muted text-xs sm:text-base">{notes}</p>
                 </div>
               )}
 
@@ -74,7 +78,7 @@ export const DiagnosticContextSection = ({
         </Dialog>
       </div>
 
-      <p className="text-muted">
+      <p className="text-muted text-xs sm:text-base">
         Síntomas: {symptomsSummary}
         {symptoms.length > 60 && (
           <span className="text-gray-500"> Respuestas a preguntas detalladas disponibles.</span>
