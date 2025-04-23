@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { Textarea } from '@/components/atoms/Textarea';
+import { VoiceTextInput } from '@/components/VoiceTextInput';
 
 interface SymptomInputFormProps {
   initialSymptoms?: string;
@@ -44,14 +45,13 @@ export default function SymptomInputForm({
         <div className="space-y-4">
           <div className="space-y-2">
             <p className="text-md text-gray-800">Describe los síntomas que presenta el vehículo</p>
-            <Textarea
-              id="symptoms"
+            <VoiceTextInput
               placeholder="Síntomas..."
-              className="min-h-[120px] resize-none"
+              className="min-h-[120px]"
               value={symptoms}
-              onChange={(e) => setSymptoms(e.target.value)}
-              required
+              onChange={setSymptoms}
               disabled={isLoading}
+              // required
             />
           </div>
 
