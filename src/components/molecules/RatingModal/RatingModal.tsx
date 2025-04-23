@@ -15,20 +15,13 @@ export const RatingModal = ({ isOpen, onClose, onSubmit, isLoading }: RatingModa
   const [wasUseful, setWasUseful] = useState<boolean | null>(null);
   const [ratingNotes, setRatingNotes] = useState('');
 
-  const handleClose = () => {
-    onClose();
-  };
-
   const handleSubmit = () => {
     if (wasUseful === null) return;
-    onSubmit(wasUseful, ratingNotes, () => {
-      setWasUseful(null);
-      setRatingNotes('');
-    });
+    onSubmit(wasUseful, ratingNotes, () => '');
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>¿Te ha sido útil este diagnóstico?</DialogTitle>
@@ -68,7 +61,7 @@ export const RatingModal = ({ isOpen, onClose, onSubmit, isLoading }: RatingModa
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={handleClose} disabled={isLoading}>
+            <Button variant="outline" onClick={onClose} disabled={isLoading}>
               Cancelar
             </Button>
             <Button onClick={handleSubmit} disabled={wasUseful === null || isLoading}>
