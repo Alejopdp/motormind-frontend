@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { useApi } from '@/hooks/useApi';
-import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
-import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
-import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
-import { Diagnosis } from '@/types/Diagnosis';
-import { Car } from '@/types/Car';
+import Spinner from '@/components/atoms/Spinner';
 import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';
-import { ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, SaveIcon } from 'lucide-react';
 import FaultCardCollapsible from '@/components/molecules/FaultCardCollapsible';
-import { Textarea } from '@/components/atoms/Textarea';
+import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
+import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
+import { VoiceTextInput } from '@/components/VoiceTextInput';
+import { useApi } from '@/hooks/useApi';
+import { Car } from '@/types/Car';
+import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
+import { ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, SaveIcon } from 'lucide-react';
 
 const PreliminaryDiagnosis = () => {
   const params = useParams();
@@ -92,10 +92,6 @@ const PreliminaryDiagnosis = () => {
     navigate(-1); // Go back to the previous page
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setObservations(e.target.value);
-  };
-
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
@@ -137,10 +133,10 @@ const PreliminaryDiagnosis = () => {
             Observaciones Adicionales del Técnico
           </p>
 
-          <Textarea
+          <VoiceTextInput
             value={observations}
-            onChange={handleChange}
-            className="min-h-[150px] resize-y"
+            onChange={setObservations}
+            className="min-h-[150px]"
             placeholder="Añade tus hallazgos, correcciones, resultados de pruebas o información adicional sobre el diagnóstico..."
             disabled={isLoadingFinalReport}
           />
