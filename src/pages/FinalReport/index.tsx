@@ -133,7 +133,7 @@ const FinalReport = () => {
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,
         }}
       />
-      <div className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
 
         <DiagnosticContextSection symptoms={diagnosis.fault} notes={diagnosis.notes} />
@@ -151,7 +151,7 @@ const FinalReport = () => {
 
         {/* Final Notes */}
         <div className="mb-20 space-y-2">
-          <p className="block text-base font-medium">Notas Adicionales del Técnico (Internas)</p>
+          <p className="block text-sm font-medium sm:text-base">Notas Adicionales del Técnico (Internas)</p>
           <VoiceTextInput
             value={finalNotes}
             onChange={setFinalNotes}
@@ -166,13 +166,13 @@ const FinalReport = () => {
         <div className="flex gap-2">
           <Button variant="ghost" onClick={shareReport}>
             <Share2Icon className="h-4 w-4" />
-            Compartir
+            <span className="hidden sm:inline">Compartir</span>
           </Button>
 
           {diagnosis.wasUseful === undefined && (
             <Button variant="ghost" onClick={() => setIsRatingModalOpen(true)}>
               <StarIcon className="h-4 w-4" />
-              Valorar
+              <span className="hidden sm:inline">Valorar</span>
             </Button>
           )}
         </div>
@@ -184,14 +184,17 @@ const FinalReport = () => {
             disabled={isLoadingFinalReport}
           >
             <ArrowLeftIcon className="h-4 w-4" />
-            Volver al detalle del Vehículo
+            Volver <span className="hidden sm:inline">al detalle del Vehículo</span>
           </Button>
           <Button
             onClick={onUpdateReport}
             disabled={isLoadingFinalReport || finalNotes.length === 0}
           >
             <SaveIcon className="h-4 w-4" />
-            {isLoadingFinalReport ? 'Cargando...' : 'Guardar Notas Adicionales'}
+            <span className="hidden sm:inline">
+              {isLoadingFinalReport ? 'Cargando...' : 'Guardar Notas Adicionales'}
+            </span>
+            <span className="sm:hidden">{isLoadingFinalReport ? 'Cargando...' : 'Guardar'}</span>
           </Button>
         </div>
       </div>

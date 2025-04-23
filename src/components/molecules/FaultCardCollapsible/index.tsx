@@ -47,25 +47,27 @@ export default function FaultCardCollapsible({
   };
 
   return (
-    <div className="rounded-md border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200">
-      <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+    <div className="rounded-md border border-gray-200 bg-white p-3 shadow-sm transition-all duration-200 sm:p-5">
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-1 sm:gap-2">
+        <h3 className="text-sm font-semibold text-gray-900 sm:text-lg">{title}</h3>
         <Badge
           variant="outline"
-          className={`${getProbabilityColor(probability)} px-3 py-1 font-medium`}
+          className={`${getProbabilityColor(probability)} px-2 py-0.5 font-medium sm:px-3 sm:py-1`}
         >
           Probabilidad: {probability}
         </Badge>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2 sm:space-y-4">
         {/* Reasoning Section - Always visible but truncated when collapsed */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <LightbulbIcon className="h-5 w-5 text-amber-500" />
-            <h4 className="font-medium">Razonamiento IA</h4>
+            <LightbulbIcon className="h-4 w-4 text-amber-500 sm:h-5 sm:w-5" />
+            <h4 className="text-sm font-medium sm:text-base">Razonamiento IA</h4>
           </div>
-          <p className="text-muted pl-7">{isExpanded ? reasoning : truncateText(reasoning)}</p>
+          <p className="text-muted pl-5 text-xs sm:pl-7 sm:text-base">
+            {isExpanded ? reasoning : truncateText(reasoning)}
+          </p>
         </div>
 
         {/* Expanded Content */}
@@ -79,9 +81,9 @@ export default function FaultCardCollapsible({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <WrenchIcon className="h-5 w-5 text-blue-600" />
-                <h4 className="font-medium">Recomendaciones Diagnósticas</h4>
+                <h4 className="text-sm font-medium sm:text-base">Recomendaciones Diagnósticas</h4>
               </div>
-              <ul className="text-muted list-disc space-y-1 pl-12">
+              <ul className="text-muted list-disc space-y-1 pl-6 text-xs sm:pl-12 sm:text-base">
                 {recommendations.map((recommendation, index) => (
                   <li key={index}>{recommendation}</li>
                 ))}
@@ -94,9 +96,9 @@ export default function FaultCardCollapsible({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <BoxIcon className="text-muted h-5 w-5" />
-                <h4 className="font-medium">Herramientas Necesarias</h4>
+                <h4 className="text-sm font-medium sm:text-base">Herramientas Necesarias</h4>
               </div>
-              <ul className="text-muted list-disc space-y-1 pl-12">
+              <ul className="text-muted list-disc space-y-1 pl-6 text-xs sm:pl-12 sm:text-base">
                 {tools.map((tool, index) => (
                   <li key={index}>{tool}</li>
                 ))}
@@ -109,7 +111,7 @@ export default function FaultCardCollapsible({
         <Button
           type="button"
           variant="ghost"
-          className="text-primary ml-auto flex h-auto items-center p-0 transition-colors"
+          className="text-primary ml-auto flex h-auto items-center !p-0 transition-colors"
           onClick={toggleExpand}
         >
           {isExpanded ? (

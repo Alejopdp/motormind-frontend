@@ -21,16 +21,16 @@ export default function HeaderPage({ data, onBack, label = '', headerActions }: 
   };
 
   return (
-    <div className="flex items-center justify-between bg-white px-6 py-4 shadow-sm">
-      <div className="flex items-center gap-4">
+    <div className="flex items-center justify-between bg-white px-4 py-2 shadow-sm sm:py-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 pl-0">
-          <ArrowLeftIcon className="text-muted !h-5 !w-5" />
+          <ArrowLeftIcon className="text-muted !h-4 !w-4 sm:!h-5 sm:!w-5" />
           {label && label}
         </Button>
 
         <div>
-          <h1 className="text-xl font-semibold">{data.title}</h1>
-          <p className="text-sm text-gray-500">{data.description}</p>
+          <h1 className="text-md font-semibold sm:text-xl">{data.title}</h1>
+          <p className="text-muted text-xs sm:text-sm">{data.description}</p>
         </div>
       </div>
       {/* Header actions */}
