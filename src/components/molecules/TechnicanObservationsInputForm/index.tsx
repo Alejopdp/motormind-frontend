@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Button } from '@/components/atoms/Button';
-import { Textarea } from '@/components/atoms/Textarea';
+import { VoiceTextInput } from '@/components/VoiceTextInput';
+import { useState } from 'react';
 
 interface TechnicanObservationsInputFormProps {
   initialDetails?: string;
@@ -37,12 +37,11 @@ export const TechnicanObservationsInputForm = ({
               Añade tus observaciones detalladas sobre las respuestas a las preguntas anteriores y
               cualquier otra información relevante.
             </p>
-            <Textarea
-              id="details"
+            <VoiceTextInput
               placeholder="Observaciones del técnico..."
-              className="min-h-[150px] resize-none"
+              className="min-h-[150px]"
               value={details}
-              onChange={(e) => setDetails(e.target.value)}
+              onChange={setDetails}
               disabled={isLoadingMoreQuestions || isLoadingDiagnosis}
             />
           </div>
