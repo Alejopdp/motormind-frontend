@@ -16,7 +16,7 @@ export const PrimaryRepairSection = ({
   }[];
 }) => {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center gap-2">
         <div className="rounded-md bg-blue-100 p-2">
           <WrenchIcon className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
