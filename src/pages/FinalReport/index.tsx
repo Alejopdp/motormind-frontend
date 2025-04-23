@@ -6,7 +6,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
 import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
-import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import { VoiceTextInput } from '@/components/VoiceTextInput';
 import { useApi } from '@/hooks/useApi';
@@ -17,8 +16,8 @@ import { AlternativeFailures } from './AlternativeFailures';
 import { Conclusion } from './Conclusion';
 import { EstimatedResources } from './EstimatedResources';
 import { PrimaryRepairSection } from './PrimaryRepairSection';
-import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
 import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';
+import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
 
 const FinalReport = () => {
   const params = useParams();
