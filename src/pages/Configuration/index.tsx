@@ -104,8 +104,8 @@ const ConfiguracionPage = () => {
       </div>
 
       <div>
-        <h1 className="text-2xl font-semibold">Configuración</h1>
-        <p className="text-muted">
+        <h1 className="text-xl font-semibold sm:text-2xl">Configuración</h1>
+        <p className="text-muted mt-1 text-sm sm:mt-0 sm:text-base">
           Administra tus preferencias de precios y configuración de tarifa por hora
         </p>
       </div>
@@ -113,8 +113,8 @@ const ConfiguracionPage = () => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold">Tarifa por Hora</h2>
-            <p className="text-muted">
+            <h2 className="text-md font-semibold sm:text-lg">Tarifa por Hora</h2>
+            <p className="text-muted mt-1 text-sm sm:mt-0 sm:text-base">
               Establece tu tarifa por hora predeterminada para las reparaciones
             </p>
           </div>
@@ -139,7 +139,7 @@ const ConfiguracionPage = () => {
         </div>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitDisabled()} className="min-w-[172px]">
+          <Button type="submit" disabled={isSubmitDisabled()}>
             {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
           </Button>
         </div>
