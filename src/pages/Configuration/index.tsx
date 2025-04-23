@@ -1,116 +1,147 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSnackbar } from 'notistack';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeftIcon } from 'lucide-react';
 
-import { useMechanic } from '@/context/Mechanic.context';
-import BodyText from '@/components/atoms/BodyText';
-import Spinner from '@/components/atoms/Spinner';
+import { Button } from '@/components/atoms/Button';
+import { Input } from '@/components/atoms/Input';
+import { useApi } from '@/hooks/useApi';
+import { useAuth } from '@/context/Auth.context';
 
 const ConfiguracionPage = () => {
-  const [newPricePerHour, setNewPricePerHour] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { pricePerHour, updatePricePerHour } = useMechanic();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
+  const [newPricePerHour, setNewPricePerHour] = useState<string>('');
+  const { execute: updatePricePerHourRequest } = useApi<{ pricePerHour: number }>(
+    'put',
+    `/mechanic/:mechanicId`,
+  );
+  const { execute: getMechanicRequest } = useApi<{ pricePerHour: number }>(
+    'get',
+    `/mechanic/${user.mechanicId}`,
+  );
 
-  useEffect(() => {
-    if (pricePerHour !== undefined) {
-      const eurosValue = (pricePerHour / 100).toFixed(2);
-      setNewPricePerHour(eurosValue);
-    }
-  }, [pricePerHour]);
+  const { data: mechanicData, isLoading: isLoadingMechanic } = useQuery({
+    queryKey: ['mechanic', user.mechanicId],
+    queryFn: async () => {
+      const response = await getMechanicRequest();
+      const price = response.data?.pricePerHour || 0;
+      setNewPricePerHour(price.toString());
+      return response.data;
+    },
+    enabled: !!user.mechanicId,
+  });
+
+  const { mutate: updatePricePerHourMutation, isPending: isSubmitting } = useMutation({
+    mutationFn: async (price: number) => {
+      const response = await updatePricePerHourRequest({ pricePerHour: price }, undefined, {
+        mechanicId: user.mechanicId,
+      });
+      return response;
+    },
+    onSuccess: () => {
+      enqueueSnackbar('Cambios guardados correctamente', {
+        variant: 'success',
+      });
+    },
+    onError: () => {
+      enqueueSnackbar('No se pudieron guardar los cambios', {
+        variant: 'error',
+      });
+    },
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(',', '.');
+    const value = e.target.value;
 
-    if (newPricePerHour === '0' && value === '00') {
+    // Si está vacío, permitir borrar
+    if (value === '') {
+      setNewPricePerHour('');
       return;
     }
 
-    if (newPricePerHour === '' && (e.target.value.includes('.') || e.target.value.includes(','))) {
-      return;
+    // Convertir a número y validar
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue >= 0) {
+      setNewPricePerHour(numValue.toString());
     }
-
-    if (value === '' || /^(\d*\.?\d{0,2})$/.test(value)) {
-      setNewPricePerHour(value);
-    }
-  };
-
-  const isSubmitDisabled = () => {
-    const numValue = parseFloat(newPricePerHour);
-    const currentValueInCents = pricePerHour || 0;
-    const newValueInCents = Math.round(numValue * 100);
-
-    return (
-      isSubmitting ||
-      newPricePerHour === '' ||
-      isNaN(numValue) ||
-      numValue <= 0 ||
-      newValueInCents === currentValueInCents
-    );
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const valueInCents = Math.round(parseFloat(newPricePerHour) * 100);
-      const res = await updatePricePerHour(valueInCents);
-
-      if (res.status === 200) {
-        enqueueSnackbar('Cambios guardados correctamente', {
-          variant: 'success',
-        });
-      } else {
-        enqueueSnackbar('No se pudieron guardar los cambios', {
-          variant: 'error',
-        });
-      }
-    } catch (error) {
-      console.error('Error al guardar la tarifa:', error);
-      enqueueSnackbar('No se pudieron guardar los cambios', {
-        variant: 'error',
-      });
-    } finally {
-      setIsSubmitting(false);
+    const numValue = parseInt(newPricePerHour, 10);
+    if (numValue > 0) {
+      updatePricePerHourMutation(numValue);
     }
   };
 
+  const isSubmitDisabled = () => {
+    const currentValue = mechanicData?.pricePerHour || 0;
+    const numValue = parseInt(newPricePerHour, 10);
+
+    return (
+      isSubmitting ||
+      isLoadingMechanic ||
+      isNaN(numValue) ||
+      numValue <= 0 ||
+      numValue === currentValue
+    );
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="mb-6 font-bold">Configuración</h2>
-      <BodyText>Administra tus preferencias de precios y configuración de tarifa por hora</BodyText>
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 p-6">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 pl-0"
+        >
+          <ArrowLeftIcon className="!h-5 !w-5" />
+          Volver al Panel
+        </Button>
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="mb-8 rounded-lg bg-white p-4 shadow">
-          <h3 className="mb-2 text-lg font-semibold">Tarifa por Hora</h3>
-          <BodyText>Establece tu tarifa por hora predeterminada para las reparaciones</BodyText>
+      <div>
+        <h1 className="text-2xl font-semibold">Configuración</h1>
+        <p className="text-muted">
+          Administra tus preferencias de precios y configuración de tarifa por hora
+        </p>
+      </div>
 
-          <div className="mb-3">
-            <label htmlFor="pricePerHour" className="mb-1 block text-sm font-medium">
-              Tarifa actual
-            </label>
-            <div className="flex rounded-md border">
-              <div className="flex items-center bg-transparent px-3">€</div>
-              <input
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">Tarifa por Hora</h2>
+            <p className="text-muted">
+              Establece tu tarifa por hora predeterminada para las reparaciones
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <span className="text-gray-500">€</span>
+              </div>
+              <Input
                 id="pricePerHour"
                 value={newPricePerHour}
                 onChange={handleInputChange}
-                type="text"
-                placeholder="3.50"
-                className="w-full border-0 p-2 focus:ring-0 focus:outline-none"
+                type="number"
+                className="pl-8"
+                placeholder={isLoadingMechanic ? 'Cargando...' : 'Price'}
                 required
+                disabled={isLoadingMechanic}
               />
             </div>
           </div>
         </div>
-        <div className="flex w-full justify-end">
-          <button
-            type="submit"
-            disabled={isSubmitDisabled()}
-            className="mt-4 min-w-[172px] rounded-md bg-black px-4 py-2 text-white disabled:bg-gray-400"
-          >
-            {isSubmitting ? <Spinner /> : 'Guardar cambios'}
-          </button>
+
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isSubmitDisabled()} className="min-w-[172px]">
+            {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
+          </Button>
         </div>
       </form>
     </div>
