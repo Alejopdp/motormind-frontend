@@ -76,7 +76,7 @@ const Diagnoses = () => {
   return (
     <div className="flex flex-grow flex-col">
       {/* Fixed Header */}
-      <div className="sticky top-0 flex items-center justify-between bg-white px-8 py-4 shadow-xs">
+      <div className="sticky top-0 z-10 flex items-center justify-between bg-white px-8 py-4 shadow-xs">
         <div className="w-1/3">
           <h1 className="text-2xl font-semibold">Diagnósticos</h1>
           <p className="text-muted">Gestiona y revisa todos los diagnósticos del taller</p>

@@ -8,19 +8,19 @@ import { ResourceLinkItems } from '@/components/atoms/ResourceLinkItems';
 export const AlternativeFailures = ({
   alternativeFailures,
 }: {
-  alternativeFailures: [
-    {
-      title: string;
-      probability: string;
-      tests: string[];
-      resources: {
-        label: string;
-        url: string;
-      }[];
-    },
-  ];
+  alternativeFailures: {
+    title: string;
+    probability: string;
+    tests: string[];
+    resources: {
+      label: string;
+      url: string;
+    }[];
+  }[];
 }) => {
   const [isContingencyExpanded, setIsContingencyExpanded] = useState(false);
+
+  if (!alternativeFailures || alternativeFailures.length === 0) return null;
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">

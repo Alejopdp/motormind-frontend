@@ -53,6 +53,12 @@ const FinalReport = () => {
     enabled: !!params.diagnosisId,
   });
 
+  useEffect(() => {
+    if (diagnosis?.finalNotes) {
+      setFinalNotes(diagnosis.finalNotes);
+    }
+  }, [diagnosis]);
+
   const { mutate: updateFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
     mutationFn: async ({
       finalNotes,
@@ -74,17 +80,21 @@ const FinalReport = () => {
       );
       return response.data;
     },
-    onSuccess: (_, { finalNotes, ratingNotes, callback }) => {
-      // I am saving the final notes, after that I open the rating modal
+    onSuccess: (_, { finalNotes, wasUseful, callback }) => {
       if (finalNotes) {
         enqueueSnackbar('Diagnóstico final actualizado correctamente', { variant: 'success' });
-        setIsRatingModalOpen(true);
+        if (diagnosis.wasUseful === undefined) setIsRatingModalOpen(true);
       }
 
-      // I am saving the rating notes, after that I close the rating modal
-      if (ratingNotes) {
+      if (wasUseful !== undefined) {
         callback?.();
         enqueueSnackbar('Valoración enviada, Muchas gracias!', { variant: 'success' });
+        queryClient.setQueryData(['getDiagnosisById', params.diagnosisId], {
+          data: {
+            ...diagnosis,
+            wasUseful,
+          },
+        });
         setIsRatingModalOpen(false);
       }
     },
