@@ -36,7 +36,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
   const navItems: NavItem[] = [
     {
       icon: BarChartIcon,
-      label: 'Dashboard',
+      label: 'Panel',
       href: '/',
     },
     {
@@ -46,7 +46,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
     },
     {
       icon: ClipboardListIcon,
-      label: 'Diagnóstico',
+      label: 'Diagnósticos',
       href: '/diagnoses',
     },
   ];

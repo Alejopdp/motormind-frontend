@@ -12,7 +12,7 @@ import Spinner from '@/components/atoms/Spinner';
 import { VehicleListTable } from '@/components/molecules/VehiceList/VehicleListTable';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 
-const LIMIT = 10;
+const LIMIT = 1000;
 
 const Vehicles = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');

@@ -64,8 +64,7 @@ const VerifyLogin = () => {
     <div className="flex h-screen items-center justify-center">
       {isVeryfiyingToken && (
         <div className="flex flex-col items-center gap-4">
-          <Spinner />
-          <p>Estamos validando tu inicio de sesión</p>
+          <Spinner label="Estamos validando tu inicio de sesión" />
         </div>
       )}
 

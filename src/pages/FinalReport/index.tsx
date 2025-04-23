@@ -17,6 +17,7 @@ import { EstimatedResources } from './EstimatedResources';
 import { AlternativeFailures } from './AlternativeFailures';
 import { PrimaryRepairSection } from './PrimaryRepairSection';
 import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
+import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';
 
 const FinalReport = () => {
   const params = useParams();
@@ -50,7 +51,6 @@ const FinalReport = () => {
       return { data: response.data };
     },
     enabled: !!params.diagnosisId,
-    staleTime: 60000, // 1 minute
   });
 
   const { mutate: updateFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
@@ -139,6 +139,8 @@ const FinalReport = () => {
       />
       <div className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
+
+        <DiagnosticContextSection symptoms={diagnosis.fault} notes={diagnosis.notes} />
 
         <PrimaryRepairSection confirmedFailures={diagnosis.diagnosis?.confirmedFailures || []} />
 

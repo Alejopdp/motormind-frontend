@@ -18,7 +18,7 @@ export const Pagination = ({
   limit = 5,
 }: PaginationProps) => {
   return (
-    <div className="w-full border-t border-gray-200 p-6">
+    <div className="w-full border-t border-gray-200 bg-white px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-500">
           {total <= limit ? (

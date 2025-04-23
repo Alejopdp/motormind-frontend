@@ -1,5 +1,6 @@
-import { Badge } from '@/components/atoms/Badge';
 import { WrenchIcon } from 'lucide-react';
+import { Badge } from '@/components/atoms/Badge';
+import { ResourceLinkItems } from '@/components/atoms/ResourceLinkItems';
 
 export const PrimaryRepairSection = ({
   confirmedFailures,
@@ -59,23 +60,7 @@ export const PrimaryRepairSection = ({
                 </ul>
               </div>
 
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-800">Recursos:</h4>
-                <ul className="text-primary list-disc space-y-1 pl-6">
-                  {fault.resources.map((resource, idx) => (
-                    <li key={idx}>
-                      <a
-                        href={resource?.url}
-                        className="text-primary"
-                        target="_blank"
-                        rel="video_reference"
-                      >
-                        {resource?.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <ResourceLinkItems resources={fault.resources} />
             </div>
           </div>
         ))}

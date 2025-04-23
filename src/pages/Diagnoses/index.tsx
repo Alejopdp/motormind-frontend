@@ -13,7 +13,7 @@ import { Input } from '@/components/atoms/Input';
 import { Button } from '@/components/atoms/Button';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 
-const LIMIT = 5;
+const LIMIT = 1000;
 
 const Diagnoses = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -142,6 +142,7 @@ const Diagnoses = () => {
               currentPage={currentPage}
               handlePreviousPage={handlePreviousPage}
               handleNextPage={handleNextPage}
+              limit={LIMIT}
             />
           </div>
         )}

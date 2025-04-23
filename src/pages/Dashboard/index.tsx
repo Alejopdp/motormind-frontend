@@ -33,7 +33,7 @@ const Dashboard = () => {
   return (
     <div className="flex flex-grow flex-col overflow-auto">
       <div className="fixed top-0 right-0 left-0 z-40 flex h-12 items-center justify-between bg-white px-3 py-2 shadow-xs sm:hidden">
-        <h1 className="ml-12 text-base font-bold">Dashboard</h1>
+        <h1 className="ml-12 text-base font-bold">Panel</h1>
         <Button onClick={() => setIsCreateModalOpen(true)} size="sm" className="h-8 w-8 p-0">
           <PlusIcon className="h-4 w-4" />
         </Button>
@@ -41,7 +41,7 @@ const Dashboard = () => {
 
       <main className="flex flex-col">
         <div className="sticky top-0 z-10 hidden h-12 items-center justify-between bg-white px-4 py-4 shadow-xs sm:flex sm:px-8 sm:py-6 md:h-16">
-          <h1 className="ml-6 text-lg font-bold sm:text-xl md:ml-0 lg:text-2xl">Dashboard</h1>
+          <h1 className="ml-6 text-lg font-bold sm:text-xl md:ml-0 lg:text-2xl">Panel</h1>
           <Button onClick={() => setIsCreateModalOpen(true)} size="lg">
             <PlusIcon className="!h-5 !w-5" />
             <span className="hidden sm:inline">Nuevo diagnóstico</span>

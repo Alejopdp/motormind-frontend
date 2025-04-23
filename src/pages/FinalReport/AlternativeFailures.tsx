@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, SearchIcon } from 'lucide-react';
 
 // import { Badge } from '@/components/atoms/Badge';
 import { Button } from '@/components/atoms/Button';
+import { ResourceLinkItems } from '@/components/atoms/ResourceLinkItems';
 
 export const AlternativeFailures = ({
   alternativeFailures,
@@ -47,7 +48,7 @@ export const AlternativeFailures = ({
       {isContingencyExpanded && (
         <div className="mt-4 space-y-6">
           {alternativeFailures.map((fault, index) => (
-            <div key={index} className="border-t pt-4 first:border-t-0 first:pt-0">
+            <div key={index} className="border-t border-gray-300 pt-4 first:border-t-0 first:pt-0">
               <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                 <h3 className="text-base font-semibold text-gray-900">{fault.title}</h3>
                 {/* <Badge
@@ -74,23 +75,7 @@ export const AlternativeFailures = ({
                   </ol>
                 </div>
 
-                <div className="space-y-2">
-                  <h4 className="font-medium text-gray-800">Recursos:</h4>
-                  <ul className="text-primary list-disc space-y-1 pl-6">
-                    {fault.resources.map((resource, idx) => (
-                      <li key={idx}>
-                        <a
-                          href={resource?.url}
-                          className="text-primary"
-                          target="_blank"
-                          rel="video_reference"
-                        >
-                          {resource?.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <ResourceLinkItems resources={fault.resources} />
               </div>
             </div>
           ))}
