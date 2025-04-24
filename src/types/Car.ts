@@ -4,7 +4,7 @@ export type Car = {
   brand: string;
   model: string;
   year?: number;
-  mechanicId: string;
+  workshopId: string;
   plate: string;
   kilometers?: number;
   fuel?: string;

@@ -42,7 +42,7 @@ export default function SymptomInputForm({
         <h2 className="text-md mb-2 font-semibold sm:mb-3 sm:text-xl">Síntomas y Observaciones</h2>
 
         <div className="space-y-4">
-          <div className="space-y-2">
+          <div className="mb-2 space-y-2">
             <p className="sm:text-md text-sm">Describe los síntomas que presenta el vehículo</p>
             <VoiceTextInput
               placeholder="Síntomas..."

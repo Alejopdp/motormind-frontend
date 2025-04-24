@@ -60,12 +60,12 @@ export type Diagnosis = {
     brand: string;
     plate: string;
     vinCode: string;
-    mechanicId: string;
+    workshopId: string;
     kilometers: number;
     fuel: string;
     lastRevision: Date;
   };
-  mechanic?: {
+  createdBy?: {
     name: string;
     avatar?: string;
   };
