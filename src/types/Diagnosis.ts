@@ -74,6 +74,7 @@ export type Diagnosis = {
 export type AiDiagnosisEvaluation = {
   _id: string;
   diagnosisId: string | { _id: string } | Diagnosis;
+  carId: string | { _id: string };
   stage: 'preliminary' | 'final';
   scores: {
     accuracy: number;

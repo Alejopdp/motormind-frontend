@@ -1,14 +1,15 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AiDiagnosisEvaluation } from '@/types/Diagnosis';
 import { useApi } from '@/hooks/useApi';
 import Spinner from '@/components/atoms/Spinner';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 
 const AiEvaluationDetails: React.FC = () => {
   const { evaluationId } = useParams<{ evaluationId: string }>();
+  const navigate = useNavigate();
   const { execute: getEvaluation } = useApi<AiDiagnosisEvaluation>(
     'get',
     '/audit/evaluations/:evaluationId',
@@ -63,6 +64,18 @@ const AiEvaluationDetails: React.FC = () => {
     return 'N/A';
   };
 
+  const getDiagnosisUrl = (evaluation: AiDiagnosisEvaluation) => {
+    const diagnosisId = getDiagnosisId(evaluation);
+    const carId = typeof evaluation.carId === 'string' ? evaluation.carId : evaluation.carId._id;
+
+    if (!carId) {
+      console.error('No se encontró el ID del vehículo');
+      return '#';
+    }
+
+    return `/cars/${carId}/diagnosis/${diagnosisId}`;
+  };
+
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleString('es-ES', {
       year: 'numeric',
@@ -75,8 +88,16 @@ const AiEvaluationDetails: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Detalles de la Evaluación</h1>
+        <Button
+          variant="outline"
+          onClick={() => navigate(getDiagnosisUrl(evaluation))}
+          className="inline-flex items-center gap-2"
+        >
+          <ExternalLink className="h-4 w-4" />
+          Ver Diagnóstico
+        </Button>
       </div>
 
       <div className="mb-6 overflow-hidden rounded-lg bg-white shadow-md">
