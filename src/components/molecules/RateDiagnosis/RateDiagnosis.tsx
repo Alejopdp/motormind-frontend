@@ -1,46 +1,33 @@
-import { ThumbsDown } from 'lucide-react'
-import { Button } from 'react-bootstrap'
-import BodyText from '../../atoms/BodyText/BodyText'
-import { ThumbsUp } from 'lucide-react'
+import { ThumbsDown } from 'lucide-react';
+import BodyText from '@/components/atoms/BodyText';
+import { ThumbsUp } from 'lucide-react';
 
 type RateDiagnosisProps = {
-    rateDiagnosis: (wasUseful: boolean) => void
-}
+  rateDiagnosis: (wasUseful: boolean) => void;
+};
 
 export const RateDiagnosis = ({ rateDiagnosis }: RateDiagnosisProps) => {
-    return (
-        <div
-            className="d-flex align-items-center gap-4 w-100 justify-content-center bg-white py-3"
-            style={{
-                position: 'sticky',
-                top: 0,
-                zIndex: 1000,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            }}
+  return (
+    <div className="sticky top-0 z-50 flex w-full items-center justify-center gap-4 bg-white py-3 shadow-md">
+      <BodyText fontSize={18} fontWeight={'normal'}>
+        ¿Este diagnóstico te ayudó a resolver el problema?
+      </BodyText>
+      <div className="flex gap-2">
+        <button
+          className="flex items-center gap-2 rounded border border-gray-300 px-3 py-1 text-black hover:bg-gray-100"
+          onClick={() => rateDiagnosis(true)}
         >
-            <BodyText fontSize={18} fontWeight={'normal'}>
-                ¿Este diagnóstico te ayudó a resolver el problema?
-            </BodyText>
-            <div className="d-flex gap-2">
-                <Button
-                    className="d-flex align-items-center gap-2 border"
-                    variant="outline-light"
-                    style={{ color: 'black' }}
-                    onClick={() => rateDiagnosis(true)}
-                >
-                    <ThumbsUp size={16} fill="black" />
-                    Sí
-                </Button>
-                <Button
-                    className="d-flex align-items-center gap-2 border"
-                    variant="outline-light"
-                    style={{ color: 'black' }}
-                    onClick={() => rateDiagnosis(false)}
-                >
-                    <ThumbsDown size={16} fill="black" />
-                    No
-                </Button>
-            </div>
-        </div>
-    )
-}
+          <ThumbsUp size={16} fill="black" />
+          Sí
+        </button>
+        <button
+          className="flex items-center gap-2 rounded border border-gray-300 px-3 py-1 text-black hover:bg-gray-100"
+          onClick={() => rateDiagnosis(false)}
+        >
+          <ThumbsDown size={16} fill="black" />
+          No
+        </button>
+      </div>
+    </div>
+  );
+};

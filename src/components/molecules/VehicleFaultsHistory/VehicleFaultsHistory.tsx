@@ -1,88 +1,107 @@
-import { Button, ListGroup, ListGroupItem } from 'react-bootstrap'
-import { useCar } from '../../../context/Car.context'
-import { useNavigate } from 'react-router-dom'
-import Spinner from '../../atoms/Spinner/Spinner'
-import { Diagnosis } from '../../../types/Diagnosis'
-const VehicleFaultsHistory = () => {
-    const { diagnoses, isLoadingDiagnoses } = useCar()
-    const navigate = useNavigate()
+import Spinner from '@/components/atoms/Spinner';
+import { Diagnosis } from '@/types/Diagnosis';
+import { useApi } from '@/hooks/useApi';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { formatToddmmyyyy } from '@/utils';
+import { enqueueSnackbar } from 'notistack';
+import { useEffect } from 'react';
+import { AlertCircleIcon } from 'lucide-react';
+import { Button } from '@/components/atoms/Button';
+import { Link } from 'react-router-dom';
 
-    const navigateToDiagnosis = (diagnosis: Diagnosis) => {
-        const url = `/car/${diagnosis.carId}/diagnosis/${diagnosis._id}`
+const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
+  const queryClient = useQueryClient();
+  const { execute: getDiagnosesByCarId } = useApi<Diagnosis[]>('get', '/cars/:carId/diagnosis');
 
-        navigate(url)
+  const {
+    data: { data: diagnoses = [] } = { data: [] },
+    isLoading: isLoadingDiagnoses,
+    isError: isErrorDiagnoses,
+    error: diagnosesError,
+  } = useQuery<{ data: Diagnosis[] }>({
+    queryKey: ['getDiagnosesByCarId'],
+    queryFn: async () => {
+      const response = await getDiagnosesByCarId(undefined, undefined, {
+        carId: carId as string,
+      });
+      return { data: response.data };
+    },
+    enabled: !!carId,
+    staleTime: 60000,
+  });
+
+  useEffect(() => {
+    if (isErrorDiagnoses) {
+      console.log(diagnosesError);
+      enqueueSnackbar('Error al buscar vehículos', { variant: 'error' });
     }
+  }, [isErrorDiagnoses, diagnosesError]);
 
-    const formatToddmmyyyy = (date: Date) => {
-        if (!date) return ''
-        const day = date.getDate()
-        const month = date.getMonth() + 1
-        const year = date.getFullYear()
+  useEffect(() => {
+    return () => {
+      queryClient.removeQueries({ queryKey: ['getDiagnosesByCarId'] });
+    };
+  }, [carId, queryClient]);
 
-        return `${day}/${month}/${year}`
-    }
+  return (
+    <div className="mt-4 rounded-lg bg-white p-4 shadow-sm sm:p-6">
+      <h3 className="mb-4 text-lg font-bold sm:text-xl">Historial de Averías Reciente</h3>
 
-    return (
-        <div>
-            <h3 className="mb-4">Historial de averías</h3>
-
-            {isLoadingDiagnoses ? (
-                <div className="d-flex justify-content-center align-items-center">
-                    <Spinner />
-                </div>
-            ) : (
-                <ListGroup>
-                    {diagnoses.length === 0 && (
-                        <p className="text-center mt-4">
-                            No hay ninguna avería registrada
-                        </p>
-                    )}
-                    {diagnoses
-                        .sort((a, b) => {
-                            return (
-                                new Date(b.createdAt).getTime() -
-                                new Date(a.createdAt).getTime()
-                            )
-                        })
-                        .map((diagnosis: Diagnosis) => (
-                            <ListGroupItem
-                                className="d-flex w-100 align-items-center"
-                                key={diagnosis._id}
-                            >
-                                <div className="d-flex flex-column">
-                                    <p className="fw-medium fs-6 mb-2">
-                                        {diagnosis.fault}
-                                    </p>
-                                    <p
-                                        className="mb-0"
-                                        style={{ color: '#808080' }}
-                                    >
-                                        Fecha:{' '}
-                                        {formatToddmmyyyy(
-                                            new Date(diagnosis.createdAt)
-                                        )}
-                                    </p>
-                                </div>
-                                <Button
-                                    className="d-flex"
-                                    variant="link"
-                                    style={{
-                                        marginLeft: 'auto',
-                                        textDecoration: 'none',
-                                        flexShrink: 0,
-                                    }}
-                                    onClick={() =>
-                                        navigateToDiagnosis(diagnosis)
-                                    }
-                                >
-                                    Ver detalles
-                                </Button>
-                            </ListGroupItem>
-                        ))}
-                </ListGroup>
-            )}
+      {isLoadingDiagnoses ? (
+        <div className="flex items-center justify-center">
+          <Spinner />
         </div>
-    )
-}
+      ) : (
+        <div className="flex flex-col">
+          {diagnoses.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="mb-4 rounded-full bg-gray-100 p-3">
+                <AlertCircleIcon className="text-muted h-8 w-8" />
+              </div>
+              <p className="text-muted text-sm sm:text-base">
+                Este vehículo no tiene historial de averías registrado.
+              </p>
+            </div>
+          )}
+          {diagnoses
+            .sort((a, b) => {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            })
+            .map((diagnosis: Diagnosis, index: number) => (
+              <div className="overflow-hidden border border-gray-200 first:rounded-t-lg last:rounded-b-lg">
+                <FaultsHistoryItem diagnosis={diagnosis} index={index} />
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
-export default VehicleFaultsHistory
+export default VehicleFaultsHistory;
+
+const FaultsHistoryItem = ({ diagnosis, index }: { diagnosis: Diagnosis; index: number }) => {
+  return (
+    <div
+      key={diagnosis._id}
+      className={`border-b last:border-b-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} transition-colors duration-200 hover:bg-[#EAF2FD]`}
+    >
+      <div className="p-3 sm:p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-muted text-xs sm:text-sm">
+            Fecha:{' '}
+            {diagnosis.createdAt ? formatToddmmyyyy(new Date(diagnosis.createdAt)) || '-' : '-'}
+          </p>
+          <Link
+            to={`/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
+          >
+            <Button variant="link" size="sm" className="p-0">
+              Ver Detalles
+            </Button>
+          </Link>
+        </div>
+        <p className="text-sm font-medium sm:text-base">{diagnosis.fault}</p>
+      </div>
+    </div>
+  );
+};

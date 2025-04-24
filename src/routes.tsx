@@ -1,47 +1,108 @@
-import { createBrowserRouter } from 'react-router-dom'
-import { CarProvider } from './context/Car.context'
-import Layout from './Layout'
-import CreateCarDiagnosis from './pages/CreateCarDiagnosis/CreateCarDiagnosis'
-import CarDetails from './pages/CarDetails/CarDetails'
-import DiagnosisPage from './pages/Diagnosis/Diagnosis'
-import Home from './pages/Home/Home'
-import Login from './pages/Login/Login'
-import VerifyMagicLink from './pages/VerifyMagicLink/VerifyMagicLink'
-import { MechanicProvider } from './context/Mechanic.context'
-import Configuration from './pages/Configuration/Configuration'
-import CreateCar from './pages/CreateCar/CreateCar'
+import { createBrowserRouter } from 'react-router-dom';
+import Layout from '@/Layout';
+import Dashboard from '@/pages/Dashboard';
+import CarDetails from '@/pages/CarDetails';
+import Login from '@/pages/Login';
+import VerifyMagicLink from '@/pages/VerifyMagicLink';
+import Configuration from '@/pages/Configuration';
+import Diagnoses from '@/pages/Diagnoses';
+import Vehicles from '@/pages/Vehicles';
+import PreliminaryDiagnosis from '@/pages/PreliminaryDiagnosis';
+import FinalReport from './pages/FinalReport';
+import ErrorBoundary from './components/ErrorBoundary';
+import NotFound from './pages/NotFound';
 
 const router = createBrowserRouter([
-    {
-        path: '/',
+  {
+    path: '/',
+    element: (
+      <ErrorBoundary>
+        <Layout />
+      </ErrorBoundary>
+    ),
+    children: [
+      {
+        index: true,
         element: (
-            <MechanicProvider>
-                <CarProvider>
-                    <Layout />
-                </CarProvider>
-            </MechanicProvider>
+          <ErrorBoundary>
+            <Dashboard />
+          </ErrorBoundary>
         ),
-        children: [
-            { index: true, element: <Home /> },
-            { path: '/car/create', element: <CreateCar /> },
-            { path: '/car/:carId', element: <CarDetails /> },
-            { path: '/car/:carId/create', element: <CreateCarDiagnosis /> },
-            {
-                path: '/car/:carId/diagnosis/:diagnosisId',
-                element: <DiagnosisPage />,
-            },
-            { path: '/configuration', element: <Configuration /> },
-            //   { path: "*", element: <NotFound /> },
-        ],
-    },
-    {
-        path: '/login',
-        element: <Login />,
-    },
-    {
-        path: '/login/verify',
-        element: <VerifyMagicLink />,
-    },
-])
+      },
+      {
+        path: '/cars',
+        element: (
+          <ErrorBoundary>
+            <Vehicles />
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/diagnoses',
+        element: (
+          <ErrorBoundary>
+            <Diagnoses />
+          </ErrorBoundary>
+        ),
+      },
+    ],
+  },
+  {
+    path: '/cars/:carId/diagnosis/:diagnosisId/final-report',
+    element: (
+      <ErrorBoundary>
+        <FinalReport />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/cars/:carId/diagnosis/:diagnosisId',
+    element: (
+      <ErrorBoundary>
+        <PreliminaryDiagnosis />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/cars/:carId',
+    element: (
+      <ErrorBoundary>
+        <CarDetails />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/configuration',
+    element: (
+      <ErrorBoundary>
+        <Configuration />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/login',
+    element: (
+      <ErrorBoundary>
+        <Login />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/login/verify',
+    element: (
+      <ErrorBoundary>
+        <VerifyMagicLink />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '*',
+    element: (
+      <ErrorBoundary>
+        <NotFound />
+      </ErrorBoundary>
+    ),
+  },
+]);
 
-export default router
+export default router;

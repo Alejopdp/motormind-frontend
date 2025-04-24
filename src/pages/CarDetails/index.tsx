@@ -1,0 +1,202 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { enqueueSnackbar } from 'notistack';
+import { AlertCircle } from 'lucide-react';
+
+import { Car } from '@/types/Car';
+import { useApi } from '@/hooks/useApi';
+import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
+import VehicleFaultsHistory from '@/components/molecules/VehicleFaultsHistory/VehicleFaultsHistory';
+import Spinner from '@/components/atoms/Spinner';
+import { Button } from '@/components/atoms/Button';
+import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
+import SymptomInputForm from '@/components/molecules/SymptomInputForm';
+import { TechnicanObservationsInputForm } from '@/components/molecules/TechnicanObservationsInputForm';
+import { QuestionsList } from '@/components/atoms/QuestionsList';
+import { Diagnosis } from '@/types/Diagnosis';
+import { PlusIcon } from 'lucide-react';
+
+const CarDetails = () => {
+  const params = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
+  const { execute: generateQuestions } = useApi<string[]>('post', '/cars/:carId/questions');
+  const { execute: createDiagnosisRequest } = useApi<Diagnosis>('post', '/cars/:carId/diagnosis');
+
+  const [step, setStep] = useState('carDetails');
+  const [symptoms, setSymptoms] = useState<string>('');
+  const [notes, setNotes] = useState<string>('');
+  const [questions, setQuestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    return () => {
+      queryClient.removeQueries({ queryKey: ['getCarById'] });
+    };
+  }, [params.carId, queryClient]);
+
+  const {
+    data: { data: car = {} as Car } = { data: {} as Car },
+    isLoading: isLoadingCar,
+    isError,
+  } = useQuery<{ data: Car }>({
+    queryKey: ['getCarById', params.carId],
+    queryFn: async () => {
+      const response = await getCarById(undefined, undefined, {
+        carId: params.carId as string,
+      });
+      return { data: response.data };
+    },
+    enabled: step === 'carDetails',
+    staleTime: 60000, // 1 minute
+    retry: 0,
+  });
+
+  const { mutate: generateQuestionsMutation, isPending: isLoadingQuestions } = useMutation({
+    mutationFn: async ({ symptoms, notes }: { symptoms: string; notes: string }) => {
+      const response = await generateQuestions(
+        {
+          fault: symptoms,
+          notes,
+          questionsToAvoid: questions,
+        },
+        undefined,
+        { carId: params.carId as string },
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      if (step === 'diagnosisQuestions') {
+        setQuestions((prevQuestions) => [...prevQuestions, ...data]);
+      } else {
+        setQuestions(data);
+        setStep('diagnosisQuestions');
+      }
+    },
+    onError: () => {
+      enqueueSnackbar('Error al generar las preguntas. Por favor, inténtalo de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
+
+  const { mutate: createDiagnosisMutation, isPending: isLoadingDiagnosis } = useMutation({
+    mutationFn: async ({ fault, notes }: { fault: string; notes: string }) => {
+      const response = await createDiagnosisRequest(
+        {
+          fault,
+          notes,
+        },
+        undefined,
+        { carId: params.carId as string },
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      navigate(`/cars/${params.carId}/diagnosis/${data._id}`);
+    },
+    onError: () => {
+      enqueueSnackbar('Error al generar el diagnóstico. Por favor, inténtalo de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
+
+  if (isLoadingCar)
+    return (
+      <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
+        <Spinner />
+      </div>
+    );
+
+  if (isError || !car) {
+    return (
+      <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4">
+        <div className="text-destructive flex items-center gap-2 rounded-lg bg-red-50 p-4">
+          <AlertCircle className="h-5 w-5" />
+          <span>Error al cargar los datos del vehículo</span>
+        </div>
+        <Button variant="outline" onClick={() => navigate('/cars')}>
+          Volver atrás
+        </Button>
+      </div>
+    );
+  }
+
+  const backNavigation = () => {
+    if (step === 'carDetails') return navigate('/cars');
+    if (step === 'newDiagnosis') setStep('carDetails');
+    if (step === 'diagnosisQuestions') setStep('newDiagnosis');
+  };
+
+  const generateDiagnosisQuestions = ({ symptoms, notes }: { symptoms: string; notes: string }) => {
+    setSymptoms(symptoms);
+    setNotes(notes);
+    generateQuestionsMutation({ symptoms, notes });
+  };
+
+  const createDiagnosis = (details: string) => {
+    createDiagnosisMutation({ fault: symptoms, notes: details });
+  };
+
+  return (
+    <div className="bg-background min-h-screen">
+      <HeaderPage
+        onBack={backNavigation}
+        data={{
+          title:
+            step === 'carDetails'
+              ? 'Detalles del Vehículo'
+              : step === 'diagnosisQuestions'
+                ? 'Nuevo diagnóstico - Preguntas guiadas'
+                : 'Nuevo diagnóstico',
+          description: `Matricula: ${car.plate || car.vinCode}`,
+        }}
+        headerActions={
+          step === 'carDetails' && (
+            <Button onClick={() => setStep('newDiagnosis')}>
+              <PlusIcon className="!h-5 !w-5" />
+              <span className="hidden sm:inline">Nuevo diagnóstico</span>
+            </Button>
+          )
+        }
+      />
+      <div className="mx-auto max-w-4xl space-y-4 px-4 py-3 sm:space-y-6 sm:px-6 sm:py-6">
+        <VehicleInformation
+          car={car}
+          editMode={step === 'carDetails'}
+          minimized={step === 'diagnosisQuestions'}
+        />
+        {/* Faults History */}
+        {step === 'carDetails' && <VehicleFaultsHistory carId={params.carId as string} />}
+
+        {/* Symptom and notes input form */}
+        {step === 'newDiagnosis' && (
+          <SymptomInputForm
+            initialSymptoms={symptoms}
+            initialNotes={notes}
+            onSubmit={generateDiagnosisQuestions}
+            isLoading={isLoadingQuestions}
+          />
+        )}
+
+        {step === 'diagnosisQuestions' && (
+          <div className="space-y-6">
+            <QuestionsList questions={questions} isLoading={isLoadingQuestions} />
+
+            <TechnicanObservationsInputForm
+              onSubmit={createDiagnosis}
+              onGenerateMoreQuestions={() => generateQuestionsMutation({ symptoms, notes })}
+              isLoadingMoreQuestions={isLoadingQuestions}
+              isLoadingDiagnosis={isLoadingDiagnosis}
+              disableMoreQuestions={isLoadingQuestions || questions.length > 7}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CarDetails;
