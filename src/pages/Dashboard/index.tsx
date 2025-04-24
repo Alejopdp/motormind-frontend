@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FileSearch, PlusIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { enqueueSnackbar } from 'notistack';
 
 import { formatDate } from '@/utils';
 import { Diagnosis } from '@/types/Diagnosis';
@@ -24,11 +25,19 @@ const Dashboard = () => {
     queryKey: ['diagnoses'],
     queryFn: async () => {
       const response = await getDiagnosesRequest(undefined, { totalLimit: 5 }, undefined);
+
       return response.data;
     },
     enabled: true,
     staleTime: 60000,
+    retry: false,
   });
+
+  useEffect(() => {
+    if (isError && error) {
+      enqueueSnackbar(`Error: No se pudieron obtener los diagnósticos`, { variant: 'error' });
+    }
+  }, [isError, error]);
 
   return (
     <div className="flex flex-grow flex-col overflow-auto">
@@ -56,12 +65,6 @@ const Dashboard = () => {
                 Ver todos
               </Link>
             </div>
-
-            {isError && (
-              <h5 className="text-destructive mb-2 text-sm font-semibold sm:text-base">
-                Error: {error?.message}
-              </h5>
-            )}
 
             {isLoadingDiagnoses ? (
               <div className="flex items-center justify-center">

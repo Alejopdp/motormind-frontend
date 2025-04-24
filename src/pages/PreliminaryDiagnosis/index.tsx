@@ -14,7 +14,7 @@ import { useApi } from '@/hooks/useApi';
 import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
-import { ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, SaveIcon } from 'lucide-react';
+import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, SaveIcon } from 'lucide-react';
 
 const PreliminaryDiagnosis = () => {
   const params = useParams();
@@ -37,7 +37,6 @@ const PreliminaryDiagnosis = () => {
     data: { data: diagnosis = {} as Diagnosis } = { data: {} as Diagnosis },
     isLoading: isLoadingDiagnosis,
     isError,
-    error,
   } = useQuery<{ data: Diagnosis }>({
     queryKey: ['getDiagnosisById', params.diagnosisId],
     queryFn: async () => {
@@ -48,6 +47,7 @@ const PreliminaryDiagnosis = () => {
     },
     enabled: !!params.diagnosisId,
     staleTime: 60000, // 1 minute
+    retry: false,
   });
 
   const { mutate: createFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
@@ -77,8 +77,14 @@ const PreliminaryDiagnosis = () => {
 
   if (isError || !diagnosis) {
     return (
-      <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
-        Error: {error?.message || 'Error al cargar los datos del diagnóstico preliminar'}
+      <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4">
+        <div className="text-destructive flex items-center gap-2 rounded-lg bg-red-50 p-4">
+          <AlertCircle className="h-5 w-5" />
+          <span>Error al cargar los datos del diagnóstico preliminar</span>
+        </div>
+        <Button variant="outline" onClick={() => navigate(`/cars/${params.carId}`)}>
+          Volver atrás
+        </Button>
       </div>
     );
   }

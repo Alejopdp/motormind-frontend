@@ -11,7 +11,7 @@ import { VoiceTextInput } from '@/components/VoiceTextInput';
 import { useApi } from '@/hooks/useApi';
 import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
-import { ArrowLeftIcon, SaveIcon, Share2Icon, StarIcon } from 'lucide-react';
+import { AlertCircle, ArrowLeftIcon, SaveIcon, Share2Icon, StarIcon } from 'lucide-react';
 import { AlternativeFailures } from './AlternativeFailures';
 import { Conclusion } from './Conclusion';
 import { EstimatedResources } from './EstimatedResources';
@@ -41,7 +41,6 @@ const FinalReport = () => {
     data: { data: diagnosis = {} as Diagnosis } = { data: {} as Diagnosis },
     isLoading: isLoadingDiagnosis,
     isError,
-    error,
   } = useQuery<{ data: Diagnosis }>({
     queryKey: ['getDiagnosisById', params.diagnosisId],
     queryFn: async () => {
@@ -51,6 +50,7 @@ const FinalReport = () => {
       return { data: response.data };
     },
     enabled: !!params.diagnosisId,
+    retry: false,
   });
 
   useEffect(() => {
@@ -114,8 +114,14 @@ const FinalReport = () => {
 
   if (isError || !diagnosis) {
     return (
-      <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
-        Error: {error?.message || 'Error al cargar los datos del diagnóstico preliminar'}
+      <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4">
+        <div className="text-destructive flex items-center gap-2 rounded-lg bg-red-50 p-4">
+          <AlertCircle className="h-5 w-5" />
+          <span>Error al cargar los datos del diagnóstico</span>
+        </div>
+        <Button variant="outline" onClick={() => navigate(`/cars/${params.carId}`)}>
+          Volver atrás
+        </Button>
       </div>
     );
   }
@@ -161,7 +167,9 @@ const FinalReport = () => {
 
         {/* Final Notes */}
         <div className="mb-20 space-y-2">
-          <p className="block text-sm font-medium sm:text-base">Notas Adicionales del Técnico (Internas)</p>
+          <p className="block text-sm font-medium sm:text-base">
+            Notas Adicionales del Técnico (Internas)
+          </p>
           <VoiceTextInput
             value={finalNotes}
             onChange={setFinalNotes}
