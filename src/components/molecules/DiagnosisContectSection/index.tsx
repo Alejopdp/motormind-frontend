@@ -47,22 +47,22 @@ export const DiagnosticContextSection = ({
             <DialogHeader>
               <DialogTitle>Contexto del Diagnóstico</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 sm:py-2">
+            <div className="space-y-3 sm:py-2">
               <div>
-                <h3 className="mb-2 text-sm font-medium sm:text-base">Síntomas Reportados</h3>
+                <h3 className="text-sm font-medium sm:text-base">Síntomas Reportados</h3>
                 <p className="text-muted text-xs sm:text-base">{symptoms}</p>
               </div>
 
               {notes && (
                 <div>
-                  <h3 className="mb-2 text-sm font-medium sm:text-base">Notas Adicionales</h3>
+                  <h3 className="text-sm font-medium sm:text-base">Notas Adicionales</h3>
                   <p className="text-muted text-xs sm:text-base">{notes}</p>
                 </div>
               )}
 
               {answers.length > 0 && (
                 <div>
-                  <h3 className="mb-2 text-base font-medium">Respuestas a Preguntas Guiadas</h3>
+                  <h3 className="text-base font-medium">Respuestas a Preguntas Guiadas</h3>
                   <div className="space-y-3">
                     {answers.map((item, index) => (
                       <div key={index} className="border-b pb-2 last:border-b-0">

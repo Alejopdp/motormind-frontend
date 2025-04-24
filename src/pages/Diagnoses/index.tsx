@@ -126,7 +126,7 @@ const Diagnoses = () => {
                   key={index}
                   vehicle={diagnosis.car}
                   problems={diagnosis.preliminary?.possibleReasons?.map(({ title }) => title) || []}
-                  technician={diagnosis.mechanic}
+                  technician={diagnosis.createdBy}
                   timestamp={formatDate(diagnosis.createdAt)}
                   diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
                 />

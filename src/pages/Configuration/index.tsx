@@ -16,28 +16,28 @@ const ConfiguracionPage = () => {
   const [newPricePerHour, setNewPricePerHour] = useState<string>('');
   const { execute: updatePricePerHourRequest } = useApi<{ pricePerHour: number }>(
     'put',
-    `/mechanic/:mechanicId`,
+    `/workshops/:workshopId`,
   );
   const { execute: getMechanicRequest } = useApi<{ pricePerHour: number }>(
     'get',
-    `/mechanic/${user.mechanicId}`,
+    `/workshops/${user.workshopId}`,
   );
 
   const { data: mechanicData, isLoading: isLoadingMechanic } = useQuery({
-    queryKey: ['mechanic', user.mechanicId],
+    queryKey: ['workshop', user.workshopId],
     queryFn: async () => {
       const response = await getMechanicRequest();
       const price = response.data?.pricePerHour || 0;
       setNewPricePerHour(price.toString());
       return response.data;
     },
-    enabled: !!user.mechanicId,
+    enabled: !!user.workshopId,
   });
 
   const { mutate: updatePricePerHourMutation, isPending: isSubmitting } = useMutation({
     mutationFn: async (price: number) => {
       const response = await updatePricePerHourRequest({ pricePerHour: price }, undefined, {
-        mechanicId: user.mechanicId,
+        workshopId: user.workshopId,
       });
       return response;
     },
