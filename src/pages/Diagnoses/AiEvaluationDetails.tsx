@@ -94,7 +94,9 @@ const AiEvaluationDetails = () => {
                 <div>
                   <p className="text-gray-600">ID de Diagnóstico:</p>
                   <p className="font-medium">
-                    {evaluation.diagnosis?._id || evaluation.diagnosisId}
+                    {typeof evaluation.diagnosisId === 'string'
+                      ? evaluation.diagnosisId
+                      : (evaluation.diagnosisId as { _id: string })?._id || 'N/A'}
                   </p>
                 </div>
                 <div>
