@@ -9,46 +9,99 @@ import Diagnoses from '@/pages/Diagnoses';
 import Vehicles from '@/pages/Vehicles';
 import PreliminaryDiagnosis from '@/pages/PreliminaryDiagnosis';
 import FinalReport from './pages/FinalReport';
+import ErrorBoundary from './components/ErrorBoundary';
+import NotFound from './pages/NotFound';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout />,
+    element: (
+      <ErrorBoundary>
+        <Layout />
+      </ErrorBoundary>
+    ),
     children: [
-      { index: true, element: <Dashboard /> },
+      {
+        index: true,
+        element: (
+          <ErrorBoundary>
+            <Dashboard />
+          </ErrorBoundary>
+        ),
+      },
       {
         path: '/cars',
-        element: <Vehicles />,
+        element: (
+          <ErrorBoundary>
+            <Vehicles />
+          </ErrorBoundary>
+        ),
       },
       {
         path: '/diagnoses',
-        element: <Diagnoses />,
+        element: (
+          <ErrorBoundary>
+            <Diagnoses />
+          </ErrorBoundary>
+        ),
       },
     ],
   },
   {
     path: '/cars/:carId/diagnosis/:diagnosisId/final-report',
-    element: <FinalReport />,
+    element: (
+      <ErrorBoundary>
+        <FinalReport />
+      </ErrorBoundary>
+    ),
   },
   {
     path: '/cars/:carId/diagnosis/:diagnosisId',
-    element: <PreliminaryDiagnosis />,
+    element: (
+      <ErrorBoundary>
+        <PreliminaryDiagnosis />
+      </ErrorBoundary>
+    ),
   },
   {
     path: '/cars/:carId',
-    element: <CarDetails />,
+    element: (
+      <ErrorBoundary>
+        <CarDetails />
+      </ErrorBoundary>
+    ),
   },
   {
     path: '/configuration',
-    element: <Configuration />,
+    element: (
+      <ErrorBoundary>
+        <Configuration />
+      </ErrorBoundary>
+    ),
   },
   {
     path: '/login',
-    element: <Login />,
+    element: (
+      <ErrorBoundary>
+        <Login />
+      </ErrorBoundary>
+    ),
   },
   {
     path: '/login/verify',
-    element: <VerifyMagicLink />,
+    element: (
+      <ErrorBoundary>
+        <VerifyMagicLink />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '*',
+    element: (
+      <ErrorBoundary>
+        <NotFound />
+      </ErrorBoundary>
+    ),
   },
 ]);
 
