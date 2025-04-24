@@ -11,6 +11,8 @@ import PreliminaryDiagnosis from '@/pages/PreliminaryDiagnosis';
 import FinalReport from './pages/FinalReport';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './pages/NotFound';
+import AiEvaluations from './pages/Diagnoses/AiEvaluations';
+import AiEvaluationDetails from './pages/Diagnoses/AiEvaluationDetails';
 
 const router = createBrowserRouter([
   {
@@ -42,6 +44,22 @@ const router = createBrowserRouter([
         element: (
           <ErrorBoundary>
             <Diagnoses />
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/audit/evaluations',
+        element: (
+          <ErrorBoundary>
+            <AiEvaluations />
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/audit/evaluations/:evaluationId',
+        element: (
+          <ErrorBoundary>
+            <AiEvaluationDetails />
           </ErrorBoundary>
         ),
       },

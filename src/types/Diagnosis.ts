@@ -70,3 +70,19 @@ export type Diagnosis = {
     avatar?: string;
   };
 };
+
+export type AiDiagnosisEvaluation = {
+  _id: string;
+  diagnosisId: string | { _id: string } | Diagnosis;
+  stage: 'preliminary' | 'final';
+  scores: {
+    accuracy: number;
+    clarity: number;
+    usefulness: number;
+    toolsCoverage: number;
+    symptomMatch: number;
+  };
+  comment: string;
+  createdAt: Date;
+  diagnosis?: Diagnosis;
+};
