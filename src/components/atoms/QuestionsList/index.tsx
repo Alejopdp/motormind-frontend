@@ -1,35 +1,17 @@
 import { ClipboardListIcon } from 'lucide-react';
 import Spinner from '../Spinner';
-import { Button } from '../Button';
 
 interface QuestionsListProps {
   questions: string[];
   isLoading?: boolean;
   title?: string;
-  error?: Error | null;
-  onRetry?: () => void;
 }
 
 export const QuestionsList = ({
   questions,
   isLoading = false,
   title = 'Cuestionario de Diagnóstico',
-  error = null,
-  onRetry,
 }: QuestionsListProps) => {
-  if (error) {
-    return (
-      <div className="w-full rounded-lg border border-red-200 bg-red-50 p-5 shadow-sm">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-destructive">
-            Error: {error.message || 'Error al generar las preguntas'}
-          </p>
-          {onRetry && <Button onClick={onRetry}>Reintentar</Button>}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
       <div className="pb-3">

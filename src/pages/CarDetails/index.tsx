@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
+import { AlertCircle } from 'lucide-react';
 
 import { Car } from '@/types/Car';
 import { useApi } from '@/hooks/useApi';
@@ -39,7 +40,6 @@ const CarDetails = () => {
     data: { data: car = {} as Car } = { data: {} as Car },
     isLoading: isLoadingCar,
     isError,
-    error,
   } = useQuery<{ data: Car }>({
     queryKey: ['getCarById', params.carId],
     queryFn: async () => {
@@ -50,14 +50,10 @@ const CarDetails = () => {
     },
     enabled: step === 'carDetails',
     staleTime: 60000, // 1 minute
+    retry: 0,
   });
 
-  const {
-    mutate: generateQuestionsMutation,
-    isPending: isLoadingQuestions,
-    isError: isQuestionsError,
-    error: questionsError,
-  } = useMutation({
+  const { mutate: generateQuestionsMutation, isPending: isLoadingQuestions } = useMutation({
     mutationFn: async ({ symptoms, notes }: { symptoms: string; notes: string }) => {
       const response = await generateQuestions(
         {
@@ -77,6 +73,11 @@ const CarDetails = () => {
         setQuestions(data);
         setStep('diagnosisQuestions');
       }
+    },
+    onError: () => {
+      enqueueSnackbar('Error al generar las preguntas. Por favor, inténtalo de nuevo.', {
+        variant: 'error',
+      });
     },
   });
 
@@ -111,8 +112,14 @@ const CarDetails = () => {
 
   if (isError || !car) {
     return (
-      <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
-        Error: {error?.message || 'Error al cargar los datos del vehículo'}
+      <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4">
+        <div className="text-destructive flex items-center gap-2 rounded-lg bg-red-50 p-4">
+          <AlertCircle className="h-5 w-5" />
+          <span>Error al cargar los datos del vehículo</span>
+        </div>
+        <Button variant="outline" onClick={() => navigate('/cars')}>
+          Volver atrás
+        </Button>
       </div>
     );
   }
@@ -176,12 +183,7 @@ const CarDetails = () => {
 
         {step === 'diagnosisQuestions' && (
           <div className="space-y-6">
-            <QuestionsList
-              questions={questions}
-              isLoading={isLoadingQuestions}
-              error={isQuestionsError ? questionsError : null}
-              onRetry={() => generateQuestionsMutation({ symptoms, notes })}
-            />
+            <QuestionsList questions={questions} isLoading={isLoadingQuestions} />
 
             <TechnicanObservationsInputForm
               onSubmit={createDiagnosis}

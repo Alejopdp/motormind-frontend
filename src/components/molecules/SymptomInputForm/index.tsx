@@ -58,7 +58,7 @@ export default function SymptomInputForm({
             <Button
               type="button"
               variant="ghost"
-              className="text-primary h-auto p-0"
+              className="text-primary h-auto !p-0"
               onClick={() => setShowNotes(!showNotes)}
             >
               {showNotes ? (

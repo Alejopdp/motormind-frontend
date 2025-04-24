@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FileSearch, PlusIcon, SearchIcon } from 'lucide-react';
 import { debounce } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
+import { enqueueSnackbar } from 'notistack';
 
 import { formatDate } from '@/utils';
 import { useApi } from '@/hooks/useApi';
@@ -58,7 +59,14 @@ const Diagnoses = () => {
     },
     enabled: true,
     staleTime: 60000,
+    retry: false,
   });
+
+  useEffect(() => {
+    if (isError && error) {
+      enqueueSnackbar(`Error: No se pudieron obtener los diagnósticos`, { variant: 'error' });
+    }
+  }, [isError, error]);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -107,10 +115,6 @@ const Diagnoses = () => {
       {/* Scrollable Content */}
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-8">
-          {isError && (
-            <h5 className="text-destructive mb-2 font-semibold">Error: {error?.message}</h5>
-          )}
-
           {isLoadingDiagnoses ? (
             <div className="flex items-center justify-center">
               <Spinner className="mt-5" />
