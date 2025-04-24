@@ -4,6 +4,9 @@ import apiService from '@/service/api.service';
 import { AiDiagnosisEvaluation } from '@/types/Diagnosis';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import ScoreBar from '@/components/ScoreBar';
+import StageBadge from '@/components/StageBadge';
+import Spinner from '@/components/atoms/Spinner';
 
 const AiEvaluations = () => {
   const [evaluations, setEvaluations] = useState<AiDiagnosisEvaluation[]>([]);
@@ -42,17 +45,6 @@ const AiEvaluations = () => {
   };
   */
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'bg-green-500';
-    if (score >= 60) return 'bg-yellow-500';
-    if (score >= 40) return 'bg-orange-500';
-    return 'bg-red-500';
-  };
-
-  const getStageText = (stage: 'preliminary' | 'final') => {
-    return stage === 'preliminary' ? 'Preliminar' : 'Final';
-  };
-
   const formatDate = (date: Date) => {
     return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: es });
   };
@@ -60,7 +52,7 @@ const AiEvaluations = () => {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"></div>
+        <Spinner />
       </div>
     );
   }
@@ -79,99 +71,140 @@ const AiEvaluations = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold">Evaluaciones de Diagnósticos</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Evaluaciones de Diagnósticos</h1>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-green-500"></div>
+            <span className="text-sm text-gray-600">≥ 80%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+            <span className="text-sm text-gray-600">≥ 60%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+            <span className="text-sm text-gray-600">≥ 40%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-red-500"></div>
+            <span className="text-sm text-gray-600">&lt; 40%</span>
+          </div>
+        </div>
+      </div>
 
       {evaluations.length === 0 ? (
-        <div className="rounded-md bg-gray-100 p-4">
-          <p className="text-gray-600">No hay evaluaciones disponibles.</p>
+        <div className="rounded-lg bg-gray-50 p-8 text-center shadow-sm">
+          <svg
+            className="mx-auto h-12 w-12 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <p className="mt-4 text-lg font-medium text-gray-900">No hay evaluaciones disponibles</p>
+          <p className="mt-2 text-sm text-gray-500">
+            Las evaluaciones aparecerán aquí cuando estén disponibles.
+          </p>
         </div>
       ) : (
-        <>
+        <div className="overflow-hidden rounded-lg bg-white shadow-md">
           <div className="overflow-x-auto">
-            <table className="min-w-full overflow-hidden rounded-lg bg-white shadow-md">
-              <thead className="bg-gray-100">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left">ID Diagnóstico</th>
-                  <th className="px-4 py-3 text-left">Etapa</th>
-                  <th className="px-4 py-3 text-left">Precisión</th>
-                  <th className="px-4 py-3 text-left">Claridad</th>
-                  <th className="px-4 py-3 text-left">Utilidad</th>
-                  <th className="px-4 py-3 text-left">Herramientas</th>
-                  <th className="px-4 py-3 text-left">Síntoma</th>
-                  <th className="px-4 py-3 text-left">Fecha</th>
-                  <th className="px-4 py-3 text-left">Acciones</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    ID Diagnóstico
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    Etapa
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    Precisión
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    Claridad
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    Utilidad
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    Herramientas
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    Síntoma
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    Fecha
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-200 bg-white">
                 {evaluations.map((evaluation) => (
-                  <tr key={evaluation._id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      {typeof evaluation.diagnosisId === 'string'
-                        ? evaluation.diagnosisId
-                        : (evaluation.diagnosisId as { _id: string })?._id || 'N/A'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`rounded-full px-2 py-1 text-xs ${
-                          evaluation.stage === 'preliminary'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-purple-100 text-purple-800'
-                        }`}
-                      >
-                        {getStageText(evaluation.stage)}
+                  <tr key={evaluation._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="font-mono text-sm text-gray-900">
+                        {typeof evaluation.diagnosisId === 'string'
+                          ? evaluation.diagnosisId
+                          : (evaluation.diagnosisId as { _id: string })?._id || 'N/A'}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="h-2.5 w-16 rounded-full bg-gray-200">
-                        <div
-                          className={`h-2.5 rounded-full ${getScoreColor(evaluation.scores.accuracy)}`}
-                          style={{ width: `${evaluation.scores.accuracy}%` }}
-                        ></div>
-                      </div>
-                      <span className="ml-1 text-xs">{evaluation.scores.accuracy}%</span>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <StageBadge stage={evaluation.stage} />
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="h-2.5 w-16 rounded-full bg-gray-200">
-                        <div
-                          className={`h-2.5 rounded-full ${getScoreColor(evaluation.scores.clarity)}`}
-                          style={{ width: `${evaluation.scores.clarity}%` }}
-                        ></div>
-                      </div>
-                      <span className="ml-1 text-xs">{evaluation.scores.clarity}%</span>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <ScoreBar score={evaluation.scores.accuracy} />
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="h-2.5 w-16 rounded-full bg-gray-200">
-                        <div
-                          className={`h-2.5 rounded-full ${getScoreColor(evaluation.scores.usefulness)}`}
-                          style={{ width: `${evaluation.scores.usefulness}%` }}
-                        ></div>
-                      </div>
-                      <span className="ml-1 text-xs">{evaluation.scores.usefulness}%</span>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <ScoreBar score={evaluation.scores.clarity} />
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="h-2.5 w-16 rounded-full bg-gray-200">
-                        <div
-                          className={`h-2.5 rounded-full ${getScoreColor(evaluation.scores.toolsCoverage)}`}
-                          style={{ width: `${evaluation.scores.toolsCoverage}%` }}
-                        ></div>
-                      </div>
-                      <span className="ml-1 text-xs">{evaluation.scores.toolsCoverage}%</span>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <ScoreBar score={evaluation.scores.usefulness} />
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="h-2.5 w-16 rounded-full bg-gray-200">
-                        <div
-                          className={`h-2.5 rounded-full ${getScoreColor(evaluation.scores.symptomMatch)}`}
-                          style={{ width: `${evaluation.scores.symptomMatch}%` }}
-                        ></div>
-                      </div>
-                      <span className="ml-1 text-xs">{evaluation.scores.symptomMatch}%</span>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <ScoreBar score={evaluation.scores.toolsCoverage} />
                     </td>
-                    <td className="px-4 py-3 text-sm">{formatDate(evaluation.createdAt)}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <ScoreBar score={evaluation.scores.symptomMatch} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-500">
+                        {formatDate(evaluation.createdAt)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         onClick={() => navigate(`/audit/evaluations/${evaluation._id}`)}
-                        className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                        className="inline-flex cursor-pointer items-center rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                       >
+                        <svg
+                          className="mr-1.5 h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
+                        </svg>
                         Ver
                       </button>
                     </td>
@@ -180,41 +213,7 @@ const AiEvaluations = () => {
               </tbody>
             </table>
           </div>
-
-          {/* Paginación - Comentada temporalmente
-          <div className="mt-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-700">
-                Mostrando {evaluations.length} de {total} evaluaciones
-              </p>
-            </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page === 1}
-                className={`rounded px-3 py-1 ${
-                  page === 1
-                    ? 'cursor-not-allowed bg-gray-300 text-gray-500'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
-              >
-                Anterior
-              </button>
-              <button
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page * limit >= total}
-                className={`rounded px-3 py-1 ${
-                  page * limit >= total
-                    ? 'cursor-not-allowed bg-gray-300 text-gray-500'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
-              >
-                Siguiente
-              </button>
-            </div>
-          </div>
-          */}
-        </>
+        </div>
       )}
     </div>
   );
