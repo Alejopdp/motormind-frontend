@@ -89,7 +89,8 @@ const FaultsHistoryItem = ({ diagnosis, index }: { diagnosis: Diagnosis; index: 
       <div className="p-3 sm:p-4">
         <div className="flex items-center justify-between">
           <p className="text-muted text-xs sm:text-sm">
-            Fecha: {formatToddmmyyyy(new Date(diagnosis.createdAt))}
+            Fecha:{' '}
+            {diagnosis.createdAt ? formatToddmmyyyy(new Date(diagnosis.createdAt)) || '-' : '-'}
           </p>
           <Link
             to={`/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
