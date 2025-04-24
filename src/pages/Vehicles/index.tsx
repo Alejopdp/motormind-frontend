@@ -74,23 +74,34 @@ const Vehicles = () => {
   };
 
   return (
-    <div className="flex flex-grow flex-col overflow-auto px-12 py-6">
-      <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-        <h1 className="text-2xl font-bold">Vehículos Registrados</h1>
+    <div className="flex flex-grow flex-col">
+      {/* Fixed Header */}
+      <div className="sticky top-0 z-10 flex flex-col items-center justify-between bg-white px-6 py-2 shadow-xs sm:flex-row sm:px-8 sm:py-4 lg:flex-row">
+        <div className="lg:w-1/3">
+          <h1 className="py-0.5 text-xl font-semibold sm:py-0 lg:text-2xl">
+            Vehículos Registrados
+          </h1>
+          <p className="text-muted hidden xl:block">
+            Gestiona y revisa todos los vehículos del taller
+          </p>
+        </div>
 
-        <div className="flex w-full flex-col space-y-2 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-2">
-          <div className="relative flex-grow sm:max-w-md">
+        <div className="mt-2 flex w-full gap-2 space-y-2 sm:mt-0 sm:w-auto sm:space-y-0 sm:space-x-2 lg:w-2/3">
+          <div className="relative flex-grow lg:min-w-[300px]">
             <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
             <Input
-              className="h-10 w-full min-w-[340px] rounded-md py-2 pr-4 pl-9"
+              className="h-8 w-full rounded-md py-2 pr-4 pl-9 sm:h-10"
               placeholder="Buscar por Matrícula, VIN, Marca, Modelo..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button onClick={() => setIsCreateModalOpen(true)} className="h-10">
-            <PlusIcon className="h-4 w-4" />
-            Añadir Vehículo
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="h-8 w-8 sm:h-auto sm:w-auto"
+          >
+            <PlusIcon className="!h-5 !w-5" />
+            <span className="hidden lg:inline">Añadir Vehículo</span>
           </Button>
 
           <CreateDiagnosticModal
@@ -102,11 +113,11 @@ const Vehicles = () => {
       </div>
 
       {isLoadingCars ? (
-        <div className="flex items-center justify-center">
+        <div className="mt-5 flex items-center justify-center">
           <Spinner />
         </div>
       ) : (
-        <>
+        <div className="px-2 py-2 sm:px-8 sm:py-4">
           <VehicleListTable
             vehicles={cars}
             isLoading={isLoadingCars}
@@ -116,7 +127,7 @@ const Vehicles = () => {
             currentPage={currentPage}
             limit={LIMIT}
           />
-        </>
+        </div>
       )}
     </div>
   );

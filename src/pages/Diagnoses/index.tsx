@@ -76,32 +76,37 @@ const Diagnoses = () => {
   return (
     <div className="flex flex-grow flex-col">
       {/* Fixed Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between bg-white px-8 py-4 shadow-xs">
-        <div className="w-1/3">
-          <h1 className="text-2xl font-semibold">Diagnósticos</h1>
-          <p className="text-muted">Gestiona y revisa todos los diagnósticos del taller</p>
+      <div className="sticky top-0 z-10 flex flex-col items-center justify-between bg-white px-6 py-2 shadow-xs sm:flex-row sm:px-8 sm:py-4 lg:flex-row">
+        <div className="lg:w-1/3">
+          <h1 className="py-0.5 text-xl font-semibold sm:py-0 lg:text-2xl">Diagnósticos</h1>
+          <p className="text-muted hidden xl:block">
+            Gestiona y revisa todos los diagnósticos del taller
+          </p>
         </div>
 
-        <div className="flex w-2/3 flex-col space-y-2 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-2">
-          <div className="relative min-w-[300px] flex-grow">
+        <div className="mt-2 flex w-full gap-2 space-y-2 sm:mt-0 sm:w-auto sm:space-y-0 sm:space-x-2 lg:w-2/3">
+          <div className="relative flex-grow lg:min-w-[300px]">
             <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
             <Input
-              className="h-10 w-full rounded-md py-2 pr-4 pl-9"
+              className="h-8 w-full rounded-md py-2 pr-4 pl-9 sm:h-10"
               placeholder="Buscar por vehículo o problema..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button onClick={() => setIsCreateModalOpen(true)} className="h-10">
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="h-8 w-8 sm:h-auto sm:w-auto"
+          >
             <PlusIcon className="!h-5 !w-5" />
-            <span className="hidden sm:inline">Nuevo diagnóstico</span>
+            <span className="hidden lg:inline">Nuevo diagnóstico</span>
           </Button>
         </div>
       </div>
 
       {/* Scrollable Content */}
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex-1 overflow-y-auto px-8 py-4">
+        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-8">
           {isError && (
             <h5 className="text-destructive mb-2 font-semibold">Error: {error?.message}</h5>
           )}

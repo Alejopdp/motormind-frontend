@@ -78,9 +78,9 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({
   }
 
   return (
-    <div className="mt-4 rounded-lg bg-white p-6 shadow-md">
+    <div className="mt-4 rounded-lg bg-white p-4 shadow-md sm:p-6">
       <div className="flex items-center justify-between">
-        <h5 className="mb-2 text-lg font-medium">Información del vehículo</h5>
+        <h5 className="text-md mb-2 font-medium sm:text-lg">Información del vehículo</h5>
         {editMode && (
           <Button variant="ghost" onClick={() => setIsEditing(true)}>
             <PencilIcon className="text-muted !h-4 !w-4" />
@@ -90,28 +90,28 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({
         <EditVehicleModal open={isEditing} onOpenChange={setIsEditing} car={car} />
       </div>
 
-      <div className="container">
-        <div className="grid grid-cols-2 gap-4 space-y-4">
+      <div className="container space-y-2 sm:space-y-0">
+        <div className="grids-cols-1 grid gap-2 space-y-1 sm:grid-cols-2 sm:gap-4 sm:space-y-4">
           <div className="flex items-center gap-2">
             <CarIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
-              <p className="text-muted mb-0 text-sm">Marca / Modelo</p>
+              <p className="text-muted mb-0 text-xs sm:text-sm">Marca / Modelo</p>
               <p className="text-sm font-medium sm:text-base">{`${car.brand || ''} ${car.model || ''}`}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="text-muted mr-2 !h-5 !w-5" />
             <div>
-              <p className="text-muted mb-0 text-sm">Matrícula</p>
+              <p className="text-muted mb-0 text-xs sm:text-sm">Matrícula</p>
               <p className="text-sm font-medium sm:text-base">{car.plate || car.vinCode}</p>
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 space-y-4">
+        <div className="grids-cols-1 grid gap-2 space-y-1 sm:grid-cols-2 sm:gap-4 sm:space-y-4">
           <div className="flex items-center gap-2">
             <GaugeIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
-              <p className="text-muted mb-0 text-sm">Kilometraje</p>
+              <p className="text-muted mb-0 text-xs sm:text-sm">Kilometraje</p>
               <p className="text-sm font-medium sm:text-base">
                 {Number(car.kilometers || 0).toLocaleString('es-ES')} km
               </p>
@@ -120,16 +120,16 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({
           <div className="flex items-center gap-2">
             <FuelIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
-              <p className="text-muted mb-0 text-sm">Combustible</p>
+              <p className="text-muted mb-0 text-xs sm:text-sm">Combustible</p>
               <p className="text-sm font-medium sm:text-base">{car.fuel || '-'}</p>
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 space-y-4">
+        <div className="grids-cols-1 grid gap-2 space-y-1 sm:grid-cols-2 sm:gap-4 sm:space-y-4">
           <div className="flex items-center gap-2">
             <CalendarIcon className="text-muted mr-2 !h-5 !w-5" />
             <div>
-              <p className="text-muted mb-0 text-sm">Última revisión</p>
+              <p className="text-muted mb-0 text-xs sm:text-sm">Última revisión</p>
               <p className="text-sm font-medium sm:text-base">
                 {car.lastRevision ? format(new Date(car.lastRevision), 'dd/MM/yyyy') : '-'}
               </p>

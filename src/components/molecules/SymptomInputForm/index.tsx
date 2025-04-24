@@ -38,12 +38,12 @@ export default function SymptomInputForm({
 
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white shadow-sm">
-      <div className="p-6">
-        <h2 className="mb-3 text-xl font-semibold">Síntomas y Observaciones</h2>
+      <div className="p-4 sm:p-6">
+        <h2 className="text-md mb-2 font-semibold sm:mb-3 sm:text-xl">Síntomas y Observaciones</h2>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <p className="text-md text-gray-800">Describe los síntomas que presenta el vehículo</p>
+            <p className="sm:text-md text-sm">Describe los síntomas que presenta el vehículo</p>
             <VoiceTextInput
               placeholder="Síntomas..."
               className="min-h-[120px]"
@@ -76,7 +76,7 @@ export default function SymptomInputForm({
 
             {showNotes && (
               <div className="mt-4 space-y-2">
-                <p className="text-base font-medium">Notas Adicionales</p>
+                <p className="text-sm font-medium sm:text-base">Notas Adicionales</p>
                 <VoiceTextInput
                   placeholder="Añade cualquier información adicional relevante..."
                   className="min-h-[100px]"

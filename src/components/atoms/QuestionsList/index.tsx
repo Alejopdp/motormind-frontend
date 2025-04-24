@@ -35,7 +35,7 @@ export const QuestionsList = ({
       <div className="pb-3">
         <div className="flex items-center gap-2">
           <ClipboardListIcon className="text-primary h-5 w-5" />
-          <p className="text-lg font-medium">{title}</p>
+          <p className="text-md font-medium sm:text-lg">{title}</p>
         </div>
       </div>
 
@@ -47,7 +47,7 @@ export const QuestionsList = ({
         ) : (
           <ul className="space-y-3 pl-1">
             {questions.map((question, index) => (
-              <li key={`question-${index}`} className="flex gap-2 text-gray-800">
+              <li key={`question-${index}`} className="flex gap-2 text-sm sm:text-base">
                 <span className="text-primary min-w-[24px] font-medium">{index + 1}.</span>
                 <span>{question}</span>
               </li>

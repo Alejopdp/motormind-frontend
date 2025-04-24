@@ -52,7 +52,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
   ];
 
   const renderNavItems = () => (
-    <nav className="flex-1 space-y-1">
+    <nav className="flex-1 sm:space-y-1">
       {navItems.map((item) => {
         const isActive =
           (item.href === '/' && currentPath === '/') ||
@@ -65,7 +65,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
             to={item.href}
             onClick={() => setIsMobileMenuOpen(false)}
             className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+              'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors sm:gap-3 sm:font-medium',
               isActive
                 ? 'bg-primary text-primary-foreground'
                 : 'hover:bg-primary hover:text-primary-foreground',
@@ -80,8 +80,8 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
   );
 
   const renderUserSection = () => (
-    <div className="mt-auto border-t border-gray-200 pt-2 sm:pt-4">
-      <div className="flex items-center gap-3 px-3 py-2 sm:py-3">
+    <div className="mt-auto border-t border-gray-200 pt-2">
+      <div className="flex items-center gap-1.5 px-1 py-2 sm:gap-3 sm:px-3 sm:py-3">
         <Avatar>
           <AvatarImage alt={user?.name || 'Unknown'} />
           <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
@@ -92,7 +92,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
         </div>
       </div>
 
-      <div className="flex px-2 sm:mt-2">
+      <div className="flex flex-col gap-2 sm:mt-2 sm:flex-row">
         {(user.role === UserRole.ADMIN || user.role === UserRole.SUPER_ADMIN) && (
           <Link
             to="/configuration"
@@ -125,12 +125,12 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
             </Button>
           </DialogTrigger>
           <DialogContent className="sidebar-dialog fixed top-0 left-0 h-full w-[280px] translate-x-0 translate-y-0 p-0">
-            <div className="bg-background flex h-full flex-col px-3 py-4">
-              <div className="mb-8 flex items-center gap-2 px-3">
-                <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-md">
-                  <CarIcon className="h-6 w-6 text-white" />
+            <div className="bg-background flex h-full flex-col px-3 py-6 sm:py-4">
+              <div className="mb-6 flex items-center gap-2 px-1 sm:mb-8">
+                <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-md sm:h-10 sm:w-10">
+                  <CarIcon className="h-5 w-5 text-white sm:h-6 sm:w-6" />
                 </div>
-                <span className="text-xl font-semibold">Motormind</span>
+                <span className="text-lg font-semibold sm:text-xl">Motormind</span>
               </div>
               {renderNavItems()}
               {renderUserSection()}
