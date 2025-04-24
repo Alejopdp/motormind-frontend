@@ -206,24 +206,22 @@ export const CreateDiagnosticModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg sm:min-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg sm:min-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            Crear Nuevo {createOnly ? 'Vehículo' : 'Diagnóstico'}
-          </DialogTitle>
-          <DialogDescription className="text-gray-500">
+          <DialogTitle>Crear Nuevo {createOnly ? 'Vehículo' : 'Diagnóstico'}</DialogTitle>
+          <DialogDescription className="text-muted">
             {isManualMode
               ? 'Introduce los datos del vehículo manualmente'
               : 'Introduce los datos del vehículo para iniciar un nuevo diagnóstico.'}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-5">
           {isManualMode ? (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2 py-0 sm:gap-4 sm:py-4">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
                 <div>
-                  <p className="text-sm font-medium">
+                  <p className="mb-0.5 text-xs font-medium sm:text-sm">
                     Marca <span className="text-red-500">*</span>
                   </p>
                   <Input
@@ -238,7 +236,7 @@ export const CreateDiagnosticModal = ({
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium">
+                  <p className="mb-0.5 text-xs font-medium sm:text-sm">
                     Modelo <span className="text-red-500">*</span>
                   </p>
                   <Input
@@ -251,9 +249,9 @@ export const CreateDiagnosticModal = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
                 <div>
-                  <p className="text-sm font-medium">
+                  <p className="mb-0.5 text-xs font-medium sm:text-sm">
                     Año <span className="text-red-500">*</span>
                   </p>
                   <Input
@@ -276,7 +274,7 @@ export const CreateDiagnosticModal = ({
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium">Matrícula</p>
+                  <p className="mb-0.5 text-xs font-medium sm:text-sm">Matrícula</p>
                   <div>
                     <div className="relative">
                       <Input
@@ -313,9 +311,9 @@ export const CreateDiagnosticModal = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
                 <div>
-                  <p className="text-sm font-medium">VIN</p>
+                  <p className="mb-0.5 text-xs font-medium sm:text-sm">VIN</p>
                   <div>
                     <div className="relative">
                       <Input
@@ -352,7 +350,7 @@ export const CreateDiagnosticModal = ({
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium">KMs</p>
+                  <p className="mb-0.5 text-xs font-medium sm:text-sm">KMs</p>
                   <Input
                     id="kilometers"
                     value={manualData.kilometers}
@@ -367,9 +365,9 @@ export const CreateDiagnosticModal = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
                 <div>
-                  <p className="text-sm font-medium">Combustible</p>
+                  <p className="mb-0.5 text-xs font-medium sm:text-sm">Combustible</p>
                   <Select
                     value={manualData.fuel}
                     onValueChange={(value) => handleManualInputChange('fuel', value)}
@@ -388,7 +386,7 @@ export const CreateDiagnosticModal = ({
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium">Última revisión</p>
+                  <p className="mb-0.5 text-xs font-medium sm:text-sm">Última revisión</p>
 
                   <Calendar
                     value={
@@ -417,7 +415,7 @@ export const CreateDiagnosticModal = ({
                   onClick={handleBackToSearch}
                 >
                   <ArrowLeftIcon className="h-4 w-4" />
-                  Volver a búsqueda por matrícula o VIN
+                  Volver <span className="hidden sm:inline">a búsqueda por matrícula o VIN</span>
                 </Button>
               </div>
             </div>
@@ -475,7 +473,9 @@ export const CreateDiagnosticModal = ({
                 </TabsContent>
                 <TabsContent value="vin" className="mt-4">
                   <div>
-                    <p className="text-sm font-medium">Número de Bastidor (VIN)</p>
+                    <p className="mb-0.5 text-xs font-medium sm:text-sm">
+                      Número de Bastidor (VIN)
+                    </p>
                     <div className="relative">
                       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                         <HashIcon className="mb-0.5 h-5 w-5 text-gray-400" />
@@ -519,7 +519,7 @@ export const CreateDiagnosticModal = ({
                 <Button
                   type="button"
                   variant="ghost"
-                  className="text-primary text-sm"
+                  className="text-primary"
                   onClick={handleCreateManually}
                 >
                   <PlusIcon className="h-4 w-4" />O crear manualmente

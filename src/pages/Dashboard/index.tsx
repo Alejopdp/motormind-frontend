@@ -48,11 +48,11 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        <div className="p-2 sm:p-4">
+        <div className="mt-12 p-2 sm:mt-0 sm:px-4">
           <div className="m-2 sm:m-4">
             <div className="mb-3 flex items-center justify-between sm:mb-4">
               <h2 className="text-base font-bold sm:text-lg lg:text-xl">Diagnósticos Recientes</h2>
-              <Link to="/diagnoses" className="text-primary text-sm font-medium sm:text-base">
+              <Link to="/diagnoses" className="text-primary text-sm sm:text-base sm:font-medium">
                 Ver todos
               </Link>
             </div>

@@ -155,7 +155,7 @@ const CarDetails = () => {
           )
         }
       />
-      <div className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-4xl space-y-4 px-4 py-3 sm:space-y-6 sm:px-6 sm:py-6">
         <VehicleInformation
           car={car}
           editMode={step === 'carDetails'}

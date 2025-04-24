@@ -90,10 +90,10 @@ export const DiagnosticListItem = ({
       </div>
 
       <div className="mb-3">
-        <p className="mb-1 text-xs text-gray-500 sm:text-sm">Problemas detectados:</p>
+        <p className="mb-1 text-xs sm:text-sm">Problemas detectados:</p>
         <ul className="space-y-1">
           {problems.map((problem, index) => (
-            <li key={index} className="flex items-start">
+            <li key={index} className="text-muted flex items-start">
               <span className="mr-2 text-xs sm:text-sm">•</span>
               <span className="text-xs sm:text-sm">{problem}</span>
             </li>

@@ -28,12 +28,12 @@ export const TechnicanObservationsInputForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white shadow-sm">
-      <div className="p-6">
-        <h2 className="mb-3 text-xl font-semibold">Observaciones Detalladas</h2>
+      <div className="p-4 sm:p-6">
+        <h2 className="text-md mb-3 font-semibold sm:text-xl">Observaciones Detalladas</h2>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <p className="text-md pl-1 text-gray-800">
+            <p className="sm:text-md pl-1 text-sm">
               Añade tus observaciones detalladas sobre las respuestas a las preguntas anteriores y
               cualquier otra información relevante.
             </p>
@@ -55,13 +55,21 @@ export const TechnicanObservationsInputForm = ({
           variant="outline"
           onClick={onGenerateMoreQuestions}
         >
-          {isLoadingMoreQuestions ? 'Generando...' : 'Generar Más Preguntas'}
+          <span className="sm:hidden">{isLoadingMoreQuestions ? 'Generando...' : 'Generar +'}</span>
+          <span className="hidden sm:inline">
+            {isLoadingMoreQuestions ? 'Generando...' : 'Generar Más Preguntas'}
+          </span>
         </Button>
         <Button
           disabled={isLoadingMoreQuestions || isLoadingDiagnosis || details.length === 0}
           type="submit"
         >
-          {isLoadingDiagnosis ? 'Generando Informe...' : 'Crear Informe Preliminar'}
+          <span className="sm:hidden">
+            {isLoadingDiagnosis ? 'Generando...' : 'Crear Informe Pre.'}
+          </span>
+          <span className="hidden sm:inline">
+            {isLoadingDiagnosis ? 'Generando...' : 'Crear Informe Preliminar'}
+          </span>
         </Button>
       </div>
     </form>

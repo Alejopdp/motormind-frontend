@@ -159,16 +159,18 @@ export const EditVehicleModal = ({ open, onOpenChange, car }: EditVehicleModalPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg sm:min-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Editar información del vehículo</DialogTitle>
+          <DialogTitle className="text-lg font-bold sm:text-xl">
+            Editar información <span className="hidden sm:inline">del vehículo</span>
+          </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-5">
+          <div className="grid gap-2 py-0 sm:gap-4 sm:py-4">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
               <div>
-                <p className="text-sm font-medium">
+                <p className="mb-0.5 text-xs font-medium sm:text-sm">
                   Marca <span className="text-red-500">*</span>
                 </p>
                 <Input
@@ -183,7 +185,7 @@ export const EditVehicleModal = ({ open, onOpenChange, car }: EditVehicleModalPr
               </div>
 
               <div>
-                <p className="text-sm font-medium">
+                <p className="mb-0.5 text-xs font-medium sm:text-sm">
                   Modelo <span className="text-red-500">*</span>
                 </p>
                 <Input
@@ -196,9 +198,9 @@ export const EditVehicleModal = ({ open, onOpenChange, car }: EditVehicleModalPr
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
               <div>
-                <p className="text-sm font-medium">
+                <p className="mb-0.5 text-xs font-medium sm:text-sm">
                   Año <span className="text-red-500">*</span>
                 </p>
                 <Input
@@ -221,7 +223,7 @@ export const EditVehicleModal = ({ open, onOpenChange, car }: EditVehicleModalPr
               </div>
 
               <div>
-                <p className="text-sm font-medium">Matrícula</p>
+                <p className="mb-0.5 text-xs font-medium sm:text-sm">Matrícula</p>
                 <div>
                   <div className="relative">
                     <Input
@@ -259,7 +261,7 @@ export const EditVehicleModal = ({ open, onOpenChange, car }: EditVehicleModalPr
             </div>
 
             <div>
-              <p className="text-sm font-medium">VIN</p>
+              <p className="mb-0.5 text-xs font-medium sm:text-sm">VIN</p>
               <div>
                 <div className="relative">
                   <Input
@@ -295,9 +297,9 @@ export const EditVehicleModal = ({ open, onOpenChange, car }: EditVehicleModalPr
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
               <div>
-                <p className="text-sm font-medium">KMs</p>
+                <p className="mb-0.5 text-xs font-medium sm:text-sm">KMs</p>
                 <Input
                   id="kilometers"
                   value={carData.kilometers}
@@ -312,7 +314,7 @@ export const EditVehicleModal = ({ open, onOpenChange, car }: EditVehicleModalPr
               </div>
 
               <div>
-                <p className="text-sm font-medium">Combustible</p>
+                <p className="mb-0.5 text-xs font-medium sm:text-sm">Combustible</p>
                 <Select
                   value={carData.fuel}
                   onValueChange={(value) => handleInputChange('fuel', value)}
@@ -332,7 +334,7 @@ export const EditVehicleModal = ({ open, onOpenChange, car }: EditVehicleModalPr
             </div>
 
             <div>
-              <p className="text-sm font-medium">Última revisión</p>
+              <p className="mb-0.5 text-xs font-medium sm:text-sm">Última revisión</p>
               <Calendar
                 value={carData.lastRevision ? new Date(carData.lastRevision) : null}
                 onChange={(date) =>
@@ -356,7 +358,11 @@ export const EditVehicleModal = ({ open, onOpenChange, car }: EditVehicleModalPr
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isSubmitDisabled || updateCarMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={isSubmitDisabled || updateCarMutation.isPending}
+              className="mt-3 sm:mt-0"
+            >
               {updateCarMutation.isPending ? 'Guardando...' : 'Guardar cambios'}
             </Button>
           </DialogFooter>

@@ -44,8 +44,8 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
   }, [carId, queryClient]);
 
   return (
-    <div className="mt-4 rounded-lg bg-white p-6 shadow-sm">
-      <h3 className="mb-4 text-xl font-bold">Historial de Averías Reciente</h3>
+    <div className="mt-4 rounded-lg bg-white p-4 shadow-sm sm:p-6">
+      <h3 className="mb-4 text-lg font-bold sm:text-xl">Historial de Averías Reciente</h3>
 
       {isLoadingDiagnoses ? (
         <div className="flex items-center justify-center">
@@ -58,7 +58,9 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
               <div className="mb-4 rounded-full bg-gray-100 p-3">
                 <AlertCircleIcon className="text-muted h-8 w-8" />
               </div>
-              <p className="text-muted">Este vehículo no tiene historial de averías registrado.</p>
+              <p className="text-muted text-sm sm:text-base">
+                Este vehículo no tiene historial de averías registrado.
+              </p>
             </div>
           )}
           {diagnoses
@@ -84,20 +86,20 @@ const FaultsHistoryItem = ({ diagnosis, index }: { diagnosis: Diagnosis; index: 
       key={diagnosis._id}
       className={`border-b last:border-b-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} transition-colors duration-200 hover:bg-[#EAF2FD]`}
     >
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         <div className="flex items-center justify-between">
-          <p className="text-muted text-sm">
+          <p className="text-muted text-xs sm:text-sm">
             Fecha: {formatToddmmyyyy(new Date(diagnosis.createdAt))}
           </p>
           <Link
             to={`/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
           >
-            <Button variant="link" size="sm">
+            <Button variant="link" size="sm" className="p-0">
               Ver Detalles
             </Button>
           </Link>
         </div>
-        <p className="font-medium">{diagnosis.fault}</p>
+        <p className="text-sm font-medium sm:text-base">{diagnosis.fault}</p>
       </div>
     </div>
   );
