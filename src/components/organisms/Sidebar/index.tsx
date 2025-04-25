@@ -6,6 +6,7 @@ import {
   SettingsIcon,
   LogOutIcon,
   MenuIcon,
+  SearchIcon,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -25,6 +26,7 @@ interface NavItem {
   icon: React.ElementType;
   label: string;
   href: string;
+  roles?: UserRole[];
 }
 
 export const Sidebar = ({ className }: SidebarNavigationProps) => {
@@ -49,33 +51,42 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
       label: 'Diagnósticos',
       href: '/diagnoses',
     },
+    {
+      icon: SearchIcon,
+      label: 'Evaluaciones',
+      href: '/audit/evaluations',
+      roles: [UserRole.SUPER_ADMIN],
+    },
   ];
 
   const renderNavItems = () => (
     <nav className="flex-1 sm:space-y-1">
-      {navItems.map((item) => {
-        const isActive =
-          (item.href === '/' && currentPath === '/') ||
-          (item.href === '/cars' && currentPath === '/cars') ||
-          (item.href === '/diagnoses' && currentPath === '/diagnoses');
+      {navItems
+        .filter((item) => !item.roles || item.roles.includes(user.role))
+        .map((item) => {
+          const isActive =
+            (item.href === '/' && currentPath === '/') ||
+            (item.href === '/cars' && currentPath === '/cars') ||
+            (item.href === '/diagnoses' && currentPath === '/diagnoses') ||
+            (item.href === '/audit/evaluations' && currentPath.startsWith('/audit/evaluations'));
 
-        return (
-          <Link
-            key={item.label}
-            to={item.href}
-            onClick={() => setIsMobileMenuOpen(false)}
-            className={cn(
-              'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors sm:gap-3 sm:font-medium',
-              isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'hover:bg-primary hover:text-primary-foreground',
-            )}
-          >
-            <item.icon className="h-5 w-5" />
-            {item.label}
-          </Link>
-        );
-      })}
+          return (
+            <Link
+              key={item.label}
+              to={item.href}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={cn(
+                'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors sm:gap-3 sm:font-medium',
+                isActive
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-primary hover:text-primary-foreground',
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              {item.label}
+            </Link>
+          );
+        })}
     </nav>
   );
 
