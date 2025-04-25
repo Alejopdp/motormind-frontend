@@ -75,15 +75,38 @@ export type AiDiagnosisEvaluation = {
   _id: string;
   diagnosisId: string | { _id: string } | Diagnosis;
   carId: string | { _id: string };
-  stage: 'preliminary' | 'final';
+  phase: 'RECEPTION' | 'PRELIMINARY_DIAGNOSIS' | 'FINAL_REPORT';
+  evaluatorModel: string;
+  evaluatedModel?: string;
   scores: {
-    accuracy: number;
-    clarity: number;
-    usefulness: number;
-    toolsCoverage: number;
-    symptomMatch: number;
+    scoreStrictFormat: number;
+    scoreClarityProfessionalism: number;
+    scoreAntiHallucinationPrecision: number;
+
+    scoreQuestionRelevance?: number | null;
+    scoreQuestionPrioritization?: number | null;
+    scoreQuestionCount?: number | null;
+
+    scoreHypothesisAccuracy?: number | null;
+    scoreReasoningQuality?: number | null;
+    scoreVerificationStepsQuality?: number | null;
+
+    scoreRepairPlan?: number | null;
+    scorePartsList?: number | null;
+    scoreBudget?: number | null;
+    scoreAlternativeFailuresConclusion?: number | null;
+
+    scoreGlobalAverage: number;
   };
   comment: string;
+  detailedEvaluation: {
+    strengths: string[];
+    weaknesses: string[];
+    scoreJustification: string;
+    improvementSuggestions: string[];
+    criticalErrorsDetected: string[];
+  };
   createdAt: Date;
+  updatedAt: Date;
   diagnosis?: Diagnosis;
 };
