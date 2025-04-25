@@ -74,17 +74,17 @@ class ApiService {
 
   // Métodos específicos para evaluaciones de diagnósticos
   async getDiagnosisEvaluations(): Promise<{ evaluations: AiDiagnosisEvaluation[]; total: number }> {
-    const response = await this.get<{ evaluations: AiDiagnosisEvaluation[]; total: number }>(`/audit/evaluations`);
+    const response = await this.get<{ evaluations: AiDiagnosisEvaluation[]; total: number }>(`/audits/evaluations`);
     return response.data;
   }
 
   async getDiagnosisEvaluationById(id: string): Promise<AiDiagnosisEvaluation> {
-    const response = await this.get<AiDiagnosisEvaluation>(`/audit/evaluations/${id}`);
+    const response = await this.get<AiDiagnosisEvaluation>(`/audits/evaluations/${id}`);
     return response.data;
   }
 
   async getDiagnosisEvaluationsByDiagnosisId(diagnosisId: string): Promise<AiDiagnosisEvaluation[]> {
-    const response = await this.get<AiDiagnosisEvaluation[]>(`/audit/evaluations/diagnosis/${diagnosisId}`);
+    const response = await this.get<AiDiagnosisEvaluation[]>(`/audits/evaluations/diagnosis/${diagnosisId}`);
     return response.data;
   }
 }
