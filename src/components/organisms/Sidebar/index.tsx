@@ -54,7 +54,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
     {
       icon: SearchIcon,
       label: 'Evaluaciones',
-      href: '/audit/evaluations',
+      href: '/audits/evaluations',
       roles: [UserRole.SUPER_ADMIN],
     },
   ];
@@ -68,7 +68,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
             (item.href === '/' && currentPath === '/') ||
             (item.href === '/cars' && currentPath === '/cars') ||
             (item.href === '/diagnoses' && currentPath === '/diagnoses') ||
-            (item.href === '/audit/evaluations' && currentPath.startsWith('/audit/evaluations'));
+            (item.href === '/audits/evaluations' && currentPath.startsWith('/audits/evaluations'));
 
           return (
             <Link

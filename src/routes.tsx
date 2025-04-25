@@ -48,7 +48,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/audit/evaluations',
+        path: '/audits/evaluations',
         element: (
           <ErrorBoundary>
             <AiEvaluations />
@@ -56,7 +56,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/audit/evaluations/:evaluationId',
+        path: '/audits/evaluations/:evaluationId',
         element: (
           <ErrorBoundary>
             <AiEvaluationDetails />

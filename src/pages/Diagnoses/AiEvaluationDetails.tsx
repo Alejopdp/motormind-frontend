@@ -12,7 +12,7 @@ const AiEvaluationDetails: React.FC = () => {
   const navigate = useNavigate();
   const { execute: getEvaluation } = useApi<AiDiagnosisEvaluation>(
     'get',
-    '/audit/evaluations/:evaluationId',
+    '/audits/evaluations/:evaluationId',
   );
 
   const {

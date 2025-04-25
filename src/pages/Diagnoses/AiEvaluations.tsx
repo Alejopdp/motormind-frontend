@@ -183,7 +183,7 @@ const AiEvaluations = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
-                        onClick={() => navigate(`/audit/evaluations/${evaluation._id}`)}
+                        onClick={() => navigate(`/audits/evaluations/${evaluation._id}`)}
                         className="inline-flex cursor-pointer items-center rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                       >
                         <svg
