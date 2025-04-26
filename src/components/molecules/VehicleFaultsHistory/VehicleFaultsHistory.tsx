@@ -2,12 +2,10 @@ import Spinner from '@/components/atoms/Spinner';
 import { Diagnosis } from '@/types/Diagnosis';
 import { useApi } from '@/hooks/useApi';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { formatToddmmyyyy } from '@/utils';
 import { enqueueSnackbar } from 'notistack';
 import { useEffect } from 'react';
 import { AlertCircleIcon } from 'lucide-react';
-import { Button } from '@/components/atoms/Button';
-import { Link } from 'react-router-dom';
+import { FaultsHistoryItem } from './FaultsHistoryItem';
 
 const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
   const queryClient = useQueryClient();

@@ -15,7 +15,7 @@ import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
 import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, SaveIcon } from 'lucide-react';
-
+import { useSymptom } from '@/hooks/useSymptom';
 const PreliminaryDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
@@ -46,6 +46,7 @@ const PreliminaryDiagnosis = () => {
     retry: false,
   });
 
+  const { symptom } = useSymptom(diagnosis);
   const { mutate: createFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
     mutationFn: async ({ observations }: { observations: string }) => {
       const response = await createFinalReportRequest({ technicalNotes: observations }, undefined, {
@@ -105,7 +106,7 @@ const PreliminaryDiagnosis = () => {
       />
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
-        <DiagnosticContextSection symptoms={diagnosis.fault} notes={diagnosis.notes} />
+        <DiagnosticContextSection symptoms={symptom} notes={diagnosis.notes} />
 
         {/* AI Detected Faults */}
         <div className="space-y-2 sm:space-y-4">

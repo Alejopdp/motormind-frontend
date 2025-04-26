@@ -4,6 +4,12 @@ export type Diagnosis = {
   fault: string;
   notes: string;
   questions: string[];
+  processedFault: {
+    symptomCleaned: string;
+    category: string;
+    potentialObdCodes: string[];
+    notes: string;
+  };
   preliminary: {
     possibleReasons: {
       title: string;
