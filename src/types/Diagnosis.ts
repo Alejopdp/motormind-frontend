@@ -3,6 +3,7 @@ export type Diagnosis = {
   carId: string;
   fault: string;
   notes: string;
+  questions: string[];
   preliminary: {
     possibleReasons: {
       title: string;

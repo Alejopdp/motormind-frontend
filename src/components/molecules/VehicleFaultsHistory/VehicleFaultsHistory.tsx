@@ -81,6 +81,17 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
 export default VehicleFaultsHistory;
 
 const FaultsHistoryItem = ({ diagnosis, index }: { diagnosis: Diagnosis; index: number }) => {
+  const getDiagnosisPath = () => {
+    if (!diagnosis.preliminary) {
+      return `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/questions`;
+    } else if (diagnosis.preliminary && !diagnosis.diagnosis) {
+      return `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}`;
+    } else if (diagnosis.diagnosis) {
+      return `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/final-report`;
+    }
+    return `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}`;
+  };
+
   return (
     <div
       key={diagnosis._id}
@@ -92,9 +103,7 @@ const FaultsHistoryItem = ({ diagnosis, index }: { diagnosis: Diagnosis; index: 
             Fecha:{' '}
             {diagnosis.createdAt ? formatToddmmyyyy(new Date(diagnosis.createdAt)) || '-' : '-'}
           </p>
-          <Link
-            to={`/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
-          >
+          <Link to={getDiagnosisPath()}>
             <Button variant="link" size="sm" className="p-0">
               Ver Detalles
             </Button>

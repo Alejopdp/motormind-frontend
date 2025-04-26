@@ -21,13 +21,13 @@ export const QuestionsList = ({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="relative h-full min-h-[200px]">
         {isLoading ? (
-          <div className="flex justify-center py-4">
-            <Spinner label="Generando preguntas..." />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Spinner />
           </div>
         ) : (
-          <ul className="space-y-3 pl-1">
+          <ul className="h-full space-y-3 pl-1">
             {questions.map((question, index) => (
               <li key={`question-${index}`} className="flex gap-2 text-sm sm:text-base">
                 <span className="text-primary min-w-[24px] font-medium">{index + 1}.</span>
