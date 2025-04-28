@@ -2,23 +2,25 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AlertCircle, ArrowLeftIcon, SaveIcon, Share2Icon, StarIcon } from 'lucide-react';
 
-import { Button } from '@/components/atoms/Button';
-import Spinner from '@/components/atoms/Spinner';
-import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
-import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
-import { VoiceTextInput } from '@/components/VoiceTextInput';
 import { useApi } from '@/hooks/useApi';
 import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
-import { AlertCircle, ArrowLeftIcon, SaveIcon, Share2Icon, StarIcon } from 'lucide-react';
+import { DiagnosisRating } from '@/types/DiagnosisRating';
+import Spinner from '@/components/atoms/Spinner';
+import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
+import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
+import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
+import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';
+import { VoiceTextInput } from '@/components/VoiceTextInput';
+import { Button } from '@/components/atoms/Button';
 import { AlternativeFailures } from './AlternativeFailures';
 import { Conclusion } from './Conclusion';
-import { EstimatedResources } from './EstimatedResources';
 import { PrimaryRepairSection } from './PrimaryRepairSection';
-import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';
-import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
+import { EstimatedResources } from './EstimatedResources';
 import { useSymptom } from '@/hooks/useSymptom';
+
 const FinalReport = () => {
   const params = useParams();
   const navigate = useNavigate();
@@ -30,6 +32,7 @@ const FinalReport = () => {
     'put',
     '/cars/:carId/diagnosis/:diagnosisId',
   );
+  const { execute: createDiagnosisRating } = useApi<DiagnosisRating>('post', '/diagnosis-ratings');
 
   useEffect(() => {
     return () => {
@@ -69,7 +72,6 @@ const FinalReport = () => {
       finalNotes?: string;
       ratingNotes?: string;
       wasUseful?: boolean;
-      callback?: () => void;
     }) => {
       const response = await updateFinalReportRequest(
         { finalNotes, ratingNotes, wasUseful },
@@ -81,23 +83,9 @@ const FinalReport = () => {
       );
       return response.data;
     },
-    onSuccess: (_, { finalNotes, wasUseful, callback }) => {
-      if (finalNotes) {
-        enqueueSnackbar('Diagnóstico final actualizado correctamente', { variant: 'success' });
-        if (diagnosis.wasUseful === undefined) setIsRatingModalOpen(true);
-      }
-
-      if (wasUseful !== undefined) {
-        callback?.();
-        enqueueSnackbar('Valoración enviada, Muchas gracias!', { variant: 'success' });
-        queryClient.setQueryData(['getDiagnosisById', params.diagnosisId], {
-          data: {
-            ...diagnosis,
-            wasUseful,
-          },
-        });
-        setIsRatingModalOpen(false);
-      }
+    onSuccess: () => {
+      enqueueSnackbar('Diagnóstico final actualizado correctamente', { variant: 'success' });
+      if (diagnosis.wasUseful === undefined) setIsRatingModalOpen(true);
     },
     onError: () => {
       enqueueSnackbar('Error al guardar. Por favor, inténtalo de nuevo.', {
@@ -105,6 +93,23 @@ const FinalReport = () => {
       });
     },
   });
+
+  const { mutate: createDiagnosisRatingMutation, isPending: isLoadingDiagnosisRating } =
+    useMutation({
+      mutationFn: async (data: DiagnosisRating) => {
+        const response = await createDiagnosisRating(data);
+        return response.data;
+      },
+      onSuccess: () => {
+        enqueueSnackbar('Valoración enviada, Muchas gracias!', { variant: 'success' });
+        setIsRatingModalOpen(false);
+      },
+      onError: () => {
+        enqueueSnackbar('Error al guardar la valoración. Por favor, inténtalo de nuevo.', {
+          variant: 'error',
+        });
+      },
+    });
 
   if (isLoadingDiagnosis)
     return (
@@ -137,8 +142,12 @@ const FinalReport = () => {
     enqueueSnackbar('URL del informe copiado', { variant: 'success' });
   };
 
-  const handleRatingSubmit = (wasUseful: boolean, ratingNotes: string, callback: () => void) => {
-    updateFinalReportMutation({ ratingNotes, wasUseful, callback });
+  const handleRatingSubmit = (wasUseful: boolean, ratingNotes: string) => {
+    createDiagnosisRatingMutation({
+      diagnosisId: params.diagnosisId as string,
+      notes: ratingNotes,
+      wasUseful,
+    });
   };
 
   return (
@@ -222,7 +231,7 @@ const FinalReport = () => {
         isOpen={isRatingModalOpen}
         onClose={() => setIsRatingModalOpen(false)}
         onSubmit={handleRatingSubmit}
-        isLoading={isLoadingFinalReport}
+        isLoading={isLoadingDiagnosisRating}
       />
     </div>
   );
