@@ -3,6 +3,13 @@ export type Diagnosis = {
   carId: string;
   fault: string;
   notes: string;
+  questions: string[];
+  processedFault: {
+    symptomCleaned: string;
+    category: string;
+    potentialObdCodes: string[];
+    notes: string;
+  };
   preliminary: {
     possibleReasons: {
       title: string;
@@ -60,13 +67,53 @@ export type Diagnosis = {
     brand: string;
     plate: string;
     vinCode: string;
-    mechanicId: string;
+    workshopId: string;
     kilometers: number;
     fuel: string;
     lastRevision: Date;
   };
-  mechanic?: {
+  createdBy?: {
     name: string;
     avatar?: string;
   };
+};
+
+export type AiDiagnosisEvaluation = {
+  _id: string;
+  diagnosisId: string | { _id: string } | Diagnosis;
+  carId: string | { _id: string };
+  phase: 'RECEPTION' | 'PRELIMINARY_DIAGNOSIS' | 'FINAL_REPORT';
+  evaluatorModel: string;
+  evaluatedModel?: string;
+  scores: {
+    scoreStrictFormat: number;
+    scoreClarityProfessionalism: number;
+    scoreAntiHallucinationPrecision: number;
+
+    scoreQuestionRelevance?: number | null;
+    scoreQuestionPrioritization?: number | null;
+    scoreQuestionCount?: number | null;
+
+    scoreHypothesisAccuracy?: number | null;
+    scoreReasoningQuality?: number | null;
+    scoreVerificationStepsQuality?: number | null;
+
+    scoreRepairPlan?: number | null;
+    scorePartsList?: number | null;
+    scoreBudget?: number | null;
+    scoreAlternativeFailuresConclusion?: number | null;
+
+    scoreGlobalAverage: number;
+  };
+  comment: string;
+  detailedEvaluation: {
+    strengths: string[];
+    weaknesses: string[];
+    scoreJustification: string;
+    improvementSuggestions: string[];
+    criticalErrorsDetected: string[];
+  };
+  createdAt: Date;
+  updatedAt: Date;
+  diagnosis?: Diagnosis;
 };

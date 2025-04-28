@@ -121,16 +121,20 @@ const Diagnoses = () => {
             </div>
           ) : diagnoses.length > 0 ? (
             <div className="space-y-4">
-              {diagnoses.map((diagnosis, index) => (
-                <DiagnosticListItem
-                  key={index}
-                  vehicle={diagnosis.car}
-                  problems={diagnosis.preliminary?.possibleReasons?.map(({ title }) => title) || []}
-                  technician={diagnosis.mechanic}
-                  timestamp={formatDate(diagnosis.createdAt)}
-                  diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
-                />
-              ))}
+              {diagnoses
+                .filter((diagnosis) => diagnosis.preliminary)
+                .map((diagnosis, index) => (
+                  <DiagnosticListItem
+                    key={index}
+                    vehicle={diagnosis.car}
+                    problems={
+                      diagnosis.preliminary?.possibleReasons?.map(({ title }) => title) || []
+                    }
+                    technician={diagnosis.createdBy}
+                    timestamp={formatDate(diagnosis.createdAt)}
+                    diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
+                  />
+                ))}
             </div>
           ) : (
             <div className="flex h-64 flex-col items-center justify-center text-center">

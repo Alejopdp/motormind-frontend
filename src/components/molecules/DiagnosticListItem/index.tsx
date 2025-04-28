@@ -5,6 +5,7 @@ import { enqueueSnackbar } from 'notistack';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/atoms/Avatar';
 import { Dropdown } from '@/components/atoms/Dropdown';
 import { cn } from '@/utils/cn';
+import { getInitials } from '@/utils';
 
 interface DiagnosticListItemProps {
   vehicle?: {
@@ -103,11 +104,15 @@ export const DiagnosticListItem = ({
 
       <div className="flex items-center justify-between border-t border-gray-100 pt-3">
         <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+          <Avatar className="h-6 w-6 sm:h-9 sm:w-9">
             <AvatarImage alt={technician?.name || 'Unknown'} />
-            <AvatarFallback>{technician?.name?.charAt(0)}</AvatarFallback>
+            <AvatarFallback>
+              {technician?.name ? getInitials(technician.name) : 'NN'}
+            </AvatarFallback>
           </Avatar>
-          <span className="text-xs font-medium sm:text-sm">{technician?.name || 'NN'}</span>
+          <span className="text-xs font-medium sm:text-sm">
+            {technician?.name || 'Sin asignar'}
+          </span>
         </div>
         <span className="text-xs text-gray-500">{timestamp}</span>
       </div>

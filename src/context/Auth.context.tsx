@@ -24,7 +24,7 @@ const AuthContext = createContext<AuthContextType>({
     email: '',
     _id: '',
     name: '',
-    mechanicId: '',
+    workshopId: '',
     role: UserRole.USER,
   },
   setUser: () => {},
@@ -40,7 +40,7 @@ export const AuthContextProvider: React.FC<PropsWithChildren> = ({ children }) =
     email: '',
     _id: '',
     name: '',
-    mechanicId: '',
+    workshopId: '',
     role: UserRole.USER,
   });
 
@@ -57,7 +57,7 @@ export const AuthContextProvider: React.FC<PropsWithChildren> = ({ children }) =
         email: '',
         _id: '',
         name: '',
-        mechanicId: '',
+        workshopId: '',
         role: UserRole.USER,
       });
       window.location.href = '/login';

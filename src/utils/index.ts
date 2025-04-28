@@ -40,3 +40,11 @@ export const parseSpanishDate = (dateString: string): Date | undefined => {
 export const capitalizeFirstLetter = (text: string) => {
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
+
+export const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map((part) => part.charAt(0))
+    .join('')
+    .toUpperCase();
+};

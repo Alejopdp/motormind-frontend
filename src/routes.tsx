@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router-dom';
 import Layout from '@/Layout';
 import Dashboard from '@/pages/Dashboard';
 import CarDetails from '@/pages/CarDetails';
+import NewDiagnosis from '@/pages/NewDiagnosis';
+import DiagnosisQuestions from '@/pages/DiagnosisQuestions';
 import Login from '@/pages/Login';
 import VerifyMagicLink from '@/pages/VerifyMagicLink';
 import Configuration from '@/pages/Configuration';
@@ -11,6 +13,8 @@ import PreliminaryDiagnosis from '@/pages/PreliminaryDiagnosis';
 import FinalReport from './pages/FinalReport';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './pages/NotFound';
+import AiEvaluations from './pages/Diagnoses/AiEvaluations';
+import AiEvaluationDetails from './pages/Diagnoses/AiEvaluationDetails';
 
 const router = createBrowserRouter([
   {
@@ -45,6 +49,22 @@ const router = createBrowserRouter([
           </ErrorBoundary>
         ),
       },
+      {
+        path: '/audits/evaluations',
+        element: (
+          <ErrorBoundary>
+            <AiEvaluations />
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/audits/evaluations/:evaluationId',
+        element: (
+          <ErrorBoundary>
+            <AiEvaluationDetails />
+          </ErrorBoundary>
+        ),
+      },
     ],
   },
   {
@@ -56,10 +76,26 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: '/cars/:carId/diagnosis/:diagnosisId/questions',
+    element: (
+      <ErrorBoundary>
+        <DiagnosisQuestions />
+      </ErrorBoundary>
+    ),
+  },
+  {
     path: '/cars/:carId/diagnosis/:diagnosisId',
     element: (
       <ErrorBoundary>
         <PreliminaryDiagnosis />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/cars/:carId/new-diagnosis',
+    element: (
+      <ErrorBoundary>
+        <NewDiagnosis />
       </ErrorBoundary>
     ),
   },

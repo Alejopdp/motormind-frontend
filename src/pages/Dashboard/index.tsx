@@ -72,16 +72,18 @@ const Dashboard = () => {
               </div>
             ) : diagnoses.length > 0 ? (
               <div className="mt-5 space-y-3 sm:mt-0 sm:space-y-4">
-                {diagnoses.map((diagnosis, index) => (
-                  <DiagnosticListItem
-                    key={index}
-                    diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
-                    vehicle={diagnosis.car}
-                    problems={diagnosis.preliminary.possibleReasons.map(({ title }) => title)}
-                    technician={diagnosis.mechanic}
-                    timestamp={formatDate(diagnosis.createdAt)}
-                  />
-                ))}
+                {diagnoses
+                  .filter((diagnosis) => diagnosis.preliminary)
+                  .map((diagnosis, index) => (
+                    <DiagnosticListItem
+                      key={index}
+                      diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
+                      vehicle={diagnosis.car}
+                      problems={diagnosis.preliminary.possibleReasons.map(({ title }) => title)}
+                      technician={diagnosis.createdBy}
+                      timestamp={formatDate(diagnosis.createdAt)}
+                    />
+                  ))}
               </div>
             ) : (
               <div className="flex h-64 flex-col items-center justify-center text-center">

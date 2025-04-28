@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@/components/atoms/Button';
@@ -15,23 +15,16 @@ import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
 import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, SaveIcon } from 'lucide-react';
-
+import { useSymptom } from '@/hooks/useSymptom';
 const PreliminaryDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [observations, setObservations] = useState('');
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: createFinalReportRequest } = useApi<Diagnosis>(
     'post',
     '/cars/:carId/diagnosis/:diagnosisId/final',
   );
-
-  useEffect(() => {
-    return () => {
-      queryClient.removeQueries({ queryKey: ['getCarById'] });
-    };
-  }, [params.carId, queryClient]);
 
   const {
     data: { data: diagnosis = {} as Diagnosis } = { data: {} as Diagnosis },
@@ -46,10 +39,14 @@ const PreliminaryDiagnosis = () => {
       return { data: response.data };
     },
     enabled: !!params.diagnosisId,
-    staleTime: 60000, // 1 minute
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     retry: false,
   });
 
+  const { symptom } = useSymptom(diagnosis);
   const { mutate: createFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
     mutationFn: async ({ observations }: { observations: string }) => {
       const response = await createFinalReportRequest({ technicalNotes: observations }, undefined, {
@@ -101,7 +98,7 @@ const PreliminaryDiagnosis = () => {
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={() => navigate(-1)}
+        onBack={() => navigate(`/cars/${params.carId}`)}
         data={{
           title: 'Informe Preliminar IA',
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,
@@ -109,7 +106,7 @@ const PreliminaryDiagnosis = () => {
       />
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
-        <DiagnosticContextSection symptoms={diagnosis.fault} notes={diagnosis.notes} />
+        <DiagnosticContextSection symptoms={symptom} notes={diagnosis.notes} />
 
         {/* AI Detected Faults */}
         <div className="space-y-2 sm:space-y-4">
@@ -121,16 +118,22 @@ const PreliminaryDiagnosis = () => {
           </div>
 
           <div className="space-y-2 sm:space-y-4">
-            {diagnosis.preliminary.possibleReasons?.map((fault, index) => (
-              <FaultCardCollapsible
-                key={index}
-                title={fault.title}
-                probability={fault.probability as ProbabilityLevel}
-                reasoning={fault.reasonDetails}
-                recommendations={fault.diagnosticRecommendations || []}
-                tools={fault.requiredTools || []}
-              />
-            ))}
+            {!diagnosis?.preliminary ? (
+              <div className="flex justify-center py-8">
+                <Spinner />
+              </div>
+            ) : (
+              diagnosis.preliminary.possibleReasons?.map((fault, index) => (
+                <FaultCardCollapsible
+                  key={index}
+                  title={fault.title}
+                  probability={fault.probability as ProbabilityLevel}
+                  reasoning={fault.reasonDetails}
+                  recommendations={fault.diagnosticRecommendations || []}
+                  tools={fault.requiredTools || []}
+                />
+              ))
+            )}
           </div>
         </div>
 
