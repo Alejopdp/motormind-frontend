@@ -2,12 +2,10 @@ import Spinner from '@/components/atoms/Spinner';
 import { Diagnosis } from '@/types/Diagnosis';
 import { useApi } from '@/hooks/useApi';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { formatToddmmyyyy } from '@/utils';
 import { enqueueSnackbar } from 'notistack';
 import { useEffect } from 'react';
 import { AlertCircleIcon } from 'lucide-react';
-import { Button } from '@/components/atoms/Button';
-import { Link } from 'react-router-dom';
+import { FaultsHistoryItem } from './FaultsHistoryItem';
 
 const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
   const queryClient = useQueryClient();
@@ -79,38 +77,3 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
 };
 
 export default VehicleFaultsHistory;
-
-const FaultsHistoryItem = ({ diagnosis, index }: { diagnosis: Diagnosis; index: number }) => {
-  const getDiagnosisPath = () => {
-    if (!diagnosis.preliminary) {
-      return `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/questions`;
-    } else if (diagnosis.preliminary && !diagnosis.diagnosis) {
-      return `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}`;
-    } else if (diagnosis.diagnosis) {
-      return `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/final-report`;
-    }
-    return `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}`;
-  };
-
-  return (
-    <div
-      key={diagnosis._id}
-      className={`border-b last:border-b-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} transition-colors duration-200 hover:bg-[#EAF2FD]`}
-    >
-      <div className="p-3 sm:p-4">
-        <div className="flex items-center justify-between">
-          <p className="text-muted text-xs sm:text-sm">
-            Fecha:{' '}
-            {diagnosis.createdAt ? formatToddmmyyyy(new Date(diagnosis.createdAt)) || '-' : '-'}
-          </p>
-          <Link to={getDiagnosisPath()}>
-            <Button variant="link" size="sm" className="p-0">
-              Ver Detalles
-            </Button>
-          </Link>
-        </div>
-        <p className="text-sm font-medium sm:text-base">{diagnosis.fault}</p>
-      </div>
-    </div>
-  );
-};

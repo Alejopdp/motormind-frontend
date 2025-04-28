@@ -18,7 +18,7 @@ import { EstimatedResources } from './EstimatedResources';
 import { PrimaryRepairSection } from './PrimaryRepairSection';
 import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';
 import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
-
+import { useSymptom } from '@/hooks/useSymptom';
 const FinalReport = () => {
   const params = useParams();
   const navigate = useNavigate();
@@ -52,6 +52,7 @@ const FinalReport = () => {
     enabled: !!params.diagnosisId,
     retry: false,
   });
+  const { symptom } = useSymptom(diagnosis);
 
   useEffect(() => {
     if (diagnosis?.finalNotes) {
@@ -152,7 +153,7 @@ const FinalReport = () => {
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
 
-        <DiagnosticContextSection symptoms={diagnosis.fault} notes={diagnosis.notes} />
+        <DiagnosticContextSection symptoms={symptom} notes={diagnosis.notes} />
 
         <PrimaryRepairSection confirmedFailures={diagnosis.diagnosis?.confirmedFailures || []} />
 
