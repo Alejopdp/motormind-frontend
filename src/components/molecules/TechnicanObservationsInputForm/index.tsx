@@ -49,17 +49,21 @@ export const TechnicanObservationsInputForm = ({
       </div>
 
       <div className="flex flex-wrap justify-end gap-3 rounded-b-lg border-t border-gray-200 bg-gray-50 px-6 py-4">
-        <Button
-          disabled={disableMoreQuestions}
-          type="button"
-          variant="outline"
-          onClick={onGenerateMoreQuestions}
-        >
-          <span className="sm:hidden">{isLoadingMoreQuestions ? 'Generando...' : 'Generar +'}</span>
-          <span className="hidden sm:inline">
-            {isLoadingMoreQuestions ? 'Generando...' : 'Generar Más Preguntas'}
-          </span>
-        </Button>
+        {!disableMoreQuestions && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onGenerateMoreQuestions}
+            disabled={isLoadingMoreQuestions}
+          >
+            <span className="sm:hidden">
+              {isLoadingMoreQuestions ? 'Generando...' : 'Generar +'}
+            </span>
+            <span className="hidden sm:inline">
+              {isLoadingMoreQuestions ? 'Generando...' : 'Generar Más Preguntas'}
+            </span>
+          </Button>
+        )}
         <Button
           disabled={isLoadingMoreQuestions || isLoadingDiagnosis || details.length === 0}
           type="submit"

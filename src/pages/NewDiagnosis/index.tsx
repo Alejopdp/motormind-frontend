@@ -1,22 +1,27 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { enqueueSnackbar } from 'notistack';
 import { AlertCircle } from 'lucide-react';
 
 import { Car } from '@/types/Car';
+import { Diagnosis } from '@/types/Diagnosis';
 import { useApi } from '@/hooks/useApi';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
-import VehicleFaultsHistory from '@/components/molecules/VehicleFaultsHistory/VehicleFaultsHistory';
+import SymptomInputForm from '@/components/molecules/SymptomInputForm';
 import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
-import { PlusIcon } from 'lucide-react';
 
-const CarDetails = () => {
+const NewDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
+  const { execute: generateQuestions } = useApi<Diagnosis>('post', '/cars/:carId/questions');
+
+  const [symptoms, setSymptoms] = useState<string>('');
+  const [notes, setNotes] = useState<string>('');
 
   useEffect(() => {
     return () => {
@@ -40,6 +45,28 @@ const CarDetails = () => {
     retry: 0,
   });
 
+  const { mutate: generateQuestionsMutation, isPending: isLoadingQuestions } = useMutation({
+    mutationFn: async ({ symptoms, notes }: { symptoms: string; notes: string }) => {
+      const response = await generateQuestions(
+        {
+          fault: symptoms,
+          notes,
+        },
+        undefined,
+        { carId: params.carId as string },
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      navigate(`/cars/${params.carId}/diagnosis/${data._id}/questions`);
+    },
+    onError: () => {
+      enqueueSnackbar('Error al generar las preguntas. Por favor, inténtalo de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
+
   if (isLoadingCar)
     return (
       <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
@@ -61,27 +88,32 @@ const CarDetails = () => {
     );
   }
 
+  const generateDiagnosisQuestions = ({ symptoms, notes }: { symptoms: string; notes: string }) => {
+    setSymptoms(symptoms);
+    setNotes(notes);
+    generateQuestionsMutation({ symptoms, notes });
+  };
+
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={() => navigate('/cars')}
+        onBack={() => navigate(`/cars/${params.carId}`)}
         data={{
-          title: 'Detalles del Vehículo',
+          title: 'Nuevo diagnóstico',
           description: `Matricula: ${car.plate || car.vinCode}`,
         }}
-        headerActions={
-          <Button onClick={() => navigate(`/cars/${params.carId}/new-diagnosis`)}>
-            <PlusIcon className="!h-5 !w-5" />
-            <span className="hidden sm:inline">Nuevo diagnóstico</span>
-          </Button>
-        }
       />
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-3 sm:space-y-6 sm:px-6 sm:py-6">
-        <VehicleInformation car={car} editMode={true} minimized={false} />
-        <VehicleFaultsHistory carId={params.carId as string} />
+        <VehicleInformation car={car} editMode={false} minimized={true} />
+        <SymptomInputForm
+          initialSymptoms={symptoms}
+          initialNotes={notes}
+          onSubmit={generateDiagnosisQuestions}
+          isLoading={isLoadingQuestions}
+        />
       </div>
     </div>
   );
 };
 
-export default CarDetails;
+export default NewDiagnosis;
