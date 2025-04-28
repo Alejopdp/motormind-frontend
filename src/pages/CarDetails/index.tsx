@@ -17,11 +17,6 @@ const CarDetails = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
-  const { execute: generateQuestions } = useApi<{ questions: string[]; processedFault: string }>(
-    'post',
-    '/cars/:carId/questions',
-  );
-  const { execute: createDiagnosisRequest } = useApi<Diagnosis>('post', '/cars/:carId/diagnosis');
 
   useEffect(() => {
     return () => {
@@ -43,56 +38,6 @@ const CarDetails = () => {
     },
     staleTime: 60000, // 1 minute
     retry: 0,
-  });
-
-  const { mutate: generateQuestionsMutation, isPending: isLoadingQuestions } = useMutation({
-    mutationFn: async ({ symptoms, notes }: { symptoms: string; notes: string }) => {
-      const response = await generateQuestions(
-        {
-          fault: symptoms,
-          notes,
-          questionsToAvoid: questions,
-        },
-        undefined,
-        { carId: params.carId as string },
-      );
-      return response.data;
-    },
-    onSuccess: (data) => {
-      if (step === 'diagnosisQuestions') {
-        setQuestions((prevQuestions) => [...prevQuestions, ...data.questions]);
-      } else {
-        setQuestions(data.questions);
-        setStep('diagnosisQuestions');
-      }
-    },
-    onError: () => {
-      enqueueSnackbar('Error al generar las preguntas. Por favor, inténtalo de nuevo.', {
-        variant: 'error',
-      });
-    },
-  });
-
-  const { mutate: createDiagnosisMutation, isPending: isLoadingDiagnosis } = useMutation({
-    mutationFn: async ({ fault, notes }: { fault: string; notes: string }) => {
-      const response = await createDiagnosisRequest(
-        {
-          fault,
-          notes,
-        },
-        undefined,
-        { carId: params.carId as string },
-      );
-      return response.data;
-    },
-    onSuccess: (data) => {
-      navigate(`/cars/${params.carId}/diagnosis/${data._id}`);
-    },
-    onError: () => {
-      enqueueSnackbar('Error al generar el diagnóstico. Por favor, inténtalo de nuevo.', {
-        variant: 'error',
-      });
-    },
   });
 
   if (isLoadingCar)
