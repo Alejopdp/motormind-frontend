@@ -168,14 +168,14 @@ export const PromptDetail: React.FC = () => {
         <div className="rounded-lg bg-white p-6 shadow-md">
           <h3 className="mb-4 text-lg font-medium text-gray-800">Histórico de Versiones</h3>
           <div className="max-h-[500px] overflow-y-auto">
-            {prompt.versions.map((version, index) => {
+            {[...prompt.versions].reverse().map((version, index) => {
               const isActive = version.isActive;
-              const isSelected = index === selectedVersionIndex;
+              const isSelected = prompt.versions.length - 1 - index === selectedVersionIndex;
 
               return (
                 <div
-                  key={index}
-                  onClick={() => handleVersionSelect(index)}
+                  key={prompt.versions.length - 1 - index}
+                  onClick={() => handleVersionSelect(prompt.versions.length - 1 - index)}
                   className={`mb-4 cursor-pointer rounded-md border p-3 transition-colors ${
                     isActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
                   } ${isSelected && !isActive ? 'border-green-500 bg-green-50' : ''}`}
