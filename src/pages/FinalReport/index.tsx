@@ -153,7 +153,7 @@ const FinalReport = () => {
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={() => navigate(`/cars/${params.carId}`)}
+        onBack={() => navigate(-1)}
         data={{
           title: 'Informe Final',
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,

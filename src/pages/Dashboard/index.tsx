@@ -71,7 +71,7 @@ const Dashboard = () => {
                 <Spinner className="mt-5" />
               </div>
             ) : diagnoses.length > 0 ? (
-              <div className="mt-5 space-y-3 sm:mt-0 sm:space-y-4">
+              <div className="mt-5 sm:mt-0">
                 {diagnoses
                   .filter((diagnosis) => diagnosis.preliminary)
                   .map((diagnosis, index) => (

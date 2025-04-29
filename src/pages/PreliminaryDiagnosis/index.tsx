@@ -93,7 +93,7 @@ const PreliminaryDiagnosis = () => {
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={() => navigate(`/cars/${params.carId}`)}
+        onBack={() => navigate(-1)}
         data={{
           title: 'Informe Preliminar IA',
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,

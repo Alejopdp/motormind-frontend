@@ -120,7 +120,7 @@ const Diagnoses = () => {
               <Spinner className="mt-5" />
             </div>
           ) : diagnoses.length > 0 ? (
-            <div className="space-y-4">
+            <>
               {diagnoses
                 .filter((diagnosis) => diagnosis.preliminary)
                 .map((diagnosis, index) => (
@@ -135,7 +135,7 @@ const Diagnoses = () => {
                     diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
                   />
                 ))}
-            </div>
+            </>
           ) : (
             <div className="flex h-64 flex-col items-center justify-center text-center">
               <div className="mb-4 rounded-full bg-gray-100 p-4">
