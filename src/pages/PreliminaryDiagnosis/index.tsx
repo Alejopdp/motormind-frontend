@@ -11,11 +11,11 @@ import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import { VoiceTextInput } from '@/components/VoiceTextInput';
 import { useApi } from '@/hooks/useApi';
+import { useSymptom } from '@/hooks/useSymptom';
 import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
-import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, SaveIcon } from 'lucide-react';
-import { useSymptom } from '@/hooks/useSymptom';
+import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon } from 'lucide-react';
 const PreliminaryDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
@@ -90,11 +90,6 @@ const PreliminaryDiagnosis = () => {
     createFinalReportMutation({ observations });
   };
 
-  const saveDraft = () => {
-    enqueueSnackbar('Diagnóstico guardado como borrador', { variant: 'success' });
-    navigate(-1); // Go back to the previous page
-  };
-
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
@@ -106,7 +101,12 @@ const PreliminaryDiagnosis = () => {
       />
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
-        <DiagnosticContextSection symptoms={symptom} notes={diagnosis.notes} />
+        <DiagnosticContextSection
+          symptoms={symptom}
+          notes={diagnosis.notes}
+          questions={diagnosis.questions}
+          answers={diagnosis.processedAnswers ?? ''}
+        />
 
         {/* AI Detected Faults */}
         <div className="space-y-2 sm:space-y-4">
@@ -159,11 +159,6 @@ const PreliminaryDiagnosis = () => {
         </Button>
 
         <div className="flex gap-3">
-          <Button variant="outline" onClick={saveDraft}>
-            <SaveIcon className="h-4 w-4" />
-            Guardar Borrador
-          </Button>
-
           <Button
             onClick={onGenerateReport}
             disabled={isLoadingFinalReport || observations.length === 0}
