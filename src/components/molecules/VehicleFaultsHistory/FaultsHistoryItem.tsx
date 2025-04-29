@@ -24,7 +24,7 @@ export const FaultsHistoryItem = ({ diagnosis, index }: FaultsHistoryItemProps) 
             {diagnosis.createdAt ? formatToddmmyyyy(new Date(diagnosis.createdAt)) || '-' : '-'}
           </p>
           <Link
-            to={`/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
+            to={`/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report?back=true' : ''}`}
           >
             <Button variant="link" size="sm" className="p-0">
               Ver Detalles
