@@ -71,13 +71,13 @@ const Dashboard = () => {
                 <Spinner className="mt-5" />
               </div>
             ) : diagnoses.length > 0 ? (
-              <div className="mt-5 space-y-3 sm:mt-0 sm:space-y-4">
+              <div className="mt-5 sm:mt-0">
                 {diagnoses
                   .filter((diagnosis) => diagnosis.preliminary)
                   .map((diagnosis, index) => (
                     <DiagnosticListItem
                       key={index}
-                      diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
+                      diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report?back=true' : ''}`}
                       vehicle={diagnosis.car}
                       problems={diagnosis.preliminary.possibleReasons.map(({ title }) => title)}
                       technician={diagnosis.createdBy}

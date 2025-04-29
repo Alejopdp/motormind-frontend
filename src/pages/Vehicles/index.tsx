@@ -9,7 +9,7 @@ import { debounce } from 'lodash';
 import { useApi } from '@/hooks/useApi';
 import { Car } from '@/types/Car';
 import Spinner from '@/components/atoms/Spinner';
-import { VehicleListTable } from '@/components/molecules/VehiceList/VehicleListTable';
+import { VehicleList } from '@/components/molecules/VehiceList';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 
 const LIMIT = 1000;
@@ -118,7 +118,7 @@ const Vehicles = () => {
         </div>
       ) : (
         <div className="px-2 py-2 sm:px-8 sm:py-4">
-          <VehicleListTable
+          <VehicleList
             vehicles={cars}
             isLoading={isLoadingCars}
             previousPage={handlePreviousPage}
