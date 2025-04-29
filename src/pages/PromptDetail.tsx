@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Prompt } from '../types/prompt';
 import { promptService } from '../service/prompt.service';
 import Spinner from '../components/atoms/Spinner';
 import { formatDate } from '../utils';
 import { Button } from '../components/atoms/Button';
+import HeaderPage from '../components/molecules/HeaderPage/HeaderPage';
+import { cn } from '../utils/cn';
 
 export const PromptDetail: React.FC = () => {
   const { phase } = useParams<{ phase: string }>();
@@ -16,6 +18,12 @@ export const PromptDetail: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedVersionIndex, setSelectedVersionIndex] = useState<number | null>(null);
   const [isChangingVersion, setIsChangingVersion] = useState(false);
+
+  // Extraer variables input del contenido activo
+  const inputVariables = useMemo(() => {
+    const matches = activeContent.match(/{[^}]+}/g) || [];
+    return [...new Set(matches)].map((match) => match.slice(1, -1));
+  }, [activeContent]);
 
   useEffect(() => {
     const fetchPrompt = async () => {
@@ -115,124 +123,143 @@ export const PromptDetail: React.FC = () => {
   const isViewingActiveVersion = selectedVersionIndex === activeVersionIndex;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Detalle del Prompt</h1>
-        <button
-          onClick={handleBack}
-          className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-        >
-          Volver
-        </button>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="mb-2 text-xl font-semibold text-gray-800">{prompt.phase}</h2>
-        <p className="text-sm text-gray-500">Actualizado: {formatDate(prompt.updatedAt)}</p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Panel principal con el prompt activo */}
-        <div className="lg:col-span-2">
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h3 className="mb-4 text-lg font-medium text-gray-800">
-              {isViewingActiveVersion ? 'Prompt Activo' : 'Visualizando Versión'}
-            </h3>
-            <textarea
-              value={activeContent}
-              onChange={(e) => setActiveContent(e.target.value)}
-              className="mb-4 h-64 w-full rounded-md border border-gray-300 p-3 font-mono text-sm whitespace-pre-wrap"
-              placeholder="Contenido del prompt..."
-            />
-            <div className="flex justify-end gap-2">
-              {!isViewingActiveVersion && (
-                <Button
-                  onClick={handleUseVersion}
-                  disabled={isChangingVersion}
-                  variant="secondary"
-                  className="min-w-[120px]"
-                >
-                  {isChangingVersion ? <Spinner className="h-5 w-5" /> : 'Usar Versión'}
-                </Button>
-              )}
-              <Button onClick={handleSave} disabled={isSaving} className="min-w-[120px]">
-                {isSaving ? <Spinner className="h-5 w-5" /> : 'Guardar Cambios'}
-              </Button>
-            </div>
-          </div>
+    <div>
+      <HeaderPage
+        data={{
+          title: 'Detalle del Prompt',
+          description: prompt.phase,
+        }}
+        onBack={handleBack}
+      />
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <p className="text-sm text-gray-500">Actualizado: {formatDate(prompt.updatedAt)}</p>
         </div>
 
-        {/* Panel de histórico de versiones */}
-        <div className="rounded-lg bg-white p-6 shadow-md">
-          {/* Sección de versión activa */}
-          {activeVersionIndex !== -1 && (
-            <>
-              <h3 className="mb-4 text-lg font-medium text-gray-800">Versión Activa</h3>
-              <div className="mb-6">
-                <div className="mb-4 rounded-md border border-blue-500 bg-blue-50 p-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
-                      Versión {activeVersionIndex + 1}
-                    </span>
-                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                      Activa
-                    </span>
-                  </div>
-                  <p className="mb-2 text-xs text-gray-500">
-                    Creada: {formatDate(prompt.versions[activeVersionIndex].createdAt)}
-                  </p>
-                  <div className="max-h-[150px] overflow-y-auto">
-                    <p className="text-sm whitespace-pre-wrap text-gray-700">
-                      {prompt.versions[activeVersionIndex].content}
-                    </p>
-                  </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Panel principal con el prompt activo */}
+          <div className="lg:col-span-2">
+            <div className="rounded-lg bg-white p-6 shadow-md">
+              <h3 className="mb-4 text-lg font-medium text-gray-800">
+                {isViewingActiveVersion ? 'Prompt Activo' : 'Visualizando Versión'}
+              </h3>
+              <textarea
+                value={activeContent}
+                onChange={(e) => setActiveContent(e.target.value)}
+                className="mb-4 h-64 w-full rounded-md border border-gray-300 p-3 font-mono text-sm whitespace-pre-wrap"
+                placeholder="Contenido del prompt..."
+              />
+              <div className="flex justify-end gap-2">
+                {!isViewingActiveVersion && (
+                  <Button
+                    onClick={handleUseVersion}
+                    disabled={isChangingVersion}
+                    variant="secondary"
+                    className="min-w-[120px]"
+                  >
+                    {isChangingVersion ? <Spinner className="h-5 w-5" /> : 'Usar Versión'}
+                  </Button>
+                )}
+                <Button onClick={handleSave} disabled={isSaving} className="min-w-[120px]">
+                  {isSaving ? <Spinner className="h-5 w-5" /> : 'Guardar Cambios'}
+                </Button>
+              </div>
+            </div>
+
+            {/* Variables Input */}
+            {inputVariables.length > 0 && (
+              <div className="mt-6 rounded-lg bg-white p-6 shadow-md">
+                <h3 className="mb-4 text-lg font-medium text-gray-800">Variables Input</h3>
+                <div className="flex flex-wrap gap-2">
+                  {inputVariables.map((variable, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        'rounded-md border px-3 py-1.5',
+                        'border-blue-200 bg-blue-50',
+                        'font-mono text-sm text-blue-700',
+                      )}
+                    >
+                      {variable}
+                    </div>
+                  ))}
                 </div>
               </div>
-            </>
-          )}
+            )}
+          </div>
 
-          {/* Separador */}
-          <div className="mb-6 border-t border-gray-200"></div>
-
-          {/* Histórico de versiones */}
-          <h3 className="mb-4 text-lg font-medium text-gray-800">Histórico de Versiones</h3>
-          <div className="max-h-[500px] overflow-y-auto">
-            {[...prompt.versions].reverse().map((version, index) => {
-              const isActive = version.isActive;
-              const isSelected = prompt.versions.length - 1 - index === selectedVersionIndex;
-
-              return (
-                <div
-                  key={prompt.versions.length - 1 - index}
-                  onClick={() => handleVersionSelect(prompt.versions.length - 1 - index)}
-                  className={`mb-4 cursor-pointer rounded-md border p-3 transition-colors ${
-                    isActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
-                  } ${isSelected && !isActive ? 'border-green-500 bg-green-50' : ''}`}
-                >
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
-                      Versión {prompt.versions.length - index}
-                    </span>
-                    {isActive && (
+          {/* Panel de histórico de versiones */}
+          <div className="rounded-lg bg-white p-6 shadow-md">
+            {/* Sección de versión activa */}
+            {activeVersionIndex !== -1 && (
+              <>
+                <h3 className="mb-4 text-lg font-medium text-gray-800">Versión Activa</h3>
+                <div className="mb-6">
+                  <div className="mb-4 rounded-md border border-blue-500 bg-blue-50 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">
+                        Versión {activeVersionIndex + 1}
+                      </span>
                       <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
                         Activa
                       </span>
-                    )}
-                    {isSelected && !isActive && (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
-                        Seleccionada
-                      </span>
-                    )}
+                    </div>
+                    <p className="mb-2 text-xs text-gray-500">
+                      Creada: {formatDate(prompt.versions[activeVersionIndex].createdAt)}
+                    </p>
+                    <div className="max-h-[150px] overflow-y-auto">
+                      <p className="text-sm whitespace-pre-wrap text-gray-700">
+                        {prompt.versions[activeVersionIndex].content}
+                      </p>
+                    </div>
                   </div>
-                  <p className="mb-2 text-xs text-gray-500">
-                    Creada: {formatDate(version.createdAt)}
-                  </p>
-                  <p className="line-clamp-3 text-sm whitespace-pre-wrap text-gray-700">
-                    {version.content}
-                  </p>
                 </div>
-              );
-            })}
+              </>
+            )}
+
+            {/* Separador */}
+            <div className="mb-6 border-t border-gray-200"></div>
+
+            {/* Histórico de versiones */}
+            <h3 className="mb-4 text-lg font-medium text-gray-800">Histórico de Versiones</h3>
+            <div className="max-h-[500px] overflow-y-auto">
+              {[...prompt.versions].reverse().map((version, index) => {
+                const isActive = version.isActive;
+                const isSelected = prompt.versions.length - 1 - index === selectedVersionIndex;
+
+                return (
+                  <div
+                    key={prompt.versions.length - 1 - index}
+                    onClick={() => handleVersionSelect(prompt.versions.length - 1 - index)}
+                    className={`mb-4 cursor-pointer rounded-md border p-3 transition-colors ${
+                      isActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                    } ${isSelected && !isActive ? 'border-green-500 bg-green-50' : ''}`}
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">
+                        Versión {prompt.versions.length - index}
+                      </span>
+                      {isActive && (
+                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                          Activa
+                        </span>
+                      )}
+                      {isSelected && !isActive && (
+                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                          Seleccionada
+                        </span>
+                      )}
+                    </div>
+                    <p className="mb-2 text-xs text-gray-500">
+                      Creada: {formatDate(version.createdAt)}
+                    </p>
+                    <p className="line-clamp-3 text-sm whitespace-pre-wrap text-gray-700">
+                      {version.content}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

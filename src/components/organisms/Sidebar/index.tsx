@@ -77,7 +77,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
             (item.href === '/diagnoses' && currentPath === '/diagnoses') ||
             (item.href === '/audits/evaluations' &&
               currentPath.startsWith('/audits/evaluations')) ||
-            (item.href === '/prompts' && currentPath === '/prompts');
+            (item.href === '/prompts' && currentPath.startsWith('/prompts'));
 
           return (
             <Link
