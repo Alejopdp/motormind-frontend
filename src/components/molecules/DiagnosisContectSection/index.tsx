@@ -11,16 +11,15 @@ import {
 interface DiagnosticContextSectionProps {
   symptoms: string;
   notes?: string;
-  answers?: Array<{
-    question: string;
-    answer: string;
-  }>;
+  questions?: string[];
+  answers?: string;
 }
 
 export const DiagnosticContextSection = ({
   symptoms,
   notes,
-  answers = [],
+  answers = '',
+  questions = [],
 }: DiagnosticContextSectionProps) => {
   // Create a summary of symptoms (first 60 characters)
   const symptomsSummary = symptoms.length > 60 ? `${symptoms.substring(0, 60)}...` : symptoms;
@@ -60,16 +59,21 @@ export const DiagnosticContextSection = ({
                 </div>
               )}
 
-              {answers.length > 0 && (
+              {questions.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium sm:text-base">Preguntas</h3>
+                  {questions.map((question, index) => (
+                    <p key={index} className="text-muted text-xs sm:text-base">
+                      {question}
+                    </p>
+                  ))}
+                </div>
+              )}
+              {answers && (
                 <div>
                   <h3 className="text-base font-medium">Respuestas a Preguntas Guiadas</h3>
                   <div className="space-y-3">
-                    {answers.map((item, index) => (
-                      <div key={index} className="border-b pb-2 last:border-b-0">
-                        <p className="font-medium text-gray-800">{item.question}</p>
-                        <p className="text-muted">{item.answer}</p>
-                      </div>
-                    ))}
+                    <p className="text-muted">{answers}</p>
                   </div>
                 </div>
               )}

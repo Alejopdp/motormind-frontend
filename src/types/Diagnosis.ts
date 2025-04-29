@@ -3,6 +3,8 @@ export type Diagnosis = {
   carId: string;
   fault: string;
   notes: string;
+  answers: string;
+  processedAnswers: string;
   questions: string[];
   processedFault: {
     symptomCleaned: string;
