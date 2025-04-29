@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon } from 'lucide-react';
 
 import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
@@ -10,16 +11,18 @@ import FaultCardCollapsible from '@/components/molecules/FaultCardCollapsible';
 import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import { VoiceTextInput } from '@/components/VoiceTextInput';
+import OBDCodeInput from '@/components/molecules/ObdCodeInput';
 import { useApi } from '@/hooks/useApi';
 import { useSymptom } from '@/hooks/useSymptom';
 import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
-import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon } from 'lucide-react';
+
 const PreliminaryDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [observations, setObservations] = useState('');
+  const [obdCodes, setObdCodes] = useState<string[]>([]);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: createFinalReportRequest } = useApi<Diagnosis>(
     'post',
@@ -48,11 +51,21 @@ const PreliminaryDiagnosis = () => {
 
   const { symptom } = useSymptom(diagnosis);
   const { mutate: createFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
-    mutationFn: async ({ observations }: { observations: string }) => {
-      const response = await createFinalReportRequest({ technicalNotes: observations }, undefined, {
-        carId: params.carId as string,
-        diagnosisId: params.diagnosisId as string,
-      });
+    mutationFn: async ({
+      observations,
+      obdCodes,
+    }: {
+      observations: string;
+      obdCodes: string[];
+    }) => {
+      const response = await createFinalReportRequest(
+        { technicalNotes: observations, obdCodes },
+        undefined,
+        {
+          carId: params.carId as string,
+          diagnosisId: params.diagnosisId as string,
+        },
+      );
       return response.data;
     },
     onSuccess: () => {
@@ -87,7 +100,7 @@ const PreliminaryDiagnosis = () => {
   }
 
   const onGenerateReport = () => {
-    createFinalReportMutation({ observations });
+    createFinalReportMutation({ observations, obdCodes });
   };
 
   return (
@@ -136,6 +149,9 @@ const PreliminaryDiagnosis = () => {
             )}
           </div>
         </div>
+
+        {/* OBD Codes Input */}
+        <OBDCodeInput onChange={setObdCodes} />
 
         <div className="mb-20 space-y-1 sm:space-y-2">
           <p className="block text-sm font-medium sm:text-base">
