@@ -15,6 +15,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './pages/NotFound';
 import AiEvaluations from './pages/Diagnoses/AiEvaluations';
 import AiEvaluationDetails from './pages/Diagnoses/AiEvaluationDetails';
+import { PromptManager } from './pages/PromptManager';
 
 const router = createBrowserRouter([
   {
@@ -62,6 +63,14 @@ const router = createBrowserRouter([
         element: (
           <ErrorBoundary>
             <AiEvaluationDetails />
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/prompt',
+        element: (
+          <ErrorBoundary>
+            <PromptManager />
           </ErrorBoundary>
         ),
       },

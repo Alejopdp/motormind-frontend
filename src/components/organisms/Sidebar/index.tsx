@@ -7,6 +7,7 @@ import {
   LogOutIcon,
   MenuIcon,
   SearchIcon,
+  FileTextIcon,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -57,6 +58,12 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
       href: '/audits/evaluations',
       roles: [UserRole.SUPER_ADMIN],
     },
+    {
+      icon: FileTextIcon,
+      label: 'Prompt Manager',
+      href: '/prompt',
+      roles: [UserRole.SUPER_ADMIN],
+    },
   ];
 
   const renderNavItems = () => (
@@ -68,7 +75,9 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
             (item.href === '/' && currentPath === '/') ||
             (item.href === '/cars' && currentPath === '/cars') ||
             (item.href === '/diagnoses' && currentPath === '/diagnoses') ||
-            (item.href === '/audits/evaluations' && currentPath.startsWith('/audits/evaluations'));
+            (item.href === '/audits/evaluations' &&
+              currentPath.startsWith('/audits/evaluations')) ||
+            (item.href === '/prompt' && currentPath === '/prompt');
 
           return (
             <Link
