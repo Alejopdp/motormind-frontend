@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AlertCircle, ArrowLeftIcon, SaveIcon, Share2Icon, StarIcon } from 'lucide-react';
 
 import { useApi } from '@/hooks/useApi';
@@ -23,6 +23,8 @@ import { useSymptom } from '@/hooks/useSymptom';
 
 const FinalReport = () => {
   const params = useParams();
+  const [searchParams] = useSearchParams();
+  const backQueryParam = searchParams.get('back');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [finalNotes, setFinalNotes] = useState('');
@@ -150,10 +152,18 @@ const FinalReport = () => {
     });
   };
 
+  const onBack = () => {
+    if (backQueryParam === 'true') {
+      navigate(-1); // Go back to the previous page
+    } else {
+      navigate(`/cars/${params.carId}`); // Go back to the route
+    }
+  };
+
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={() => navigate(-1)}
+        onBack={onBack}
         data={{
           title: 'Informe Final',
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,

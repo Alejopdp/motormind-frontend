@@ -132,7 +132,7 @@ const Diagnoses = () => {
                     }
                     technician={diagnosis.createdBy}
                     timestamp={formatDate(diagnosis.createdAt)}
-                    diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
+                    diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report?back=true' : ''}`}
                   />
                 ))}
             </>
