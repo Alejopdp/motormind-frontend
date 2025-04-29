@@ -1,6 +1,7 @@
 import React from 'react';
 import { Prompt } from '../../types/prompt';
 import { formatDate } from '../../utils';
+import { useNavigate } from 'react-router-dom';
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -9,9 +10,17 @@ interface PromptCardProps {
 export const PromptCard: React.FC<PromptCardProps> = ({ prompt }) => {
   const activeVersion = prompt.versions.find((v) => v.isActive);
   const totalVersions = prompt.versions.length;
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/prompts/${prompt.phase}`);
+  };
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow-md transition-shadow duration-200 hover:shadow-lg">
+    <div
+      className="w-full cursor-pointer rounded-lg bg-white p-6 shadow-md transition-shadow duration-200 hover:shadow-lg"
+      onClick={handleClick}
+    >
       <div className="mb-4 flex items-start justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">{prompt.phase}</h3>

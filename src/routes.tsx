@@ -16,6 +16,7 @@ import NotFound from './pages/NotFound';
 import AiEvaluations from './pages/Diagnoses/AiEvaluations';
 import AiEvaluationDetails from './pages/Diagnoses/AiEvaluationDetails';
 import { PromptManager } from './pages/PromptManager';
+import { PromptDetail } from './pages/PromptDetail';
 
 const router = createBrowserRouter([
   {
@@ -67,10 +68,18 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/prompt',
+        path: '/prompts',
         element: (
           <ErrorBoundary>
             <PromptManager />
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/prompts/:phase',
+        element: (
+          <ErrorBoundary>
+            <PromptDetail />
           </ErrorBoundary>
         ),
       },

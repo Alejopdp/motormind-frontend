@@ -61,7 +61,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
     {
       icon: FileTextIcon,
       label: 'Prompt Manager',
-      href: '/prompt',
+      href: '/prompts',
       roles: [UserRole.SUPER_ADMIN],
     },
   ];
@@ -77,7 +77,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
             (item.href === '/diagnoses' && currentPath === '/diagnoses') ||
             (item.href === '/audits/evaluations' &&
               currentPath.startsWith('/audits/evaluations')) ||
-            (item.href === '/prompt' && currentPath === '/prompt');
+            (item.href === '/prompts' && currentPath === '/prompts');
 
           return (
             <Link

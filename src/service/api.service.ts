@@ -72,6 +72,14 @@ class ApiService {
     return this.api.delete<T>(url, config);
   }
 
+  async patch<T, D = unknown>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
+    return this.api.patch<T>(url, data, config);
+  }
+
   // Métodos específicos para evaluaciones de diagnósticos
   async getDiagnosisEvaluations(): Promise<{ evaluations: AiDiagnosisEvaluation[]; total: number }> {
     const response = await this.get<{ evaluations: AiDiagnosisEvaluation[]; total: number }>(`/audits/evaluations`);
