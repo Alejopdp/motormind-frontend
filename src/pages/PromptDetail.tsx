@@ -4,6 +4,7 @@ import { Prompt } from '../types/prompt';
 import { promptService } from '../service/prompt.service';
 import Spinner from '../components/atoms/Spinner';
 import { formatDate } from '../utils';
+import { Button } from '../components/atoms/Button';
 
 export const PromptDetail: React.FC = () => {
   const { phase } = useParams<{ phase: string }>();
@@ -145,27 +146,55 @@ export const PromptDetail: React.FC = () => {
             />
             <div className="flex justify-end gap-2">
               {!isViewingActiveVersion && (
-                <button
+                <Button
                   onClick={handleUseVersion}
                   disabled={isChangingVersion}
-                  className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:bg-green-300"
+                  variant="secondary"
+                  className="min-w-[120px]"
                 >
-                  {isChangingVersion ? <Spinner /> : 'Usar Versión'}
-                </button>
+                  {isChangingVersion ? <Spinner className="h-5 w-5" /> : 'Usar Versión'}
+                </Button>
               )}
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-blue-300"
-              >
-                {isSaving ? <Spinner /> : 'Guardar Cambios'}
-              </button>
+              <Button onClick={handleSave} disabled={isSaving} className="min-w-[120px]">
+                {isSaving ? <Spinner className="h-5 w-5" /> : 'Guardar Cambios'}
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Panel de histórico de versiones */}
         <div className="rounded-lg bg-white p-6 shadow-md">
+          {/* Sección de versión activa */}
+          {activeVersionIndex !== -1 && (
+            <>
+              <h3 className="mb-4 text-lg font-medium text-gray-800">Versión Activa</h3>
+              <div className="mb-6">
+                <div className="mb-4 rounded-md border border-blue-500 bg-blue-50 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">
+                      Versión {activeVersionIndex + 1}
+                    </span>
+                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                      Activa
+                    </span>
+                  </div>
+                  <p className="mb-2 text-xs text-gray-500">
+                    Creada: {formatDate(prompt.versions[activeVersionIndex].createdAt)}
+                  </p>
+                  <div className="max-h-[150px] overflow-y-auto">
+                    <p className="text-sm whitespace-pre-wrap text-gray-700">
+                      {prompt.versions[activeVersionIndex].content}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Separador */}
+          <div className="mb-6 border-t border-gray-200"></div>
+
+          {/* Histórico de versiones */}
           <h3 className="mb-4 text-lg font-medium text-gray-800">Histórico de Versiones</h3>
           <div className="max-h-[500px] overflow-y-auto">
             {[...prompt.versions].reverse().map((version, index) => {
