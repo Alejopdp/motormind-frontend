@@ -26,9 +26,7 @@ export const PromptDetail: React.FC = () => {
         const activeVersionIndex = data.versions.findIndex((v) => v.isActive);
         if (activeVersionIndex !== -1) {
           const activeVersion = data.versions[activeVersionIndex];
-          // Procesar los saltos de línea para mostrarlos correctamente
-          const processedContent = activeVersion.content.replace(/\\n/g, '\n');
-          setActiveContent(processedContent);
+          setActiveContent(activeVersion.content);
           setSelectedVersionIndex(activeVersionIndex);
         }
       } catch (err) {
@@ -69,8 +67,7 @@ export const PromptDetail: React.FC = () => {
 
     setSelectedVersionIndex(index);
     const version = prompt.versions[index];
-    const processedContent = version.content.replace(/\\n/g, '\n');
-    setActiveContent(processedContent);
+    setActiveContent(version.content);
   };
 
   const handleUseVersion = async () => {
@@ -143,7 +140,7 @@ export const PromptDetail: React.FC = () => {
             <textarea
               value={activeContent}
               onChange={(e) => setActiveContent(e.target.value)}
-              className="mb-4 h-64 w-full rounded-md border border-gray-300 p-3 font-mono text-sm"
+              className="mb-4 h-64 w-full rounded-md border border-gray-300 p-3 font-mono text-sm whitespace-pre-wrap"
               placeholder="Contenido del prompt..."
             />
             <div className="flex justify-end gap-2">
@@ -201,8 +198,8 @@ export const PromptDetail: React.FC = () => {
                   <p className="mb-2 text-xs text-gray-500">
                     Creada: {formatDate(version.createdAt)}
                   </p>
-                  <p className="line-clamp-3 text-sm whitespace-pre-line text-gray-700">
-                    {version.content.replace(/\\n/g, '\n')}
+                  <p className="line-clamp-3 text-sm whitespace-pre-wrap text-gray-700">
+                    {version.content}
                   </p>
                 </div>
               );
