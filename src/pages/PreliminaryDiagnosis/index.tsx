@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon } from 'lucide-react';
 
 import { Button } from '@/components/atoms/Button';
@@ -12,6 +12,7 @@ import HeaderPage from '@/components/molecules/HeaderPage';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import { VoiceTextInput } from '@/components/VoiceTextInput';
 import OBDCodeInput from '@/components/molecules/ObdCodeInput';
+import { LoadingModal } from '@/components/molecules/LoadingModal';
 import { useApi } from '@/hooks/useApi';
 import { useSymptom } from '@/hooks/useSymptom';
 import { Car } from '@/types/Car';
@@ -21,6 +22,8 @@ import { ProbabilityLevel } from '@/types/Probability';
 const PreliminaryDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const backQueryParam = searchParams.get('back');
   const [observations, setObservations] = useState('');
   const [obdCodes, setObdCodes] = useState<string[]>([]);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
@@ -103,10 +106,18 @@ const PreliminaryDiagnosis = () => {
     createFinalReportMutation({ observations, obdCodes });
   };
 
+  const onBack = () => {
+    if (backQueryParam === 'true') {
+      navigate(-1); // Go back to the previous page
+    } else {
+      navigate(`/cars/${params.carId}`); // Go back to the route
+    }
+  };
+
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={() => navigate(-1)}
+        onBack={onBack}
         data={{
           title: 'Informe Preliminar IA',
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,
@@ -151,7 +162,7 @@ const PreliminaryDiagnosis = () => {
         </div>
 
         {/* OBD Codes Input */}
-        <OBDCodeInput onChange={setObdCodes} />
+        <OBDCodeInput onChange={setObdCodes} disabled={isLoadingFinalReport} />
 
         <div className="mb-20 space-y-1 sm:space-y-2">
           <p className="block text-sm font-medium sm:text-base">
@@ -180,13 +191,13 @@ const PreliminaryDiagnosis = () => {
             disabled={isLoadingFinalReport || observations.length === 0}
           >
             <FileTextIcon className="h-4 w-4" />
-            <span className="sm:hidden">{isLoadingFinalReport ? 'Generando...' : 'Generar'}</span>
-            <span className="hidden sm:inline">
-              {isLoadingFinalReport ? 'Generando...' : 'Generar Informe Final'}
-            </span>
+            <span className="sm:hidden">Generar</span>
+            <span className="hidden sm:inline">Generar Informe Final</span>
           </Button>
         </div>
       </div>
+
+      <LoadingModal isOpen={isLoadingFinalReport} message="Generando informe final" />
     </div>
   );
 };

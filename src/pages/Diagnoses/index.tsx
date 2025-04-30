@@ -4,7 +4,7 @@ import { debounce } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 
-import { formatDate } from '@/utils';
+import { diagnosisLink, formatDate } from '@/utils';
 import { useApi } from '@/hooks/useApi';
 import { Diagnosis } from '@/types/Diagnosis';
 import Spinner from '@/components/atoms/Spinner';
@@ -13,6 +13,7 @@ import { Pagination } from '@/components/molecules/Pagination';
 import { Input } from '@/components/atoms/Input';
 import { Button } from '@/components/atoms/Button';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
+import { DIAGNOSIS_STATUS } from '@/constants';
 
 const LIMIT = 1000;
 
@@ -121,20 +122,20 @@ const Diagnoses = () => {
             </div>
           ) : diagnoses.length > 0 ? (
             <>
-              {diagnoses
-                .filter((diagnosis) => diagnosis.preliminary)
-                .map((diagnosis, index) => (
-                  <DiagnosticListItem
-                    key={index}
-                    vehicle={diagnosis.car}
-                    problems={
-                      diagnosis.preliminary?.possibleReasons?.map(({ title }) => title) || []
-                    }
-                    technician={diagnosis.createdBy}
-                    timestamp={formatDate(diagnosis.createdAt)}
-                    diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report?back=true' : ''}`}
-                  />
-                ))}
+              {diagnoses.map((diagnosis, index) => (
+                <DiagnosticListItem
+                  key={index}
+                  vehicle={diagnosis.car}
+                  problems={diagnosis.preliminary?.possibleReasons?.map(({ title }) => title) || []}
+                  questions={diagnosis.questions || []}
+                  technician={diagnosis.createdBy}
+                  status={
+                    diagnosis.status as (typeof DIAGNOSIS_STATUS)[keyof typeof DIAGNOSIS_STATUS]
+                  }
+                  timestamp={formatDate(diagnosis.createdAt)}
+                  diagnosisLink={diagnosisLink(diagnosis, true)}
+                />
+              ))}
             </>
           ) : (
             <div className="flex h-64 flex-col items-center justify-center text-center">

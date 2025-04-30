@@ -1,3 +1,6 @@
+import { DIAGNOSIS_STATUS } from '@/constants';
+import { Diagnosis } from '@/types/Diagnosis';
+
 export const formatDate = (dateString: string | Date) => {
   const date = new Date(dateString);
   const today = new Date();
@@ -47,4 +50,22 @@ export const getInitials = (name: string) => {
     .map((part) => part.charAt(0))
     .join('')
     .toUpperCase();
+};
+
+export const diagnosisLink = (diagnosis: Diagnosis, back?: boolean) => {
+  const mainLink = `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}`;
+
+  let path = '';
+  if (diagnosis.status === DIAGNOSIS_STATUS.GUIDED_QUESTIONS) {
+    path = back ? 'questions?back=true' : 'questions';
+  } else if (diagnosis.status === DIAGNOSIS_STATUS.PRELIMINARY) {
+    path = back ? 'preliminary-report?back=true' : 'preliminary-report';
+  } else if (
+    diagnosis.status === DIAGNOSIS_STATUS.IN_REPARATION ||
+    diagnosis.status === DIAGNOSIS_STATUS.REPAIRED
+  ) {
+    path = back ? 'final-report?back=true' : 'final-report';
+  }
+
+  return `${mainLink}/${path}`;
 };

@@ -6,6 +6,7 @@ export type Diagnosis = {
   answers: string;
   processedAnswers: string;
   questions: string[];
+  status: string;
   processedFault: {
     symptomCleaned: string;
     category: string;
@@ -63,6 +64,11 @@ export type Diagnosis = {
   wasUseful?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  rating?: {
+    _id: string;
+    notes: string;
+    scoreStrictFormat: number;
+  };
   car?: {
     _id: string;
     model: string;
@@ -78,6 +84,7 @@ export type Diagnosis = {
     name: string;
     avatar?: string;
   };
+  markedAsRepairedBy?: string;
 };
 
 export type AiDiagnosisEvaluation = {

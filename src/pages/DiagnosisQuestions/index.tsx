@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { AlertCircle } from 'lucide-react';
@@ -16,6 +16,8 @@ import HeaderPage from '@/components/molecules/HeaderPage';
 const DiagnosisQuestions = () => {
   const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const backQueryParam = searchParams.get('back');
   const queryClient = useQueryClient();
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
@@ -95,7 +97,7 @@ const DiagnosisQuestions = () => {
         return response.data;
       },
       onSuccess: (data) => {
-        navigate(`/cars/${params.carId}/diagnosis/${data._id}`);
+        navigate(`/cars/${params.carId}/diagnosis/${data._id}/preliminary-report`);
       },
       onError: () => {
         enqueueSnackbar('Error al generar el diagnóstico. Por favor, inténtalo de nuevo.', {
@@ -129,10 +131,18 @@ const DiagnosisQuestions = () => {
     createPreliminaryDiagnosisMutation({ notes: details });
   };
 
+  const onBack = () => {
+    if (backQueryParam === 'true') {
+      navigate(-1); // Go back to the previous page
+    } else {
+      navigate(`/cars/${params.carId}`); // Go back to the route
+    }
+  };
+
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={() => navigate(`/cars/${params.carId}`)}
+        onBack={onBack}
         data={{
           title: 'Nuevo diagnóstico - Preguntas guiadas',
           description: `Matricula: ${car.plate || car.vinCode}`,

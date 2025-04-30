@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AlertCircle, ArrowLeftIcon, SaveIcon, Share2Icon, StarIcon } from 'lucide-react';
+import { AlertCircle, ArrowLeftIcon, CircleCheckBig, Share2Icon, StarIcon } from 'lucide-react';
 
 import { useApi } from '@/hooks/useApi';
 import { Car } from '@/types/Car';
@@ -20,6 +20,15 @@ import { Conclusion } from './Conclusion';
 import { PrimaryRepairSection } from './PrimaryRepairSection';
 import { EstimatedResources } from './EstimatedResources';
 import { useSymptom } from '@/hooks/useSymptom';
+import { DIAGNOSIS_STATUS } from '@/constants';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/atoms/Dialog';
 
 const FinalReport = () => {
   const params = useParams();
@@ -29,12 +38,17 @@ const FinalReport = () => {
   const queryClient = useQueryClient();
   const [finalNotes, setFinalNotes] = useState('');
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: updateFinalReportRequest } = useApi<Diagnosis>(
     'put',
     '/cars/:carId/diagnosis/:diagnosisId',
   );
   const { execute: createDiagnosisRating } = useApi<DiagnosisRating>('post', '/diagnosis-ratings');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -66,28 +80,29 @@ const FinalReport = () => {
   }, [diagnosis]);
 
   const { mutate: updateFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
-    mutationFn: async ({
-      finalNotes,
-      ratingNotes,
-      wasUseful,
-    }: {
-      finalNotes?: string;
-      ratingNotes?: string;
-      wasUseful?: boolean;
-    }) => {
-      const response = await updateFinalReportRequest(
-        { finalNotes, ratingNotes, wasUseful },
-        undefined,
-        {
-          carId: params.carId as string,
-          diagnosisId: params.diagnosisId as string,
-        },
-      );
+    mutationFn: async ({ finalNotes }: { finalNotes?: string }) => {
+      const response = await updateFinalReportRequest({ finalNotes }, undefined, {
+        carId: params.carId as string,
+        diagnosisId: params.diagnosisId as string,
+      });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (updatedDiagnosis) => {
       enqueueSnackbar('Diagnóstico final actualizado correctamente', { variant: 'success' });
-      if (diagnosis.wasUseful === undefined) setIsRatingModalOpen(true);
+      setIsConfirmationModalOpen(false);
+      if (!diagnosis.rating?._id) {
+        setIsRatingModalOpen(true);
+      }
+      queryClient.setQueryData(
+        ['getDiagnosisById', params.diagnosisId],
+        (oldData: { data: Diagnosis }) => ({
+          data: {
+            ...oldData.data,
+            status: updatedDiagnosis.status,
+            finalNotes: updatedDiagnosis.finalNotes,
+          },
+        }),
+      );
     },
     onError: () => {
       enqueueSnackbar('Error al guardar. Por favor, inténtalo de nuevo.', {
@@ -102,9 +117,22 @@ const FinalReport = () => {
         const response = await createDiagnosisRating(data);
         return response.data;
       },
-      onSuccess: () => {
+      onSuccess: (rating) => {
         enqueueSnackbar('Valoración enviada, Muchas gracias!', { variant: 'success' });
         setIsRatingModalOpen(false);
+        queryClient.setQueryData(
+          ['getDiagnosisById', params.diagnosisId],
+          (oldData: { data: Diagnosis }) => ({
+            data: {
+              ...oldData.data,
+              rating: {
+                _id: rating._id,
+                wasUseful: rating.wasUseful,
+                notes: rating.notes,
+              },
+            },
+          }),
+        );
       },
       onError: () => {
         enqueueSnackbar('Error al guardar la valoración. Por favor, inténtalo de nuevo.', {
@@ -134,7 +162,15 @@ const FinalReport = () => {
     );
   }
 
-  const onUpdateReport = () => {
+  const markAsRepaired = () => {
+    setIsConfirmationModalOpen(true);
+  };
+
+  const updateFinalNotes = () => {
+    updateFinalReportMutation({ finalNotes });
+  };
+
+  const handleConfirmRepair = () => {
     updateFinalReportMutation({ finalNotes });
   };
 
@@ -207,7 +243,7 @@ const FinalReport = () => {
             <span className="hidden sm:inline">Compartir</span>
           </Button>
 
-          {diagnosis.wasUseful === undefined && (
+          {!diagnosis.rating?._id && (
             <Button variant="ghost" onClick={() => setIsRatingModalOpen(true)}>
               <StarIcon className="h-4 w-4" />
               <span className="hidden sm:inline">Valorar</span>
@@ -221,21 +257,64 @@ const FinalReport = () => {
             onClick={() => navigate(`/cars/${params.carId}`)}
             disabled={isLoadingFinalReport}
           >
-            <ArrowLeftIcon className="h-4 w-4" />
+            <ArrowLeftIcon className="hidden h-4 w-4 sm:block" />
             Volver <span className="hidden sm:inline">al detalle del Vehículo</span>
           </Button>
-          <Button
-            onClick={onUpdateReport}
-            disabled={isLoadingFinalReport || finalNotes.length === 0}
-          >
-            <SaveIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {isLoadingFinalReport ? 'Cargando...' : 'Guardar Notas Adicionales'}
-            </span>
-            <span className="sm:hidden">{isLoadingFinalReport ? 'Cargando...' : 'Guardar'}</span>
-          </Button>
+
+          {diagnosis.status === DIAGNOSIS_STATUS.REPAIRED && !!diagnosis.finalNotes && (
+            <Button
+              onClick={updateFinalNotes}
+              disabled={diagnosis.finalNotes === finalNotes || isLoadingFinalReport}
+            >
+              <span className="hidden sm:inline">
+                {isLoadingFinalReport ? 'Guardando...' : 'Guardar Cambios'}
+              </span>
+              <span className="sm:hidden">
+                {isLoadingFinalReport ? 'Guardando ...' : 'Guardar'}
+              </span>
+            </Button>
+          )}
+
+          {diagnosis.status !== DIAGNOSIS_STATUS.REPAIRED ? (
+            <Button
+              onClick={markAsRepaired}
+              disabled={isLoadingFinalReport || finalNotes.length === 0}
+            >
+              <CircleCheckBig className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isLoadingFinalReport ? 'Cargando...' : 'Marcar Reparación Completa'}
+              </span>
+              <span className="sm:hidden">{isLoadingFinalReport ? 'Cargando...' : 'Guardar'}</span>
+            </Button>
+          ) : (
+            <Button disabled className="bg-green-600 text-white">
+              <CircleCheckBig className="hidden h-4 w-4 text-white sm:block" />
+              Reparado
+            </Button>
+          )}
         </div>
       </div>
+
+      <Dialog open={isConfirmationModalOpen} onOpenChange={setIsConfirmationModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmación</DialogTitle>
+            <DialogDescription>¿Confirmás que este diagnóstico ha sido reparado?</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsConfirmationModalOpen(false)}
+              disabled={isLoadingFinalReport}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmRepair} disabled={isLoadingFinalReport}>
+              {isLoadingFinalReport ? 'Cargando...' : 'Confirmar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <RatingModal
         isOpen={isRatingModalOpen}
