@@ -73,8 +73,8 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
         .map((item) => {
           const isActive =
             (item.href === '/' && currentPath === '/') ||
-            (item.href === '/cars' && currentPath === '/cars') ||
-            (item.href === '/diagnoses' && currentPath === '/diagnoses') ||
+            (item.href === '/cars' && currentPath.startsWith('/cars')) ||
+            (item.href === '/diagnoses' && currentPath.startsWith('/diagnoses')) ||
             (item.href === '/audits/evaluations' &&
               currentPath.startsWith('/audits/evaluations')) ||
             (item.href === '/prompts' && currentPath.startsWith('/prompts'));

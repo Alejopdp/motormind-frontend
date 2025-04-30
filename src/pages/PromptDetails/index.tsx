@@ -1,17 +1,18 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Prompt } from '../types/prompt';
-import { promptService } from '../service/prompt.service';
-import Spinner from '../components/atoms/Spinner';
-import { formatDate } from '../utils';
-import { Button } from '../components/atoms/Button';
-import HeaderPage from '../components/molecules/HeaderPage/HeaderPage';
-import { PromptVariables } from '../components/molecules/PromptVariables';
-import { PromptWarningModal } from '../components/molecules/PromptWarningModal';
-import { PromptVersionHistory } from '../components/molecules/PromptVersionHistory';
-import { usePromptVariables } from '../hooks/usePromptVariables';
+import { Prompt } from '../../types/prompt';
+import { promptService } from '../../service/prompt.service';
+import Spinner from '../../components/atoms/Spinner';
+import { formatDate } from '../../utils';
+import { Button } from '../../components/atoms/Button';
+import HeaderPage from '../../components/molecules/HeaderPage';
+import { PromptVariables } from '../../components/molecules/PromptVariables';
+import { PromptWarningModal } from '../../components/molecules/PromptWarningModal';
+import { PromptVersionHistory } from '../../components/molecules/PromptVersionHistory';
+import { usePromptVariables } from '../../hooks/usePromptVariables';
+import { Textarea } from '@/components/atoms/Textarea';
 
-export const PromptDetail: React.FC = () => {
+const PromptDetail: React.FC = () => {
   const { phase } = useParams<{ phase: string }>();
   const navigate = useNavigate();
   const [prompt, setPrompt] = useState<Prompt | null>(null);
@@ -167,7 +168,7 @@ export const PromptDetail: React.FC = () => {
   const isViewingActiveVersion = selectedVersionIndex === activeVersionIndex;
 
   return (
-    <div>
+    <div className="bg-background flex h-screen flex-grow flex-col">
       <HeaderPage
         data={{
           title: 'Detalle del Prompt',
@@ -175,50 +176,54 @@ export const PromptDetail: React.FC = () => {
         }}
         onBack={handleBack}
       />
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <p className="text-sm text-gray-500">Actualizado: {formatDate(prompt.updatedAt)}</p>
+      <div className="container mx-auto px-4 py-2 sm:px-8 sm:py-4">
+        <div className="mb-4">
+          <p className="text-muted text-xs sm:text-sm">
+            Actualizado: {formatDate(prompt.updatedAt)}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Panel principal con el editor */}
           <div className="lg:col-span-2">
-            <div className="rounded-lg bg-white p-6 shadow-md">
-              <h3 className="mb-4 text-lg font-medium text-gray-800">Editor de Prompt</h3>
-              <textarea
+            <div className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm sm:p-6">
+              <h3 className="text-md mb-4 font-medium sm:text-lg">Editor de Prompt</h3>
+              <Textarea
                 value={activeContent}
                 onChange={(e) => setActiveContent(e.target.value)}
-                className="mb-4 h-64 w-full rounded-md border border-gray-300 p-3 font-mono text-sm"
                 placeholder="Contenido del prompt..."
+                className="min-h-[250px]"
+                disabled={isChangingVersion}
               />
+
               <div className="flex justify-end gap-2">
                 {!isViewingActiveVersion && (
                   <Button
                     onClick={handleUseVersion}
-                    disabled={isChangingVersion}
+                    disabled={isChangingVersion || isSaving}
                     variant="outline"
-                    className="min-w-[120px]"
+                    className="mt-4"
                   >
-                    {isChangingVersion ? <Spinner className="h-5 w-5" /> : 'Usar Versión'}
+                    {isChangingVersion ? 'Cambiando...' : 'Usar Versión'}
                   </Button>
                 )}
                 {hasContentChanged && (
-                  <Button onClick={handleRevertChanges} variant="outline" className="min-w-[120px]">
+                  <Button onClick={handleRevertChanges} variant="outline" className="mt-4">
                     Descartar cambios
                   </Button>
                 )}
                 <Button
+                  className="mt-4"
                   onClick={handleSaveClick}
                   disabled={isSaving || !hasContentChanged}
-                  className="min-w-[120px]"
                 >
-                  {isSaving ? <Spinner className="h-5 w-5" /> : 'Guardar Cambios'}
+                  {isSaving ? 'Guardando...' : 'Guardar Cambios'}
                 </Button>
               </div>
             </div>
 
             {/* Variables Input */}
-            <PromptVariables variables={inputVariables} className="mt-6" />
+            <PromptVariables variables={inputVariables} className="mt-4" />
           </div>
 
           {/* Panel de histórico de versiones */}
@@ -243,3 +248,5 @@ export const PromptDetail: React.FC = () => {
     </div>
   );
 };
+
+export default PromptDetail;

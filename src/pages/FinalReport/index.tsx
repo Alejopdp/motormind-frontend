@@ -9,7 +9,7 @@ import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
 import { DiagnosisRating } from '@/types/DiagnosisRating';
 import Spinner from '@/components/atoms/Spinner';
-import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
+import HeaderPage from '@/components/molecules/HeaderPage';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
 import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';

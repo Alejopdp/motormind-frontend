@@ -1,3 +1,4 @@
+import { Badge } from '@/components/atoms/Badge';
 import { cn } from '@/utils/cn';
 
 interface PromptVariablesProps {
@@ -9,20 +10,18 @@ export const PromptVariables = ({ variables, className }: PromptVariablesProps) 
   if (!variables.length) return null;
 
   return (
-    <div className={cn('rounded-lg bg-white p-6 shadow-md', className)}>
-      <h3 className="mb-4 text-lg font-medium text-gray-800">Variables Input</h3>
+    <div
+      className={cn(
+        'space-y-2 rounded-lg border border-gray-300 bg-white p-4 shadow-sm sm:space-y-4 sm:p-6',
+        className,
+      )}
+    >
+      <h3 className="text-md font-medium sm:text-lg">Variables Input</h3>
       <div className="flex flex-wrap gap-2">
         {variables.map((variable, index) => (
-          <div
-            key={index}
-            className={cn(
-              'rounded-md border px-3 py-1.5',
-              'border-blue-200 bg-blue-50',
-              'font-mono text-sm text-blue-700',
-            )}
-          >
+          <Badge variant="outline" key={index} className="px-3 py-2">
             {variable}
-          </div>
+          </Badge>
         ))}
       </div>
     </div>

@@ -8,7 +8,7 @@ import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
 import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';
 import FaultCardCollapsible from '@/components/molecules/FaultCardCollapsible';
-import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
+import HeaderPage from '@/components/molecules/HeaderPage';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import { VoiceTextInput } from '@/components/VoiceTextInput';
 import OBDCodeInput from '@/components/molecules/ObdCodeInput';
