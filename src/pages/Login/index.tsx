@@ -5,6 +5,8 @@ import axios from 'axios';
 import { apiUrl } from '@/constants/env';
 import { Input } from '@/components/atoms/Input';
 import { Button } from '@/components/atoms/Button';
+import { useAuth } from '@/context/Auth.context';
+import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -12,6 +14,14 @@ const Login: React.FC = () => {
   const [linkSent, setLinkSent] = useState(false);
   const [timer, setTimer] = useState(30);
   const { enqueueSnackbar } = useSnackbar();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!linkSent) return;
