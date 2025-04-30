@@ -103,10 +103,14 @@ const PreliminaryDiagnosis = () => {
     createFinalReportMutation({ observations, obdCodes });
   };
 
+  const onBack = () => {
+    navigate(`/cars/${params.carId}`);
+  };
+
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={() => navigate(-1)}
+        onBack={onBack}
         data={{
           title: 'Informe Preliminar IA',
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,

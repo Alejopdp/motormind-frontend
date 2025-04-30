@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AlertCircle, ArrowLeftIcon, SaveIcon, Share2Icon, StarIcon } from 'lucide-react';
+import { AlertCircle, ArrowLeftIcon, CircleCheckBig, Share2Icon, StarIcon } from 'lucide-react';
 
 import { useApi } from '@/hooks/useApi';
 import { Car } from '@/types/Car';
@@ -20,6 +20,7 @@ import { Conclusion } from './Conclusion';
 import { PrimaryRepairSection } from './PrimaryRepairSection';
 import { EstimatedResources } from './EstimatedResources';
 import { useSymptom } from '@/hooks/useSymptom';
+import { DIAGNOSIS_STATUS } from '@/constants';
 
 const FinalReport = () => {
   const params = useParams();
@@ -66,28 +67,16 @@ const FinalReport = () => {
   }, [diagnosis]);
 
   const { mutate: updateFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
-    mutationFn: async ({
-      finalNotes,
-      ratingNotes,
-      wasUseful,
-    }: {
-      finalNotes?: string;
-      ratingNotes?: string;
-      wasUseful?: boolean;
-    }) => {
-      const response = await updateFinalReportRequest(
-        { finalNotes, ratingNotes, wasUseful },
-        undefined,
-        {
-          carId: params.carId as string,
-          diagnosisId: params.diagnosisId as string,
-        },
-      );
+    mutationFn: async ({ finalNotes }: { finalNotes?: string }) => {
+      const response = await updateFinalReportRequest({ finalNotes }, undefined, {
+        carId: params.carId as string,
+        diagnosisId: params.diagnosisId as string,
+      });
       return response.data;
     },
     onSuccess: () => {
       enqueueSnackbar('Diagnóstico final actualizado correctamente', { variant: 'success' });
-      if (diagnosis.wasUseful === undefined) setIsRatingModalOpen(true);
+      setIsRatingModalOpen(true);
     },
     onError: () => {
       enqueueSnackbar('Error al guardar. Por favor, inténtalo de nuevo.', {
@@ -207,12 +196,10 @@ const FinalReport = () => {
             <span className="hidden sm:inline">Compartir</span>
           </Button>
 
-          {diagnosis.wasUseful === undefined && (
-            <Button variant="ghost" onClick={() => setIsRatingModalOpen(true)}>
-              <StarIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">Valorar</span>
-            </Button>
-          )}
+          <Button variant="ghost" onClick={() => setIsRatingModalOpen(true)}>
+            <StarIcon className="h-4 w-4" />
+            <span className="hidden sm:inline">Valorar</span>
+          </Button>
         </div>
 
         <div className="flex gap-3">
@@ -224,16 +211,18 @@ const FinalReport = () => {
             <ArrowLeftIcon className="h-4 w-4" />
             Volver <span className="hidden sm:inline">al detalle del Vehículo</span>
           </Button>
-          <Button
-            onClick={onUpdateReport}
-            disabled={isLoadingFinalReport || finalNotes.length === 0}
-          >
-            <SaveIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {isLoadingFinalReport ? 'Cargando...' : 'Guardar Notas Adicionales'}
-            </span>
-            <span className="sm:hidden">{isLoadingFinalReport ? 'Cargando...' : 'Guardar'}</span>
-          </Button>
+          {diagnosis.status !== DIAGNOSIS_STATUS.REPAIRED && (
+            <Button
+              onClick={onUpdateReport}
+              disabled={isLoadingFinalReport || finalNotes.length === 0}
+            >
+              <CircleCheckBig className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isLoadingFinalReport ? 'Cargando...' : 'Marcar Reparación Completa'}
+              </span>
+              <span className="sm:hidden">{isLoadingFinalReport ? 'Cargando...' : 'Guardar'}</span>
+            </Button>
+          )}
         </div>
       </div>
 

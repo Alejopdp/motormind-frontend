@@ -6,6 +6,7 @@ export type Diagnosis = {
   answers: string;
   processedAnswers: string;
   questions: string[];
+  status: string;
   processedFault: {
     symptomCleaned: string;
     category: string;

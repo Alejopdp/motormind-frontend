@@ -6,6 +6,8 @@ import { cn } from '@/utils/cn';
 import { getInitials } from '@/utils';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
+import { Badge } from '@/components/atoms/Badge';
+import { DIAGNOSIS_STATUS } from '@/constants';
 
 interface DiagnosticListItemProps {
   vehicle?: {
@@ -16,12 +18,12 @@ interface DiagnosticListItemProps {
     vinCode: string;
   };
   problems: string[];
+  questions: string[];
   technician?: {
     name: string;
     avatar?: string;
   };
-  // status: 'Pendiente' | 'En Progreso' | 'Completado';
-  // priority?: 'Baja' | 'Media' | 'Alta';
+  status: (typeof DIAGNOSIS_STATUS)[keyof typeof DIAGNOSIS_STATUS];
   timestamp: string;
   className?: string;
   diagnosisLink: string;
@@ -30,14 +32,46 @@ interface DiagnosticListItemProps {
 export const DiagnosticListItem = ({
   vehicle,
   problems,
+  questions,
   technician,
   timestamp,
   className,
   diagnosisLink,
+  status,
 }: DiagnosticListItemProps) => {
   const copyDiagnosis = (link: string) => {
     navigator.clipboard.writeText(link);
     enqueueSnackbar('🔗 Link del diagnóstico copiado', { variant: 'success' });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case DIAGNOSIS_STATUS.GUIDED_QUESTIONS:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+      case DIAGNOSIS_STATUS.PRELIMINARY:
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case DIAGNOSIS_STATUS.IN_REPARATION:
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case DIAGNOSIS_STATUS.REPAIRED:
+        return 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case DIAGNOSIS_STATUS.GUIDED_QUESTIONS:
+        return 'Preguntas Guíadas';
+      case DIAGNOSIS_STATUS.PRELIMINARY:
+        return 'Pre-Diagnóstico';
+      case DIAGNOSIS_STATUS.IN_REPARATION:
+        return 'En Reparación';
+      case DIAGNOSIS_STATUS.REPAIRED:
+        return 'Reparado';
+      default:
+        return status;
+    }
   };
 
   return (
@@ -63,29 +97,53 @@ export const DiagnosticListItem = ({
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              copyDiagnosis(diagnosisLink);
-            }}
-          >
-            <Share2Icon className="text-primary h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {status && (
+              <Badge
+                variant="outline"
+                className={`${getStatusColor(status)} px-2 py-0.5 text-xs font-medium`}
+              >
+                {getStatusText(status)}
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                copyDiagnosis(diagnosisLink);
+              }}
+            >
+              <Share2Icon className="text-primary h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
-        <div className="mb-3">
-          <p className="mb-1 text-xs sm:text-sm">Problemas detectados:</p>
-          <ul className="space-y-1">
-            {problems.map((problem, index) => (
-              <li key={index} className="text-muted flex items-start">
-                <span className="mr-2 text-xs sm:text-sm">•</span>
-                <span className="text-xs sm:text-sm">{problem}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {status === DIAGNOSIS_STATUS.GUIDED_QUESTIONS ? (
+          <div className="mb-3">
+            <p className="mb-1 text-xs sm:text-sm">Preguntas guiadas:</p>
+            <ul className="space-y-1">
+              {questions.map((question, index) => (
+                <li key={index} className="text-muted flex items-start">
+                  <span className="mr-2 text-xs sm:text-sm">•</span>
+                  <span className="text-xs sm:text-sm">{question}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="mb-3">
+            <p className="mb-1 text-xs sm:text-sm">Problemas detectados:</p>
+            <ul className="space-y-1">
+              {problems.map((problem, index) => (
+                <li key={index} className="text-muted flex items-start">
+                  <span className="mr-2 text-xs sm:text-sm">•</span>
+                  <span className="text-xs sm:text-sm">{problem}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="flex items-center justify-between border-t border-gray-100 pt-3">
           <div className="flex items-center gap-2">

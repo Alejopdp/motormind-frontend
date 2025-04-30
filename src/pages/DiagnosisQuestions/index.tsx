@@ -95,7 +95,7 @@ const DiagnosisQuestions = () => {
         return response.data;
       },
       onSuccess: (data) => {
-        navigate(`/cars/${params.carId}/diagnosis/${data._id}`);
+        navigate(`/cars/${params.carId}/diagnosis/${data._id}/preliminary-report`);
       },
       onError: () => {
         enqueueSnackbar('Error al generar el diagnóstico. Por favor, inténtalo de nuevo.', {

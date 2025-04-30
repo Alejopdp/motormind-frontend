@@ -84,7 +84,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/cars/:carId/diagnosis/:diagnosisId',
+    path: '/cars/:carId/diagnosis/:diagnosisId/preliminary-report',
     element: (
       <ErrorBoundary>
         <PreliminaryDiagnosis />
