@@ -1,17 +1,8 @@
 import { useEffect, useState } from 'react';
 import Spinner from '@/components/atoms/Spinner';
+import MetricsSection from '@/components/molecules/MetricsSection';
 import apiService from '@/service/api.service';
-
-interface DiagnosisMetrics {
-  timeToPreliminary: number;
-  timeToFinal: number;
-  averageTimeToFinal: number;
-  averageTimeToRepaired: number;
-  totalDiagnoses: number;
-  completedDiagnoses: number;
-  repairedDiagnoses: number;
-  timeSavedInHours: number;
-}
+import { DiagnosisMetrics } from '@/types/DiagnosisMetrics';
 
 export default function Metrics() {
   const [metrics, setMetrics] = useState<DiagnosisMetrics | null>(null);
@@ -66,81 +57,107 @@ export default function Metrics() {
     );
   }
 
+  const usageMetrics = [
+    {
+      title: 'Tiempo Ahorrado',
+      value: metrics.timeSavedInHours,
+      unit: 'horas ahorradas',
+      tooltip:
+        'Tiempo total que se ha ahorrado en diagnósticos gracias a Motormind, comparado con el método tradicional.',
+    },
+    {
+      title: 'Total de Diagnósticos',
+      value: metrics.totalDiagnoses,
+      unit: 'diagnósticos realizados',
+      tooltip: 'Número total de diagnósticos que se han iniciado en la plataforma.',
+    },
+    {
+      title: 'Diagnósticos Completados',
+      value: metrics.completedDiagnoses,
+      description:
+        metrics.totalDiagnoses > 0
+          ? `${Math.round((metrics.completedDiagnoses / metrics.totalDiagnoses) * 100)}% completados`
+          : '0% completados',
+      tooltip:
+        'Porcentaje de diagnósticos que han sido completados exitosamente, incluyendo informe final.',
+    },
+    {
+      title: 'Diagnósticos Reparados',
+      value: metrics.repairedDiagnoses,
+      description:
+        metrics.totalDiagnoses > 0
+          ? `${Math.round((metrics.repairedDiagnoses / metrics.totalDiagnoses) * 100)}% reparados`
+          : '0% reparados',
+      tooltip:
+        'Porcentaje de diagnósticos donde el vehículo fue reparado exitosamente después del diagnóstico.',
+    },
+    {
+      title: 'Tiempo hasta Informe Preliminar',
+      value: Math.round(metrics.timeToPreliminary),
+      unit: 'minutos promedio',
+      tooltip: 'Tiempo promedio que toma generar el primer informe preliminar de diagnóstico.',
+    },
+    {
+      title: 'Tiempo hasta Informe Final',
+      value: Math.round(metrics.timeToFinal),
+      unit: 'minutos promedio',
+      tooltip: 'Tiempo promedio que toma completar el informe final de diagnóstico.',
+    },
+    {
+      title: 'Tiempo Promedio Total',
+      value: Math.round(metrics.averageTimeToFinal),
+      unit: 'minutos promedio',
+      tooltip: 'Tiempo promedio total desde que se inicia hasta que se completa un diagnóstico.',
+    },
+    {
+      title: 'Tiempo hasta Reparación',
+      value: Math.round(metrics.averageTimeToRepaired),
+      unit: 'minutos promedio',
+      tooltip:
+        'Tiempo promedio que toma desde el inicio del diagnóstico hasta que el vehículo es reparado.',
+    },
+  ];
+
+  const modelQualityMetrics = [
+    {
+      title: 'Score Global Preliminar',
+      value: Math.round(metrics.modelQuality.averageScoreByPhase.preliminary),
+      unit: 'puntos promedio',
+      tooltip:
+        'Calificación promedio de la calidad del diagnóstico preliminar, basada en la precisión y completitud.',
+    },
+    {
+      title: 'Score Global Final',
+      value: Math.round(metrics.modelQuality.averageScoreByPhase.final),
+      unit: 'puntos promedio',
+      tooltip:
+        'Calificación promedio de la calidad del diagnóstico final, basada en la precisión y completitud.',
+    },
+    {
+      title: 'Diagnósticos con Código OBD',
+      value: Math.round(metrics.modelQuality.obdCodePercentage),
+      unit: '%',
+      description: 'de diagnósticos incluyen códigos OBD',
+      tooltip:
+        'Porcentaje de diagnósticos que incluyen códigos de error OBD identificados automáticamente.',
+    },
+    {
+      title: 'Diagnósticos con Video',
+      value: Math.round(metrics.modelQuality.videoRecommendationPercentage),
+      unit: '%',
+      description: 'de diagnósticos incluyen videos',
+      tooltip:
+        'Porcentaje de diagnósticos que incluyen videos recomendados para ayudar en la reparación.',
+    },
+  ];
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="mb-8 text-3xl font-bold">Métricas de Diagnóstico</h1>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {/* Tiempo ahorrado */}
-        <div className="rounded-lg bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-md">
-          <h3 className="text-lg font-semibold text-green-700">Tiempo Ahorrado</h3>
-          <p className="mt-2 text-4xl font-bold text-green-600">{metrics.timeSavedInHours}</p>
-          <p className="mt-2 text-sm text-green-700">horas ahorradas</p>
-        </div>
+      <MetricsSection title="Uso de Motormind" metrics={usageMetrics} columns={4} />
 
-        {/* Total de diagnósticos */}
-        <div className="rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-md">
-          <h3 className="text-lg font-semibold text-blue-700">Total de Diagnósticos</h3>
-          <p className="mt-2 text-4xl font-bold text-blue-600">{metrics.totalDiagnoses}</p>
-          <p className="mt-2 text-sm text-blue-700">diagnósticos realizados</p>
-        </div>
-
-        {/* Diagnósticos completados */}
-        <div className="rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-md">
-          <h3 className="text-lg font-semibold text-purple-700">Diagnósticos Completados</h3>
-          <p className="mt-2 text-4xl font-bold text-purple-600">{metrics.completedDiagnoses}</p>
-          <p className="mt-2 text-sm text-purple-700">
-            {metrics.totalDiagnoses > 0
-              ? `${Math.round((metrics.completedDiagnoses / metrics.totalDiagnoses) * 100)}% completados`
-              : '0% completados'}
-          </p>
-        </div>
-
-        {/* Diagnósticos reparados */}
-        <div className="rounded-lg bg-gradient-to-br from-amber-50 to-amber-100 p-6 shadow-md">
-          <h3 className="text-lg font-semibold text-amber-700">Diagnósticos Reparados</h3>
-          <p className="mt-2 text-4xl font-bold text-amber-600">{metrics.repairedDiagnoses}</p>
-          <p className="mt-2 text-sm text-amber-700">
-            {metrics.totalDiagnoses > 0
-              ? `${Math.round((metrics.repairedDiagnoses / metrics.totalDiagnoses) * 100)}% reparados`
-              : '0% reparados'}
-          </p>
-        </div>
-
-        {/* Tiempo hasta informe preliminar */}
-        <div className="rounded-lg bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 shadow-md">
-          <h3 className="text-lg font-semibold text-indigo-700">Tiempo hasta Informe Preliminar</h3>
-          <p className="mt-2 text-4xl font-bold text-indigo-600">
-            {Math.round(metrics.timeToPreliminary)}
-          </p>
-          <p className="mt-2 text-sm text-indigo-700">minutos promedio</p>
-        </div>
-
-        {/* Tiempo hasta informe final */}
-        <div className="rounded-lg bg-gradient-to-br from-rose-50 to-rose-100 p-6 shadow-md">
-          <h3 className="text-lg font-semibold text-rose-700">Tiempo hasta Informe Final</h3>
-          <p className="mt-2 text-4xl font-bold text-rose-600">{Math.round(metrics.timeToFinal)}</p>
-          <p className="mt-2 text-sm text-rose-700">minutos promedio</p>
-        </div>
-
-        {/* Tiempo promedio total */}
-        <div className="rounded-lg bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 shadow-md">
-          <h3 className="text-lg font-semibold text-cyan-700">Tiempo Promedio Total</h3>
-          <p className="mt-2 text-4xl font-bold text-cyan-600">
-            {Math.round(metrics.averageTimeToFinal)}
-          </p>
-          <p className="mt-2 text-sm text-cyan-700">minutos promedio</p>
-        </div>
-
-        {/* Tiempo promedio hasta reparación */}
-        <div className="rounded-lg bg-gradient-to-br from-teal-50 to-teal-100 p-6 shadow-md">
-          <h3 className="text-lg font-semibold text-teal-700">Tiempo hasta Reparación</h3>
-          <p className="mt-2 text-4xl font-bold text-teal-600">
-            {Math.round(metrics.averageTimeToRepaired)}
-          </p>
-          <p className="mt-2 text-sm text-teal-700">minutos promedio</p>
-        </div>
-      </div>
+      <MetricsSection title="Calidad del Modelo" metrics={modelQualityMetrics} columns={3} />
     </div>
   );
 }
