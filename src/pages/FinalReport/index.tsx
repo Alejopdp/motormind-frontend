@@ -90,13 +90,16 @@ const FinalReport = () => {
     onSuccess: (updatedDiagnosis) => {
       enqueueSnackbar('Diagnóstico final actualizado correctamente', { variant: 'success' });
       setIsConfirmationModalOpen(false);
-      setIsRatingModalOpen(true);
+      if (!diagnosis.rating?._id) {
+        setIsRatingModalOpen(true);
+      }
       queryClient.setQueryData(
         ['getDiagnosisById', params.diagnosisId],
         (oldData: { data: Diagnosis }) => ({
           data: {
             ...oldData.data,
             status: updatedDiagnosis.status,
+            finalNotes: updatedDiagnosis.finalNotes,
           },
         }),
       );
@@ -114,9 +117,22 @@ const FinalReport = () => {
         const response = await createDiagnosisRating(data);
         return response.data;
       },
-      onSuccess: () => {
+      onSuccess: (rating) => {
         enqueueSnackbar('Valoración enviada, Muchas gracias!', { variant: 'success' });
         setIsRatingModalOpen(false);
+        queryClient.setQueryData(
+          ['getDiagnosisById', params.diagnosisId],
+          (oldData: { data: Diagnosis }) => ({
+            data: {
+              ...oldData.data,
+              rating: {
+                _id: rating._id,
+                wasUseful: rating.wasUseful,
+                notes: rating.notes,
+              },
+            },
+          }),
+        );
       },
       onError: () => {
         enqueueSnackbar('Error al guardar la valoración. Por favor, inténtalo de nuevo.', {
@@ -148,6 +164,10 @@ const FinalReport = () => {
 
   const markAsRepaired = () => {
     setIsConfirmationModalOpen(true);
+  };
+
+  const updateFinalNotes = () => {
+    updateFinalReportMutation({ finalNotes });
   };
 
   const handleConfirmRepair = () => {
@@ -223,10 +243,12 @@ const FinalReport = () => {
             <span className="hidden sm:inline">Compartir</span>
           </Button>
 
-          <Button variant="ghost" onClick={() => setIsRatingModalOpen(true)}>
-            <StarIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">Valorar</span>
-          </Button>
+          {!diagnosis.rating?._id && (
+            <Button variant="ghost" onClick={() => setIsRatingModalOpen(true)}>
+              <StarIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">Valorar</span>
+            </Button>
+          )}
         </div>
 
         <div className="flex gap-3">
@@ -235,9 +257,24 @@ const FinalReport = () => {
             onClick={() => navigate(`/cars/${params.carId}`)}
             disabled={isLoadingFinalReport}
           >
-            <ArrowLeftIcon className="h-4 w-4" />
+            <ArrowLeftIcon className="hidden h-4 w-4 sm:block" />
             Volver <span className="hidden sm:inline">al detalle del Vehículo</span>
           </Button>
+
+          {diagnosis.status === DIAGNOSIS_STATUS.REPAIRED && !!diagnosis.finalNotes && (
+            <Button
+              onClick={updateFinalNotes}
+              disabled={diagnosis.finalNotes === finalNotes || isLoadingFinalReport}
+            >
+              <span className="hidden sm:inline">
+                {isLoadingFinalReport ? 'Guardando...' : 'Guardar Cambios'}
+              </span>
+              <span className="sm:hidden">
+                {isLoadingFinalReport ? 'Guardando ...' : 'Guardar'}
+              </span>
+            </Button>
+          )}
+
           {diagnosis.status !== DIAGNOSIS_STATUS.REPAIRED ? (
             <Button
               onClick={markAsRepaired}
@@ -251,7 +288,7 @@ const FinalReport = () => {
             </Button>
           ) : (
             <Button disabled className="bg-green-600 text-white">
-              <CircleCheckBig className="h-4 w-4 text-white" />
+              <CircleCheckBig className="hidden h-4 w-4 text-white sm:block" />
               Reparado
             </Button>
           )}

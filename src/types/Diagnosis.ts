@@ -64,6 +64,11 @@ export type Diagnosis = {
   wasUseful?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  rating?: {
+    _id: string;
+    notes: string;
+    scoreStrictFormat: number;
+  };
   car?: {
     _id: string;
     model: string;
