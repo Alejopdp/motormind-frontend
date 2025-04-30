@@ -11,7 +11,7 @@ import { TechnicanObservationsInputForm } from '@/components/molecules/Technican
 import { QuestionsList } from '@/components/atoms/QuestionsList';
 import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
-import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
+import HeaderPage from '@/components/molecules/HeaderPage';
 
 const DiagnosisQuestions = () => {
   const params = useParams();

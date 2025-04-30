@@ -9,7 +9,7 @@ import VehicleInformation from '@/components/molecules/VehicleInformation/Vehicl
 import VehicleFaultsHistory from '@/components/molecules/VehicleFaultsHistory/VehicleFaultsHistory';
 import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
-import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
+import HeaderPage from '@/components/molecules/HeaderPage';
 import { PlusIcon } from 'lucide-react';
 
 const CarDetails = () => {

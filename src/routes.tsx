@@ -15,6 +15,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './pages/NotFound';
 import AiEvaluations from './pages/Diagnoses/AiEvaluations';
 import AiEvaluationDetails from './pages/Diagnoses/AiEvaluationDetails';
+import PromptManager from './pages/PromptManager';
+import PromptDetail from './pages/PromptDetails';
 
 const router = createBrowserRouter([
   {
@@ -65,6 +67,14 @@ const router = createBrowserRouter([
           </ErrorBoundary>
         ),
       },
+      {
+        path: '/prompts',
+        element: (
+          <ErrorBoundary>
+            <PromptManager />
+          </ErrorBoundary>
+        ),
+      },
     ],
   },
   {
@@ -104,6 +114,14 @@ const router = createBrowserRouter([
     element: (
       <ErrorBoundary>
         <CarDetails />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/prompts/:phase',
+    element: (
+      <ErrorBoundary>
+        <PromptDetail />
       </ErrorBoundary>
     ),
   },
