@@ -1,6 +1,7 @@
 import { Button } from '@/components/atoms/Button';
 import { VoiceTextInput } from '@/components/VoiceTextInput';
 import { useState } from 'react';
+import { LoadingModal } from '../LoadingModal';
 
 interface TechnicanObservationsInputFormProps {
   initialDetails?: string;
@@ -27,55 +28,58 @@ export const TechnicanObservationsInputForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white shadow-sm">
-      <div className="p-4 sm:p-6">
-        <h2 className="text-md mb-3 font-semibold sm:text-xl">Observaciones Detalladas</h2>
+    <>
+      <form
+        onSubmit={handleSubmit}
+        className="rounded-lg border border-gray-200 bg-white shadow-sm"
+      >
+        <div className="p-4 sm:p-6">
+          <h2 className="text-md mb-3 font-semibold sm:text-xl">Observaciones Detalladas</h2>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <p className="sm:text-md pl-1 text-sm">
-              Añade tus observaciones detalladas sobre las respuestas a las preguntas anteriores y
-              cualquier otra información relevante.
-            </p>
-            <VoiceTextInput
-              placeholder="Observaciones del técnico..."
-              className="min-h-[150px]"
-              value={details}
-              onChange={setDetails}
-              disabled={isLoadingMoreQuestions || isLoadingDiagnosis}
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="sm:text-md pl-1 text-sm">
+                Añade tus observaciones detalladas sobre las respuestas a las preguntas anteriores y
+                cualquier otra información relevante.
+              </p>
+              <VoiceTextInput
+                placeholder="Observaciones del técnico..."
+                className="min-h-[150px]"
+                value={details}
+                onChange={setDetails}
+                disabled={isLoadingMoreQuestions || isLoadingDiagnosis}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex flex-wrap justify-end gap-3 rounded-b-lg border-t border-gray-200 bg-gray-50 px-6 py-4">
-        {!disableMoreQuestions && (
+        <div className="flex flex-wrap justify-end gap-3 rounded-b-lg border-t border-gray-200 bg-gray-50 px-6 py-4">
+          {!disableMoreQuestions && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onGenerateMoreQuestions}
+              disabled={isLoadingMoreQuestions}
+            >
+              <span className="sm:hidden">
+                {isLoadingMoreQuestions ? 'Generando...' : 'Generar +'}
+              </span>
+              <span className="hidden sm:inline">
+                {isLoadingMoreQuestions ? 'Generando...' : 'Generar Más Preguntas'}
+              </span>
+            </Button>
+          )}
           <Button
-            type="button"
-            variant="outline"
-            onClick={onGenerateMoreQuestions}
-            disabled={isLoadingMoreQuestions}
+            disabled={isLoadingMoreQuestions || isLoadingDiagnosis || details.length === 0}
+            type="submit"
           >
-            <span className="sm:hidden">
-              {isLoadingMoreQuestions ? 'Generando...' : 'Generar +'}
-            </span>
-            <span className="hidden sm:inline">
-              {isLoadingMoreQuestions ? 'Generando...' : 'Generar Más Preguntas'}
-            </span>
+            <span className="sm:hidden">Crear Informe Pre.</span>
+            <span className="hidden sm:inline">Crear Informe Preliminar</span>
           </Button>
-        )}
-        <Button
-          disabled={isLoadingMoreQuestions || isLoadingDiagnosis || details.length === 0}
-          type="submit"
-        >
-          <span className="sm:hidden">
-            {isLoadingDiagnosis ? 'Generando...' : 'Crear Informe Pre.'}
-          </span>
-          <span className="hidden sm:inline">
-            {isLoadingDiagnosis ? 'Generando...' : 'Crear Informe Preliminar'}
-          </span>
-        </Button>
-      </div>
-    </form>
+        </div>
+      </form>
+
+      <LoadingModal isOpen={isLoadingDiagnosis} message="Generando informe preliminar" />
+    </>
   );
 };

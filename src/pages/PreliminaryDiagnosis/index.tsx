@@ -12,6 +12,7 @@ import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import { VoiceTextInput } from '@/components/VoiceTextInput';
 import OBDCodeInput from '@/components/molecules/ObdCodeInput';
+import { LoadingModal } from '@/components/molecules/LoadingModal';
 import { useApi } from '@/hooks/useApi';
 import { useSymptom } from '@/hooks/useSymptom';
 import { Car } from '@/types/Car';
@@ -190,13 +191,13 @@ const PreliminaryDiagnosis = () => {
             disabled={isLoadingFinalReport || observations.length === 0}
           >
             <FileTextIcon className="h-4 w-4" />
-            <span className="sm:hidden">{isLoadingFinalReport ? 'Generando...' : 'Generar'}</span>
-            <span className="hidden sm:inline">
-              {isLoadingFinalReport ? 'Generando...' : 'Generar Informe Final'}
-            </span>
+            <span className="sm:hidden">Generar</span>
+            <span className="hidden sm:inline">Generar Informe Final</span>
           </Button>
         </div>
       </div>
+
+      <LoadingModal isOpen={isLoadingFinalReport} message="Generando informe final" />
     </div>
   );
 };
