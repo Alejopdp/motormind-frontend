@@ -7,9 +7,10 @@ import { Badge } from '@/components/atoms/Badge';
 interface OBDCodeInputProps {
   initialCodes?: string[];
   onChange?: (codes: string[]) => void;
+  disabled?: boolean;
 }
 
-export default function OBDCodeInput({ initialCodes = [], onChange }: OBDCodeInputProps) {
+export default function OBDCodeInput({ initialCodes = [], onChange, disabled }: OBDCodeInputProps) {
   const [codes, setCodes] = useState<string[]>(initialCodes);
   const [inputValue, setInputValue] = useState('');
 
@@ -72,6 +73,7 @@ export default function OBDCodeInput({ initialCodes = [], onChange }: OBDCodeInp
           onKeyDown={handleKeyDown}
           onBlur={() => inputValue && addCode(inputValue)}
           placeholder={codes.length ? '' : 'Ingresa códigos OBD (ej: P0301) y presiona Enter'}
+          disabled={disabled}
         />
       </div>
 

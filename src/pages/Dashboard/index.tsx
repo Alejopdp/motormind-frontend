@@ -76,7 +76,7 @@ const Dashboard = () => {
                 {diagnoses.map((diagnosis, index) => (
                   <DiagnosticListItem
                     key={index}
-                    diagnosisLink={diagnosisLink(diagnosis)}
+                    diagnosisLink={diagnosisLink(diagnosis, true)}
                     vehicle={diagnosis.car}
                     problems={
                       diagnosis.preliminary?.possibleReasons.map(({ title }) => title) || []

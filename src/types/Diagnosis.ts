@@ -79,6 +79,7 @@ export type Diagnosis = {
     name: string;
     avatar?: string;
   };
+  markedAsRepairedBy?: string;
 };
 
 export type AiDiagnosisEvaluation = {

@@ -21,6 +21,14 @@ import { PrimaryRepairSection } from './PrimaryRepairSection';
 import { EstimatedResources } from './EstimatedResources';
 import { useSymptom } from '@/hooks/useSymptom';
 import { DIAGNOSIS_STATUS } from '@/constants';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/atoms/Dialog';
 
 const FinalReport = () => {
   const params = useParams();
@@ -30,12 +38,17 @@ const FinalReport = () => {
   const queryClient = useQueryClient();
   const [finalNotes, setFinalNotes] = useState('');
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: updateFinalReportRequest } = useApi<Diagnosis>(
     'put',
     '/cars/:carId/diagnosis/:diagnosisId',
   );
   const { execute: createDiagnosisRating } = useApi<DiagnosisRating>('post', '/diagnosis-ratings');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -74,9 +87,19 @@ const FinalReport = () => {
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (updatedDiagnosis) => {
       enqueueSnackbar('Diagnóstico final actualizado correctamente', { variant: 'success' });
+      setIsConfirmationModalOpen(false);
       setIsRatingModalOpen(true);
+      queryClient.setQueryData(
+        ['getDiagnosisById', params.diagnosisId],
+        (oldData: { data: Diagnosis }) => ({
+          data: {
+            ...oldData.data,
+            status: updatedDiagnosis.status,
+          },
+        }),
+      );
     },
     onError: () => {
       enqueueSnackbar('Error al guardar. Por favor, inténtalo de nuevo.', {
@@ -123,7 +146,11 @@ const FinalReport = () => {
     );
   }
 
-  const onUpdateReport = () => {
+  const markAsRepaired = () => {
+    setIsConfirmationModalOpen(true);
+  };
+
+  const handleConfirmRepair = () => {
     updateFinalReportMutation({ finalNotes });
   };
 
@@ -211,9 +238,9 @@ const FinalReport = () => {
             <ArrowLeftIcon className="h-4 w-4" />
             Volver <span className="hidden sm:inline">al detalle del Vehículo</span>
           </Button>
-          {diagnosis.status !== DIAGNOSIS_STATUS.REPAIRED && (
+          {diagnosis.status !== DIAGNOSIS_STATUS.REPAIRED ? (
             <Button
-              onClick={onUpdateReport}
+              onClick={markAsRepaired}
               disabled={isLoadingFinalReport || finalNotes.length === 0}
             >
               <CircleCheckBig className="h-4 w-4" />
@@ -222,9 +249,35 @@ const FinalReport = () => {
               </span>
               <span className="sm:hidden">{isLoadingFinalReport ? 'Cargando...' : 'Guardar'}</span>
             </Button>
+          ) : (
+            <Button disabled className="bg-green-600 text-white">
+              <CircleCheckBig className="h-4 w-4 text-white" />
+              Reparado
+            </Button>
           )}
         </div>
       </div>
+
+      <Dialog open={isConfirmationModalOpen} onOpenChange={setIsConfirmationModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmación</DialogTitle>
+            <DialogDescription>¿Confirmás que este diagnóstico ha sido reparado?</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsConfirmationModalOpen(false)}
+              disabled={isLoadingFinalReport}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmRepair} disabled={isLoadingFinalReport}>
+              {isLoadingFinalReport ? 'Cargando...' : 'Confirmar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <RatingModal
         isOpen={isRatingModalOpen}

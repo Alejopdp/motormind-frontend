@@ -49,9 +49,7 @@ export const RatingModal = ({ isOpen, onClose, onSubmit, isLoading }: RatingModa
           </div>
 
           <div>
-            <p className="text-muted-foreground text-sm">
-              Comentarios sobre el diagnóstico (opcional)
-            </p>
+            <p className="mb-1 text-sm">Comentarios sobre el diagnóstico (opcional)</p>
             <Textarea
               value={ratingNotes}
               onChange={(e) => setRatingNotes(e.target.value)}

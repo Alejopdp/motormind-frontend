@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon } from 'lucide-react';
 
 import { Button } from '@/components/atoms/Button';
@@ -21,6 +21,8 @@ import { ProbabilityLevel } from '@/types/Probability';
 const PreliminaryDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const backQueryParam = searchParams.get('back');
   const [observations, setObservations] = useState('');
   const [obdCodes, setObdCodes] = useState<string[]>([]);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
@@ -104,7 +106,11 @@ const PreliminaryDiagnosis = () => {
   };
 
   const onBack = () => {
-    navigate(`/cars/${params.carId}`);
+    if (backQueryParam === 'true') {
+      navigate(-1); // Go back to the previous page
+    } else {
+      navigate(`/cars/${params.carId}`); // Go back to the route
+    }
   };
 
   return (
@@ -155,7 +161,7 @@ const PreliminaryDiagnosis = () => {
         </div>
 
         {/* OBD Codes Input */}
-        <OBDCodeInput onChange={setObdCodes} />
+        <OBDCodeInput onChange={setObdCodes} disabled={isLoadingFinalReport} />
 
         <div className="mb-20 space-y-1 sm:space-y-2">
           <p className="block text-sm font-medium sm:text-base">
