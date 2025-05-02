@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { getScoreColor } from '@/utils/scoreColors';
 
 interface MetricCardProps {
   title: string;
@@ -7,6 +8,7 @@ interface MetricCardProps {
   description?: string;
   percentage?: boolean;
   tooltip?: string;
+  isScore?: boolean;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({
@@ -16,6 +18,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   description,
   percentage = false,
   tooltip,
+  isScore = false,
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -27,13 +30,14 @@ const MetricCard: React.FC<MetricCardProps> = ({
       const buttonRect = buttonRef.current.getBoundingClientRect();
       const tooltipRect = tooltipRef.current.getBoundingClientRect();
 
-      // Calcular la posición para que aparezca arriba y a la derecha
       const top = buttonRect.top - tooltipRect.height - 10;
       const left = buttonRect.right + 10;
 
       setTooltipPosition({ top, left });
     }
   }, [showTooltip]);
+
+  const scoreColor = isScore ? getScoreColor(Number(value)) : '';
 
   return (
     <div className="group from-primary/5 to-primary/10 relative overflow-hidden rounded-lg bg-gradient-to-br p-6 shadow-md transition-all duration-300 hover:shadow-lg">
@@ -80,10 +84,27 @@ const MetricCard: React.FC<MetricCardProps> = ({
           </div>
         )}
       </div>
-      <p className="text-primary relative mt-2 text-4xl font-bold">
-        {percentage ? `${Math.round(Number(value))}%` : value}
+      <p className={`text-primary/80 relative mt-2 text-4xl font-bold`}>
+        {isScore ? (
+          <>
+            <span className={`text-4xl font-bold ${scoreColor}`}>{Math.round(Number(value))}</span>
+            <span className="text-primary/80 text-4xl font-bold">/100</span>
+          </>
+        ) : percentage ? (
+          <>
+            {Math.round(Number(value))}
+            <span>%</span>
+          </>
+        ) : (
+          <>
+            {value}
+            {unit && <span className="text-primary/80 ml-2 text-sm">{unit}</span>}
+          </>
+        )}
       </p>
-      <p className="text-primary/80 relative mt-2 text-sm">{description || unit}</p>
+      {!percentage && !isScore && description && (
+        <p className="text-primary/80 relative mt-2 text-sm">{description}</p>
+      )}
     </div>
   );
 };

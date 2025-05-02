@@ -1,5 +1,5 @@
 import React from 'react';
-import MetricCard from '../atoms/MetricCard';
+import MetricCard from '../../atoms/MetricCard';
 
 interface MetricItem {
   title: string;
@@ -8,6 +8,7 @@ interface MetricItem {
   description?: string;
   percentage?: boolean;
   tooltip?: string;
+  isScore?: boolean;
 }
 
 interface MetricsSectionProps {
@@ -37,6 +38,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({ title, metrics, columns
             description={metric.description}
             percentage={metric.percentage}
             tooltip={metric.tooltip}
+            isScore={metric.isScore}
           />
         ))}
       </div>

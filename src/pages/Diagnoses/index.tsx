@@ -3,7 +3,6 @@ import { FileSearch, PlusIcon, SearchIcon } from 'lucide-react';
 import { debounce } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
-
 import { diagnosisLink, formatDate } from '@/utils';
 import { useApi } from '@/hooks/useApi';
 import { Diagnosis } from '@/types/Diagnosis';

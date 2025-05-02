@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { promptService } from '@/service/prompt.service';
 import { Button } from '@/components/atoms/Button';
-import { PromptCard } from '@/components/prompts/PromptCard';
+import { PromptCard } from '@/components/molecules/PromptCard';
 import Spinner from '@/components/atoms/Spinner';
 import { Prompt } from '@/types/prompt';
 

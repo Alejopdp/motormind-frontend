@@ -69,50 +69,49 @@ export default function Metrics() {
       title: 'Total de Diagnósticos',
       value: metrics.totalDiagnoses,
       unit: 'diagnósticos realizados',
-      tooltip: 'Número total de diagnósticos que se han iniciado en la plataforma.',
+      tooltip:
+        'Número total de diagnósticos que se han iniciado en la plataforma (no necesariamente completados).',
     },
     {
       title: 'Diagnósticos Completados',
       value: metrics.completedDiagnoses,
       description:
         metrics.totalDiagnoses > 0
-          ? `${Math.round((metrics.completedDiagnoses / metrics.totalDiagnoses) * 100)}% completados`
-          : '0% completados',
-      tooltip:
-        'Porcentaje de diagnósticos que han sido completados exitosamente, incluyendo informe final.',
+          ? `${Math.round((metrics.completedDiagnoses / metrics.totalDiagnoses) * 100)}% respecto al total de diagnósticos`
+          : '0%',
+      tooltip: 'Cantidad de diagnósticos con informe final generado.',
     },
     {
       title: 'Diagnósticos Reparados',
       value: metrics.repairedDiagnoses,
       description:
         metrics.totalDiagnoses > 0
-          ? `${Math.round((metrics.repairedDiagnoses / metrics.totalDiagnoses) * 100)}% reparados`
-          : '0% reparados',
-      tooltip:
-        'Porcentaje de diagnósticos donde el vehículo fue reparado exitosamente después del diagnóstico.',
+          ? `${Math.round((metrics.repairedDiagnoses / metrics.totalDiagnoses) * 100)}% respecto al total de diagnósticos`
+          : '0%',
+      tooltip: 'Cantidad de diagnósticos que se han marcado como reparados.',
     },
     {
       title: 'Tiempo hasta Informe Preliminar',
       value: Math.round(metrics.timeToPreliminary),
-      unit: 'minutos promedio',
-      tooltip: 'Tiempo promedio que toma generar el primer informe preliminar de diagnóstico.',
+      unit: 'minutos',
+      tooltip: 'Tiempo promedio que toma generar el primer informe preliminar de diagnóstico',
     },
     {
       title: 'Tiempo hasta Informe Final',
       value: Math.round(metrics.timeToFinal),
-      unit: 'minutos promedio',
+      unit: 'minutos',
       tooltip: 'Tiempo promedio que toma completar el informe final de diagnóstico.',
     },
     {
       title: 'Tiempo Promedio Total',
       value: Math.round(metrics.averageTimeToFinal),
-      unit: 'minutos promedio',
+      unit: 'minutos',
       tooltip: 'Tiempo promedio total desde que se inicia hasta que se completa un diagnóstico.',
     },
     {
       title: 'Tiempo hasta Reparación',
       value: Math.round(metrics.averageTimeToRepaired),
-      unit: 'minutos promedio',
+      unit: 'minutos',
       tooltip:
         'Tiempo promedio que toma desde el inicio del diagnóstico hasta que el vehículo es reparado.',
     },
@@ -121,31 +120,29 @@ export default function Metrics() {
   const modelQualityMetrics = [
     {
       title: 'Score Global Preliminar',
-      value: Math.round(metrics.modelQuality.averageScoreByPhase.preliminary),
-      unit: 'puntos promedio',
+      value: metrics.modelQuality.averageScoreByPhase.preliminary,
       tooltip:
         'Calificación promedio de la calidad del diagnóstico preliminar, basada en la precisión y completitud.',
+      isScore: true,
     },
     {
       title: 'Score Global Final',
-      value: Math.round(metrics.modelQuality.averageScoreByPhase.final),
-      unit: 'puntos promedio',
+      value: metrics.modelQuality.averageScoreByPhase.final,
       tooltip:
         'Calificación promedio de la calidad del diagnóstico final, basada en la precisión y completitud.',
+      isScore: true,
     },
     {
       title: 'Diagnósticos con Código OBD',
-      value: Math.round(metrics.modelQuality.obdCodePercentage),
-      unit: '%',
-      description: 'de diagnósticos incluyen códigos OBD',
+      value: metrics.modelQuality.obdCodePercentage,
+      percentage: true,
       tooltip:
         'Porcentaje de diagnósticos que incluyen códigos de error OBD identificados automáticamente.',
     },
     {
       title: 'Diagnósticos con Video',
-      value: Math.round(metrics.modelQuality.videoRecommendationPercentage),
-      unit: '%',
-      description: 'de diagnósticos incluyen videos',
+      value: metrics.modelQuality.videoRecommendationPercentage,
+      percentage: true,
       tooltip:
         'Porcentaje de diagnósticos que incluyen videos recomendados para ayudar en la reparación.',
     },
