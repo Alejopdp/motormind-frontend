@@ -195,15 +195,15 @@ const AiEvaluationDetails: React.FC = () => {
         data={{ title: 'Detalles de la Evaluación' }}
         onBack={() => navigate('/audits/evaluations')}
         headerActions={
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Button variant="outline" onClick={() => copyDiagnosis(evaluation?.diagnosisId)}>
-              <Copy className="h-4 w-4" />
+              <Copy className="hidden h-4 w-4 sm:inline" />
               Copiar ID diagnóstico
             </Button>
             <Button
               onClick={() => navigate(diagnosisLink(evaluation?.diagnosis as Diagnosis, true))}
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="hidden h-4 w-4 sm:inline" />
               Ver Diagnóstico
             </Button>
           </div>
@@ -211,29 +211,29 @@ const AiEvaluationDetails: React.FC = () => {
       />
 
       <div className="container mx-auto px-4 py-2 sm:px-8 sm:py-6">
-        <div className="mb-6 overflow-hidden rounded-lg bg-white p-4 shadow-md sm:p-6">
+        <div className="mb-3 overflow-hidden rounded-lg bg-white p-4 shadow-md sm:mb-6 sm:p-6">
           <h2 className="mb-4 text-lg font-semibold sm:text-xl">Información General</h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 sm:gap-4 md:grid-cols-2">
             <div>
-              <p className="text-xs sm:text-sm">ID del Diagnóstico</p>
-              <p className="font-medium">{evaluation.diagnosisId}</p>
+              <p className="text-muted text-xs sm:text-sm">ID del Diagnóstico</p>
+              <p className="text-sm font-medium sm:text-base">{evaluation.diagnosisId}</p>
             </div>
             <div>
-              <p className="text-xs sm:text-sm">Fase</p>
+              <p className="text-muted text-xs sm:text-sm">Fase</p>
               <Badge variant={getPhaseVariant(evaluation.phase)}>{renderPhase()}</Badge>
             </div>
             <div>
-              <p className="text-xs sm:text-sm">Fecha de Creación</p>
-              <p className="font-medium">{formatDate(evaluation.createdAt)}</p>
+              <p className="text-muted text-xs sm:text-sm">Fecha de Creación</p>
+              <p className="text-sm font-medium sm:text-base">{formatDate(evaluation.createdAt)}</p>
             </div>
             <div>
-              <p className="text-xs sm:text-sm">Modelo Evaluador</p>
-              <p className="font-medium">{evaluation.evaluatorModel}</p>
+              <p className="text-muted text-xs sm:text-sm">Modelo Evaluador</p>
+              <p className="text-sm font-medium sm:text-base">{evaluation.evaluatorModel}</p>
             </div>
           </div>
         </div>
 
-        <div className="mb-6 overflow-hidden rounded-lg bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-3 overflow-hidden rounded-lg bg-white p-4 shadow-sm sm:mb-6 sm:p-6">
           <div className="flex items-center justify-between sm:items-start">
             <h2 className="text-lg font-semibold sm:text-xl">Puntuaciones</h2>
 
@@ -269,32 +269,36 @@ const AiEvaluationDetails: React.FC = () => {
           </div>
         </div>
 
-        <div className="mb-3 overflow-hidden rounded-lg bg-white p-4 shadow-sm sm:mb-6 sm:p-6">
+        <div className="mb-3 overflow-hidden rounded-lg bg-white p-4 shadow-sm sm:sm:mb-6 sm:p-6">
           <h2 className="mb-4 text-lg font-semibold sm:text-xl">Evaluación Detallada</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <h3 className="mb-2 font-medium">Fortalezas</h3>
-              <ul className="text-muted list-inside list-disc space-y-1">
+              <h3 className="mb-2 text-sm font-medium sm:text-base">Fortalezas</h3>
+              <ul className="text-muted list-inside list-disc space-y-1 text-sm sm:text-base">
                 {evaluation.detailedEvaluation.strengths.map((strength, index) => (
                   <li key={index}>{strength}</li>
                 ))}
               </ul>
             </div>
             <div>
-              <h3 className="mb-2 font-medium">Debilidades</h3>
-              <ul className="text-muted list-inside list-disc space-y-1">
+              <h3 className="mb-2 text-sm font-medium sm:text-base">Debilidades</h3>
+              <ul className="text-muted list-inside list-disc space-y-1 text-sm sm:text-base">
                 {evaluation.detailedEvaluation.weaknesses.map((weakness, index) => (
                   <li key={index}>{weakness}</li>
                 ))}
               </ul>
             </div>
             <div className="md:col-span-2">
-              <h3 className="mb-2 font-medium">Justificación de Puntuaciones</h3>
-              <p className="text-muted">{evaluation.detailedEvaluation.scoreJustification}</p>
+              <h3 className="mb-2 text-sm font-medium sm:text-base">
+                Justificación de Puntuaciones
+              </h3>
+              <p className="text-muted text-sm sm:text-base">
+                {evaluation.detailedEvaluation.scoreJustification}
+              </p>
             </div>
             <div className="md:col-span-2">
-              <h3 className="mb-2 font-medium">Sugerencias de Mejora</h3>
-              <ul className="text-muted list-inside list-disc space-y-1">
+              <h3 className="mb-2 text-sm font-medium sm:text-base">Sugerencias de Mejora</h3>
+              <ul className="text-muted list-inside list-disc space-y-1 text-sm sm:text-base">
                 {evaluation.detailedEvaluation.improvementSuggestions.map((suggestion, index) => (
                   <li key={index}>{suggestion}</li>
                 ))}
@@ -302,8 +306,10 @@ const AiEvaluationDetails: React.FC = () => {
             </div>
             {evaluation.detailedEvaluation.criticalErrorsDetected.length > 0 && (
               <div className="md:col-span-2">
-                <h3 className="mb-2 font-medium">Errores Críticos Detectados</h3>
-                <ul className="text-muted list-inside list-disc space-y-1">
+                <h3 className="mb-2 text-sm font-medium sm:text-base">
+                  Errores Críticos Detectados
+                </h3>
+                <ul className="text-muted list-inside list-disc space-y-1 text-sm sm:text-base">
                   {evaluation.detailedEvaluation.criticalErrorsDetected.map((error, index) => (
                     <li key={index}>{error}</li>
                   ))}
