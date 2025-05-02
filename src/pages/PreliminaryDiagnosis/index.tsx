@@ -18,6 +18,7 @@ import { useSymptom } from '@/hooks/useSymptom';
 import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
+import { ConfirmFaultModal } from './ConfirmFaultModal';
 
 const PreliminaryDiagnosis = () => {
   const params = useParams();
@@ -26,6 +27,7 @@ const PreliminaryDiagnosis = () => {
   const backQueryParam = searchParams.get('back');
   const [observations, setObservations] = useState('');
   const [obdCodes, setObdCodes] = useState<string[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: createFinalReportRequest } = useApi<Diagnosis>(
     'post',
@@ -57,12 +59,18 @@ const PreliminaryDiagnosis = () => {
     mutationFn: async ({
       observations,
       obdCodes,
+      confirmedFailure,
     }: {
       observations: string;
       obdCodes: string[];
+      confirmedFailure: {
+        source: 'suggested' | 'custom';
+        value: string;
+        reasonId?: string;
+      };
     }) => {
       const response = await createFinalReportRequest(
-        { technicalNotes: observations, obdCodes },
+        { technicalNotes: observations, obdCodes, confirmedFailure },
         undefined,
         {
           carId: params.carId as string,
@@ -103,7 +111,20 @@ const PreliminaryDiagnosis = () => {
   }
 
   const onGenerateReport = () => {
-    createFinalReportMutation({ observations, obdCodes });
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmFault = (selectedFault: string, reasonId?: string) => {
+    createFinalReportMutation({
+      observations,
+      obdCodes,
+      confirmedFailure: {
+        source: reasonId ? 'suggested' : 'custom',
+        value: selectedFault,
+        reasonId,
+      },
+    });
+    setIsModalOpen(false);
   };
 
   const onBack = () => {
@@ -166,7 +187,8 @@ const PreliminaryDiagnosis = () => {
 
         <div className="mb-20 space-y-1 sm:space-y-2">
           <p className="block text-sm font-medium sm:text-base">
-            Observaciones Adicionales del Técnico
+            Observaciones Adicionales del Técnico{' '}
+            <span className="text-muted font-normal">(Opcional)</span>
           </p>
 
           <VoiceTextInput
@@ -186,10 +208,7 @@ const PreliminaryDiagnosis = () => {
         </Button>
 
         <div className="flex gap-3">
-          <Button
-            onClick={onGenerateReport}
-            disabled={isLoadingFinalReport || observations.length === 0}
-          >
+          <Button onClick={onGenerateReport} disabled={isLoadingFinalReport}>
             <FileTextIcon className="h-4 w-4" />
             <span className="sm:hidden">Generar</span>
             <span className="hidden sm:inline">Generar Informe Final</span>
@@ -198,6 +217,12 @@ const PreliminaryDiagnosis = () => {
       </div>
 
       <LoadingModal isOpen={isLoadingFinalReport} message="Generando informe final" />
+      <ConfirmFaultModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmFault}
+        possibleReasons={diagnosis.preliminary?.possibleReasons || []}
+      />
     </div>
   );
 };
