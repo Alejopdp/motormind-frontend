@@ -1,5 +1,5 @@
 import { Button } from '@/components/atoms/Button';
-import { VoiceTextInput } from '@/components/VoiceTextInput';
+import { VoiceTextInput } from '@/components/molecules/VoiceTextInput';
 import { useState } from 'react';
 import { LoadingModal } from '../LoadingModal';
 

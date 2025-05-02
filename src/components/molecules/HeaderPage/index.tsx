@@ -5,7 +5,7 @@ import { ArrowLeftIcon } from 'lucide-react';
 interface HeaderPageProps {
   data: {
     title: string;
-    description: string;
+    description?: string;
   };
   onBack?: () => void;
   label?: string;

@@ -13,7 +13,7 @@ import HeaderPage from '@/components/molecules/HeaderPage';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import { RatingModal } from '@/components/molecules/RatingModal/RatingModal';
 import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';
-import { VoiceTextInput } from '@/components/VoiceTextInput';
+import { VoiceTextInput } from '@/components/molecules/VoiceTextInput';
 import { Button } from '@/components/atoms/Button';
 import { AlternativeFailures } from './AlternativeFailures';
 import { Conclusion } from './Conclusion';

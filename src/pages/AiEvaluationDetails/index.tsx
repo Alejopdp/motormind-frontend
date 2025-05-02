@@ -1,14 +1,18 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { AiDiagnosisEvaluation } from '@/types/Diagnosis';
-import { useApi } from '@/hooks/useApi';
-import Spinner from '@/components/atoms/Spinner';
-import { AlertCircle, ExternalLink, Copy } from 'lucide-react';
-import { Button } from '@/components/atoms/Button';
-import ScoreBar from '@/components/ScoreBar';
-import StageBadge from '@/components/StageBadge';
 import { useSnackbar } from 'notistack';
+import { AlertCircle, ExternalLink, Copy } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+
+import { useApi } from '@/hooks/useApi';
+import { AiDiagnosisEvaluation } from '@/types/AiDiagnosisEvaluation';
+import Spinner from '@/components/atoms/Spinner';
+import { Button } from '@/components/atoms/Button';
+import ScoreBar from '@/components/atoms/ScoreBar';
+import { Badge } from '@/components/atoms/Badge';
+import HeaderPage from '@/components/molecules/HeaderPage';
+import { diagnosisLink } from '@/utils';
+import { Diagnosis } from '@/types/Diagnosis';
 
 const AiEvaluationDetails: React.FC = () => {
   const { evaluationId } = useParams<{ evaluationId: string }>();
@@ -36,12 +40,8 @@ const AiEvaluationDetails: React.FC = () => {
     retry: 0,
   });
 
-  const copyDiagnosis = async () => {
-    if (!evaluation) return;
-
+  const copyDiagnosis = async (diagnosisId: string) => {
     try {
-      const diagnosisId = getDiagnosisId(evaluation);
-
       await navigator.clipboard.writeText(diagnosisId);
       enqueueSnackbar('ID copiado al portapapeles', { variant: 'success' });
     } catch (err) {
@@ -71,28 +71,6 @@ const AiEvaluationDetails: React.FC = () => {
       </div>
     );
   }
-
-  const getDiagnosisId = (evaluation: AiDiagnosisEvaluation) => {
-    if (typeof evaluation.diagnosisId === 'string') {
-      return evaluation.diagnosisId;
-    }
-    if (typeof evaluation.diagnosisId === 'object' && evaluation.diagnosisId !== null) {
-      return evaluation.diagnosisId._id || 'N/A';
-    }
-    return 'N/A';
-  };
-
-  const getDiagnosisUrl = (evaluation: AiDiagnosisEvaluation) => {
-    const diagnosisId = getDiagnosisId(evaluation);
-    const carId = typeof evaluation.carId === 'string' ? evaluation.carId : evaluation.carId._id;
-
-    if (!carId) {
-      console.error('No se encontró el ID del vehículo');
-      return '#';
-    }
-
-    return `/cars/${carId}/diagnosis/${diagnosisId}`;
-  };
 
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleString('es-ES', {
@@ -185,107 +163,118 @@ const AiEvaluationDetails: React.FC = () => {
     return 'text-red-500 border-red-500';
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Detalles de la Evaluación</h1>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={copyDiagnosis}
-            className="inline-flex items-center gap-2"
-          >
-            <Copy className="h-4 w-4" />
-            Copiar ID diagnóstico
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate(getDiagnosisUrl(evaluation))}
-            className="inline-flex items-center gap-2"
-          >
-            <ExternalLink className="h-4 w-4" />
-            Ver Diagnóstico
-          </Button>
-        </div>
-      </div>
+  const getPhaseVariant = (phase: string) => {
+    switch (phase) {
+      case 'RECEPTION':
+        return 'secondary';
+      case 'PRELIMINARY_DIAGNOSIS':
+        return 'tertiary';
+      case 'FINAL_REPORT':
+        return 'selected';
+      default:
+        return 'outline';
+    }
+  };
 
-      <div className="mb-6 overflow-hidden rounded-lg bg-white shadow-md">
-        <div className="p-6">
-          <h2 className="mb-4 text-xl font-semibold">Información General</h2>
+  const renderPhase = () => {
+    switch (evaluation.phase) {
+      case 'RECEPTION':
+        return 'Recepción';
+      case 'PRELIMINARY_DIAGNOSIS':
+        return 'Diagnóstico Preliminar';
+      case 'FINAL_REPORT':
+        return 'Informe Final';
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="bg-background flex flex-grow flex-col">
+      <HeaderPage
+        data={{ title: 'Detalles de la Evaluación' }}
+        onBack={() => navigate('/audits/evaluations')}
+        headerActions={
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => copyDiagnosis(evaluation?.diagnosisId)}>
+              <Copy className="h-4 w-4" />
+              Copiar ID diagnóstico
+            </Button>
+            <Button
+              onClick={() => navigate(diagnosisLink(evaluation?.diagnosis as Diagnosis, true))}
+            >
+              <ExternalLink className="h-4 w-4" />
+              Ver Diagnóstico
+            </Button>
+          </div>
+        }
+      />
+
+      <div className="container mx-auto px-4 py-2 sm:px-8 sm:py-6">
+        <div className="mb-6 overflow-hidden rounded-lg bg-white p-4 shadow-md sm:p-6">
+          <h2 className="mb-4 text-lg font-semibold sm:text-xl">Información General</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <p className="text-sm text-gray-600">ID del Diagnóstico</p>
-              <p className="font-medium">{getDiagnosisId(evaluation)}</p>
+              <p className="text-xs sm:text-sm">ID del Diagnóstico</p>
+              <p className="font-medium">{evaluation.diagnosisId}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Fase</p>
-              <div className="mt-1">
-                <StageBadge stage={evaluation.phase} />
-              </div>
+              <p className="text-xs sm:text-sm">Fase</p>
+              <Badge variant={getPhaseVariant(evaluation.phase)}>{renderPhase()}</Badge>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Fecha de Creación</p>
+              <p className="text-xs sm:text-sm">Fecha de Creación</p>
               <p className="font-medium">{formatDate(evaluation.createdAt)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Modelo Evaluador</p>
+              <p className="text-xs sm:text-sm">Modelo Evaluador</p>
               <p className="font-medium">{evaluation.evaluatorModel}</p>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="mb-6 overflow-hidden rounded-lg bg-white shadow-md">
-        <div className="p-6">
-          <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Puntuaciones</h2>
-            <div
-              className={`flex h-28 w-28 items-center justify-center rounded-full border-2 ${getScoreColor(evaluation.scores.scoreGlobalAverage)}`}
-            >
-              <div className="text-center">
-                <span className="text-3xl font-bold">{evaluation.scores.scoreGlobalAverage}</span>
-                <span className="block text-xs">Puntos</span>
+        <div className="mb-6 overflow-hidden rounded-lg bg-white p-4 shadow-sm sm:p-6">
+          <div className="flex items-center justify-between sm:items-start">
+            <h2 className="text-lg font-semibold sm:text-xl">Puntuaciones</h2>
+
+            <div className="flex flex-col items-center sm:my-0 sm:pr-3">
+              <div
+                className={`flex h-11 w-11 items-center justify-center rounded-full border-2 sm:h-14 sm:w-14 ${getScoreColor(evaluation.scores.scoreGlobalAverage)}`}
+              >
+                <span className="text-xl font-bold sm:text-2xl">
+                  {evaluation.scores.scoreGlobalAverage.toFixed(0)}
+                </span>
               </div>
+              <span className="text-muted text-sm">Puntos</span>
             </div>
           </div>
 
-          <div className="mb-8">
-            <h3 className="mb-4 text-sm font-medium text-gray-700">Generales</h3>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              <div className="col-span-1">
-                <ScoreBar score={evaluation.scores.scoreStrictFormat} label="Formato Estricto" />
-              </div>
-              <div className="col-span-1">
-                <ScoreBar
-                  score={evaluation.scores.scoreClarityProfessionalism}
-                  label="Claridad y Profesionalismo"
-                />
-              </div>
-              <div className="col-span-1">
-                <ScoreBar
-                  score={evaluation.scores.scoreAntiHallucinationPrecision}
-                  label="Precisión Anti-Alucinación"
-                />
-              </div>
+          <div className="mb-4 sm:mb-8">
+            <h1 className="text-muted sm:text-md mb-2 text-sm font-medium">Generales</h1>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <ScoreBar
+                label="Precisión"
+                score={evaluation.scores.scoreAntiHallucinationPrecision}
+              />
+              <ScoreBar label="Claridad" score={evaluation.scores.scoreClarityProfessionalism} />
+              <ScoreBar label="Formato" score={evaluation.scores.scoreStrictFormat} />
             </div>
           </div>
 
-          <div className="mb-8">
-            <h3 className="mb-4 text-sm font-medium text-gray-700">Específicos</h3>
+          <div className="mb-4 sm:mb-8">
+            <h1 className="text-muted sm:text-md mb-2 text-sm font-medium">Específicos</h1>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               {renderPhaseSpecificScores()}
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="mb-6 overflow-hidden rounded-lg bg-white shadow-md">
-        <div className="p-6">
-          <h2 className="mb-4 text-xl font-semibold">Evaluación Detallada</h2>
+        <div className="mb-3 overflow-hidden rounded-lg bg-white p-4 shadow-sm sm:mb-6 sm:p-6">
+          <h2 className="mb-4 text-lg font-semibold sm:text-xl">Evaluación Detallada</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
               <h3 className="mb-2 font-medium">Fortalezas</h3>
-              <ul className="list-inside list-disc space-y-1 text-gray-700">
+              <ul className="text-muted list-inside list-disc space-y-1">
                 {evaluation.detailedEvaluation.strengths.map((strength, index) => (
                   <li key={index}>{strength}</li>
                 ))}
@@ -293,7 +282,7 @@ const AiEvaluationDetails: React.FC = () => {
             </div>
             <div>
               <h3 className="mb-2 font-medium">Debilidades</h3>
-              <ul className="list-inside list-disc space-y-1 text-gray-700">
+              <ul className="text-muted list-inside list-disc space-y-1">
                 {evaluation.detailedEvaluation.weaknesses.map((weakness, index) => (
                   <li key={index}>{weakness}</li>
                 ))}
@@ -301,11 +290,11 @@ const AiEvaluationDetails: React.FC = () => {
             </div>
             <div className="md:col-span-2">
               <h3 className="mb-2 font-medium">Justificación de Puntuaciones</h3>
-              <p className="text-gray-700">{evaluation.detailedEvaluation.scoreJustification}</p>
+              <p className="text-muted">{evaluation.detailedEvaluation.scoreJustification}</p>
             </div>
             <div className="md:col-span-2">
               <h3 className="mb-2 font-medium">Sugerencias de Mejora</h3>
-              <ul className="list-inside list-disc space-y-1 text-gray-700">
+              <ul className="text-muted list-inside list-disc space-y-1">
                 {evaluation.detailedEvaluation.improvementSuggestions.map((suggestion, index) => (
                   <li key={index}>{suggestion}</li>
                 ))}
@@ -314,7 +303,7 @@ const AiEvaluationDetails: React.FC = () => {
             {evaluation.detailedEvaluation.criticalErrorsDetected.length > 0 && (
               <div className="md:col-span-2">
                 <h3 className="mb-2 font-medium">Errores Críticos Detectados</h3>
-                <ul className="list-inside list-disc space-y-1 text-gray-700">
+                <ul className="text-muted list-inside list-disc space-y-1">
                   {evaluation.detailedEvaluation.criticalErrorsDetected.map((error, index) => (
                     <li key={index}>{error}</li>
                   ))}
@@ -323,18 +312,16 @@ const AiEvaluationDetails: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
 
-      {evaluation.comment && (
-        <div className="overflow-hidden rounded-lg bg-white shadow-md">
-          <div className="p-6">
-            <h2 className="mb-4 text-xl font-semibold">Comentario General</h2>
-            <div className="rounded-md bg-gray-50 p-4">
-              <p className="whitespace-pre-line text-gray-700">{evaluation.comment}</p>
+        {evaluation.comment && (
+          <div className="overflow-hidden rounded-lg bg-white p-4 shadow-md sm:p-6">
+            <h2 className="mb-4 text-lg font-semibold sm:text-xl">Comentario General</h2>
+            <div className="rounded-md bg-gray-50 p-2 sm:p-4">
+              <p className="text-muted whitespace-pre-line">{evaluation.comment}</p>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

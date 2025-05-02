@@ -6,8 +6,8 @@ import {
   SettingsIcon,
   LogOutIcon,
   MenuIcon,
-  SearchIcon,
   FileTextIcon,
+  TestTubeDiagonal,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -53,7 +53,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
       href: '/diagnoses',
     },
     {
-      icon: SearchIcon,
+      icon: TestTubeDiagonal,
       label: 'Evaluaciones',
       href: '/audits/evaluations',
       roles: [UserRole.SUPER_ADMIN],
