@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
-import { VoiceTextInput } from '@/components/VoiceTextInput';
+import { VoiceTextInput } from '@/components/molecules/VoiceTextInput';
 import { LoadingModal } from '../LoadingModal';
 
 interface SymptomInputFormProps {

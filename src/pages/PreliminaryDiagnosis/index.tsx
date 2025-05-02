@@ -10,7 +10,7 @@ import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContec
 import FaultCardCollapsible from '@/components/molecules/FaultCardCollapsible';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
-import { VoiceTextInput } from '@/components/VoiceTextInput';
+import { VoiceTextInput } from '@/components/molecules/VoiceTextInput';
 import OBDCodeInput from '@/components/molecules/ObdCodeInput';
 import { LoadingModal } from '@/components/molecules/LoadingModal';
 import { useApi } from '@/hooks/useApi';

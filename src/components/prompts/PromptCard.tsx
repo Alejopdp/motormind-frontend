@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { formatDate } from '@/utils';
-import { Prompt } from '@/types/prompt';
+import { Prompt } from '@/types/Prompt';
 import { Badge } from '@/components/atoms/Badge';
 
 interface PromptCardProps {

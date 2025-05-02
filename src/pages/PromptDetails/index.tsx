@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Prompt } from '../../types/prompt';
+import { Prompt } from '../../types/Prompt';
 import { promptService } from '../../service/prompt.service';
 import Spinner from '../../components/atoms/Spinner';
 import { formatDate } from '../../utils';

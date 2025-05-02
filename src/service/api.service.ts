@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { apiUrl } from '@/constants/env';
-import { AiDiagnosisEvaluation } from '@/types/Diagnosis';
+import { AiDiagnosisEvaluation } from '@/types/AiDiagnosisEvaluation';
 
 class ApiService {
   private static instance: ApiService;
@@ -81,8 +81,13 @@ class ApiService {
   }
 
   // Métodos específicos para evaluaciones de diagnósticos
-  async getDiagnosisEvaluations(): Promise<{ evaluations: AiDiagnosisEvaluation[]; total: number }> {
-    const response = await this.get<{ evaluations: AiDiagnosisEvaluation[]; total: number }>(`/audits/evaluations`);
+  async getDiagnosisEvaluations(): Promise<{
+    evaluations: AiDiagnosisEvaluation[];
+    total: number;
+  }> {
+    const response = await this.get<{ evaluations: AiDiagnosisEvaluation[]; total: number }>(
+      `/audits/evaluations`,
+    );
     return response.data;
   }
 
@@ -91,8 +96,12 @@ class ApiService {
     return response.data;
   }
 
-  async getDiagnosisEvaluationsByDiagnosisId(diagnosisId: string): Promise<AiDiagnosisEvaluation[]> {
-    const response = await this.get<AiDiagnosisEvaluation[]>(`/audits/evaluations/diagnosis/${diagnosisId}`);
+  async getDiagnosisEvaluationsByDiagnosisId(
+    diagnosisId: string,
+  ): Promise<AiDiagnosisEvaluation[]> {
+    const response = await this.get<AiDiagnosisEvaluation[]>(
+      `/audits/evaluations/diagnosis/${diagnosisId}`,
+    );
     return response.data;
   }
 }
