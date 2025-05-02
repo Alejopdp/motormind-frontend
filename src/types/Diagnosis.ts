@@ -15,6 +15,7 @@ export type Diagnosis = {
   };
   preliminary: {
     possibleReasons: {
+      _id: string;
       title: string;
       probability: string;
       reasonDetails: string;

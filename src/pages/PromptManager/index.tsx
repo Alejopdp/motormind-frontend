@@ -6,7 +6,7 @@ import { promptService } from '@/service/prompt.service';
 import { Button } from '@/components/atoms/Button';
 import { PromptCard } from '@/components/prompts/PromptCard';
 import Spinner from '@/components/atoms/Spinner';
-import { Prompt } from '@/types/Prompt';
+import { Prompt } from '@/types/prompt';
 
 const PromptManager: React.FC = () => {
   const {

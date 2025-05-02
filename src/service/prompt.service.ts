@@ -1,4 +1,4 @@
-import { Prompt } from '@/types/Prompt';
+import { Prompt } from '@/types/prompt';
 import apiService from './api.service';
 
 export const promptService = {

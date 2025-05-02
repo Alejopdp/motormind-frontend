@@ -47,7 +47,9 @@ export default function OBDCodeInput({ initialCodes = [], onChange, disabled }: 
 
   return (
     <div className="space-y-2">
-      <p className="block text-base font-medium">Códigos OBD Leídos (Opcional)</p>
+      <p className="block text-base font-medium">
+        Códigos OBD Leídos <span className="text-muted font-normal">(Opcional)</span>
+      </p>
 
       <div className="flex min-h-[42px] flex-wrap gap-2 rounded-md border border-gray-300 bg-white p-2">
         {codes.map((code, index) => (

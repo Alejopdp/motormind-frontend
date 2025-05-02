@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { formatDate } from '@/utils';
-import { Prompt } from '@/types/Prompt';
+import { Prompt } from '@/types/prompt';
+import { PromptVersion } from '@/types/prompt';
 import { Badge } from '@/components/atoms/Badge';
 
 interface PromptCardProps {
@@ -10,7 +11,7 @@ interface PromptCardProps {
 }
 
 export const PromptCard: React.FC<PromptCardProps> = ({ prompt }) => {
-  const activeVersion = prompt.versions.find((v) => v.isActive);
+  const activeVersion = prompt.versions.find((v: PromptVersion) => v.isActive);
   const totalVersions = prompt.versions.length;
 
   return (

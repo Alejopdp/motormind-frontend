@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Prompt } from '../../types/Prompt';
-import { promptService } from '../../service/prompt.service';
-import Spinner from '../../components/atoms/Spinner';
-import { formatDate } from '../../utils';
-import { Button } from '../../components/atoms/Button';
-import HeaderPage from '../../components/molecules/HeaderPage';
-import { PromptVariables } from '../../components/molecules/PromptVariables';
-import { PromptWarningModal } from '../../components/molecules/PromptWarningModal';
-import { PromptVersionHistory } from '../../components/molecules/PromptVersionHistory';
-import { usePromptVariables } from '../../hooks/usePromptVariables';
+import { Prompt, PromptVersion } from '@/types/prompt';
+import { promptService } from '@/service/prompt.service';
+import Spinner from '@/components/atoms/Spinner';
+import { formatDate } from '@/utils';
+import { Button } from '@/components/atoms/Button';
+import HeaderPage from '@/components/molecules/HeaderPage';
+import { PromptVariables } from '@/components/molecules/PromptVariables';
+import { PromptWarningModal } from '@/components/molecules/PromptWarningModal';
+import { PromptVersionHistory } from '@/components/molecules/PromptVersionHistory';
+import { usePromptVariables } from '@/hooks/usePromptVariables';
 import { Textarea } from '@/components/atoms/Textarea';
 
 const PromptDetail: React.FC = () => {
@@ -56,7 +56,7 @@ const PromptDetail: React.FC = () => {
       try {
         const data = await promptService.getPromptByPhase(phase);
         setPrompt(data);
-        const activeVersionIndex = data.versions.findIndex((v) => v.isActive);
+        const activeVersionIndex = data.versions.findIndex((v: PromptVersion) => v.isActive);
         if (activeVersionIndex !== -1) {
           const activeVersion = data.versions[activeVersionIndex];
           setActiveContent(activeVersion.content);
