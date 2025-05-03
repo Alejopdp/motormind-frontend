@@ -14,6 +14,7 @@ import { Input } from '@/components/atoms/Input';
 import { Button } from '@/components/atoms/Button';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 import { DIAGNOSIS_STATUS } from '@/constants';
+import { FloatingButton } from '@/components/atoms/FloatingButton';
 
 const LIMIT = 1000;
 
@@ -105,7 +106,7 @@ const Diagnoses = () => {
           </div>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
-            className="h-8 w-8 sm:h-auto sm:w-auto"
+            className="hidden h-8 w-8 sm:flex sm:h-auto sm:w-auto"
           >
             <PlusIcon className="!h-5 !w-5" />
             <span className="hidden lg:inline">Nuevo diagnóstico</span>
@@ -163,6 +164,13 @@ const Diagnoses = () => {
       </div>
 
       <CreateDiagnosticModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
+
+      {/* FloatingButton solo en mobile */}
+      <div className="sm:hidden">
+        <FloatingButton onClick={() => setIsCreateModalOpen(true)}>
+          <PlusIcon className="!h-5 !w-5" />
+        </FloatingButton>
+      </div>
     </div>
   );
 };
