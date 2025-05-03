@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/atoms/Select';
+import { FloatingButton } from '@/components/atoms/FloatingButton';
 
 const LIMIT = 1000;
 
@@ -155,6 +156,13 @@ const Diagnoses = () => {
               <span className="hidden xl:inline">Nuevo diagnóstico</span>
             </Button>
           </div>
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="hidden h-8 w-8 sm:flex sm:h-auto sm:w-auto"
+          >
+            <PlusIcon className="!h-5 !w-5" />
+            <span className="hidden lg:inline">Nuevo diagnóstico</span>
+          </Button>
         </div>
       </div>
 
@@ -208,6 +216,13 @@ const Diagnoses = () => {
       </div>
 
       <CreateDiagnosticModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
+
+      {/* FloatingButton solo en mobile */}
+      <div className="sm:hidden">
+        <FloatingButton onClick={() => setIsCreateModalOpen(true)}>
+          <PlusIcon className="!h-5 !w-5" />
+        </FloatingButton>
+      </div>
     </div>
   );
 };

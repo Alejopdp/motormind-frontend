@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { FileSearch, PlusIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
-
 import { diagnosisLink, formatDate } from '@/utils';
 import { Diagnosis } from '@/types/Diagnosis';
 import { useApi } from '@/hooks/useApi';
@@ -12,6 +11,7 @@ import { DIAGNOSIS_STATUS } from '@/constants';
 import Spinner from '@/components/atoms/Spinner';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 import { Button } from '@/components/atoms/Button';
+import { FloatingButton } from '@/components/atoms/FloatingButton';
 
 const Dashboard = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -50,7 +50,7 @@ const Dashboard = () => {
           </h1>
           <p className="text-muted hidden xl:block">Gestiona y revisa el estado del taller</p>
         </div>
-        <div className="flex items-center">
+        <div className="hidden items-center sm:flex">
           <Button
             onClick={() => setIsCreateModalOpen(true)}
             className="h-8 w-8 sm:h-auto sm:w-auto"
@@ -112,6 +112,13 @@ const Dashboard = () => {
       </main>
 
       <CreateDiagnosticModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
+
+      {/* FloatingButton solo en mobile */}
+      <div className="sm:hidden">
+        <FloatingButton onClick={() => setIsCreateModalOpen(true)}>
+          <PlusIcon className="!h-5 !w-5" />
+        </FloatingButton>
+      </div>
     </div>
   );
 };

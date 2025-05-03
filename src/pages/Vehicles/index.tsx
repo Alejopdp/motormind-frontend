@@ -11,6 +11,7 @@ import { Car } from '@/types/Car';
 import Spinner from '@/components/atoms/Spinner';
 import { VehicleList } from '@/components/molecules/VehiceList';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
+import { FloatingButton } from '@/components/atoms/FloatingButton';
 
 const LIMIT = 1000;
 
@@ -98,7 +99,7 @@ const Vehicles = () => {
           </div>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
-            className="h-8 w-8 sm:h-auto sm:w-auto"
+            className="hidden h-8 w-8 sm:flex sm:h-auto sm:w-auto"
           >
             <PlusIcon className="!h-5 !w-5" />
             <span className="hidden lg:inline">Añadir Vehículo</span>
@@ -110,6 +111,13 @@ const Vehicles = () => {
             createOnly
           />
         </div>
+      </div>
+
+      {/* FloatingButton solo en mobile */}
+      <div className="sm:hidden">
+        <FloatingButton onClick={() => setIsCreateModalOpen(true)}>
+          <PlusIcon className="!h-5 !w-5" />
+        </FloatingButton>
       </div>
 
       {isLoadingCars ? (
