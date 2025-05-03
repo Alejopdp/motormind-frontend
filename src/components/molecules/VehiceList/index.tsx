@@ -2,27 +2,26 @@ import { FileSearch } from 'lucide-react';
 
 import { Button } from '@/components/atoms/Button';
 import { Car } from '@/types/Car';
-import { Pagination } from '../Pagination';
 import { VehicleListItem } from './VehicleListItem';
 
 interface VehicleListProps {
   vehicles: Car[];
   isLoading?: boolean;
-  previousPage: () => void;
-  nextPage: () => void;
-  total: number;
-  currentPage: number;
-  limit: number;
+  // previousPage: () => void;
+  // nextPage: () => void;
+  // total: number;
+  // currentPage: number;
+  // limit: number;
 }
 
 export const VehicleList = ({
   vehicles,
   isLoading = false,
-  previousPage,
-  nextPage,
-  total,
-  currentPage,
-  limit,
+  // previousPage,
+  // nextPage,
+  // total,
+  // currentPage,
+  // limit,
 }: VehicleListProps) => {
   if (isLoading) {
     return (
@@ -55,7 +54,7 @@ export const VehicleList = ({
         ))}
       </div>
 
-      {vehicles.length > 0 && (
+      {/* {vehicles.length > 0 && (
         <div className="sticky bottom-0">
           <Pagination
             total={total}
@@ -65,7 +64,7 @@ export const VehicleList = ({
             limit={limit}
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 };
