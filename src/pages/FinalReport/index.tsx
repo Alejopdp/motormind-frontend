@@ -208,7 +208,12 @@ const FinalReport = () => {
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
 
-        <DiagnosticContextSection symptoms={symptom} notes={diagnosis.notes} />
+        <DiagnosticContextSection
+          symptoms={symptom}
+          notes={diagnosis.notes}
+          questions={diagnosis.questions}
+          answers={diagnosis.processedAnswers ?? ''}
+        />
 
         <PrimaryRepairSection confirmedFailures={diagnosis.diagnosis?.confirmedFailures || []} />
 
