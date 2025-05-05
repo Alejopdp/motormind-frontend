@@ -1,5 +1,5 @@
 import { formatDate } from '@/utils';
-import { PromptVersion } from '@/types/Prompt';
+import { PromptVersion } from '@/types/prompt';
 import { Badge } from '@/components/atoms/Badge';
 
 interface PromptVersionHistoryProps {
