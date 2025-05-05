@@ -117,7 +117,7 @@ const Vehicles = () => {
           <Spinner />
         </div>
       ) : (
-        <div className="px-2 py-2 sm:px-8 sm:py-4">
+        <div className="px-4 py-2 sm:px-8 sm:py-4">
           <VehicleList
             vehicles={cars}
             isLoading={isLoadingCars}

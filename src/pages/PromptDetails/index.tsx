@@ -157,7 +157,7 @@ const PromptDetail: React.FC = () => {
     return (
       <div className="p-4 text-center text-red-600">
         {error || 'Prompt no encontrado'}
-        <button onClick={handleBack} className="ml-4 text-blue-600 hover:text-blue-800">
+        <button onClick={handleBack} className="text-primary ml-4 hover:text-blue-800">
           Volver
         </button>
       </div>

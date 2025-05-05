@@ -6,7 +6,7 @@ import NewDiagnosis from '@/pages/NewDiagnosis';
 import DiagnosisQuestions from '@/pages/DiagnosisQuestions';
 import Login from '@/pages/Login';
 import VerifyMagicLink from '@/pages/VerifyMagicLink';
-import Configuration from '@/pages/Configuration';
+import Settings from '@/pages/Settings';
 import Diagnoses from '@/pages/Diagnoses';
 import Vehicles from '@/pages/Vehicles';
 import PreliminaryDiagnosis from '@/pages/PreliminaryDiagnosis';
@@ -126,10 +126,10 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/configuration',
+    path: '/settings',
     element: (
       <ErrorBoundary>
-        <Configuration />
+        <Settings />
       </ErrorBoundary>
     ),
   },

@@ -80,7 +80,7 @@ export default function FaultCardCollapsible({
           {!!recommendations.length && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <WrenchIcon className="h-5 w-5 text-blue-600" />
+                <WrenchIcon className="text-primary h-5 w-5" />
                 <h4 className="text-sm font-medium sm:text-base">Recomendaciones Diagnósticas</h4>
               </div>
               <ul className="text-muted list-disc space-y-1 pl-6 text-xs sm:pl-12 sm:text-base">
