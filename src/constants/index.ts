@@ -28,3 +28,10 @@ export const PROBABILITY_LEVELS = {
   MEDIUM: 'Media',
   LOW: 'Baja',
 } as const;
+
+export const DIAGNOSIS_STATUS = {
+  GUIDED_QUESTIONS: 'GUIDED_QUESTIONS',
+  PRELIMINARY: 'PRELIMINARY',
+  IN_REPARATION: 'IN_REPARATION',
+  REPAIRED: 'REPAIRED',
+} as const;

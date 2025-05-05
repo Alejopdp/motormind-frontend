@@ -1,25 +1,33 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon } from 'lucide-react';
 
 import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
 import { DiagnosticContextSection } from '@/components/molecules/DiagnosisContectSection';
 import FaultCardCollapsible from '@/components/molecules/FaultCardCollapsible';
-import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
+import HeaderPage from '@/components/molecules/HeaderPage';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
-import { VoiceTextInput } from '@/components/VoiceTextInput';
+import { VoiceTextInput } from '@/components/molecules/VoiceTextInput';
+import OBDCodeInput from '@/components/molecules/ObdCodeInput';
+import { LoadingModal } from '@/components/molecules/LoadingModal';
 import { useApi } from '@/hooks/useApi';
+import { useSymptom } from '@/hooks/useSymptom';
 import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
-import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, SaveIcon } from 'lucide-react';
-import { useSymptom } from '@/hooks/useSymptom';
+import { ConfirmFaultModal } from './ConfirmFaultModal';
+
 const PreliminaryDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const backQueryParam = searchParams.get('back');
   const [observations, setObservations] = useState('');
+  const [obdCodes, setObdCodes] = useState<string[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: createFinalReportRequest } = useApi<Diagnosis>(
     'post',
@@ -48,11 +56,27 @@ const PreliminaryDiagnosis = () => {
 
   const { symptom } = useSymptom(diagnosis);
   const { mutate: createFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
-    mutationFn: async ({ observations }: { observations: string }) => {
-      const response = await createFinalReportRequest({ technicalNotes: observations }, undefined, {
-        carId: params.carId as string,
-        diagnosisId: params.diagnosisId as string,
-      });
+    mutationFn: async ({
+      observations,
+      obdCodes,
+      confirmedFailure,
+    }: {
+      observations: string;
+      obdCodes: string[];
+      confirmedFailure: {
+        source: 'suggested' | 'custom';
+        value: string;
+        reasonId?: string;
+      };
+    }) => {
+      const response = await createFinalReportRequest(
+        { technicalNotes: observations, obdCodes, confirmedFailure },
+        undefined,
+        {
+          carId: params.carId as string,
+          diagnosisId: params.diagnosisId as string,
+        },
+      );
       return response.data;
     },
     onSuccess: () => {
@@ -87,18 +111,34 @@ const PreliminaryDiagnosis = () => {
   }
 
   const onGenerateReport = () => {
-    createFinalReportMutation({ observations });
+    setIsModalOpen(true);
   };
 
-  const saveDraft = () => {
-    enqueueSnackbar('Diagnóstico guardado como borrador', { variant: 'success' });
-    navigate(-1); // Go back to the previous page
+  const handleConfirmFault = (selectedFault: string, reasonId?: string) => {
+    createFinalReportMutation({
+      observations,
+      obdCodes,
+      confirmedFailure: {
+        source: reasonId ? 'suggested' : 'custom',
+        value: selectedFault,
+        reasonId,
+      },
+    });
+    setIsModalOpen(false);
+  };
+
+  const onBack = () => {
+    if (backQueryParam === 'true') {
+      navigate(-1); // Go back to the previous page
+    } else {
+      navigate(`/cars/${params.carId}`); // Go back to the route
+    }
   };
 
   return (
     <div className="bg-background min-h-screen">
       <HeaderPage
-        onBack={() => navigate(`/cars/${params.carId}`)}
+        onBack={onBack}
         data={{
           title: 'Informe Preliminar IA',
           description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,
@@ -106,7 +146,12 @@ const PreliminaryDiagnosis = () => {
       />
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
-        <DiagnosticContextSection symptoms={symptom} notes={diagnosis.notes} />
+        <DiagnosticContextSection
+          symptoms={symptom}
+          notes={diagnosis.notes}
+          questions={diagnosis.questions}
+          answers={diagnosis.processedAnswers ?? ''}
+        />
 
         {/* AI Detected Faults */}
         <div className="space-y-2 sm:space-y-4">
@@ -137,9 +182,13 @@ const PreliminaryDiagnosis = () => {
           </div>
         </div>
 
+        {/* OBD Codes Input */}
+        <OBDCodeInput onChange={setObdCodes} disabled={isLoadingFinalReport} />
+
         <div className="mb-20 space-y-1 sm:space-y-2">
           <p className="block text-sm font-medium sm:text-base">
-            Observaciones Adicionales del Técnico
+            Observaciones Adicionales del Técnico{' '}
+            <span className="text-muted font-normal">(Opcional)</span>
           </p>
 
           <VoiceTextInput
@@ -159,23 +208,21 @@ const PreliminaryDiagnosis = () => {
         </Button>
 
         <div className="flex gap-3">
-          <Button variant="outline" onClick={saveDraft}>
-            <SaveIcon className="h-4 w-4" />
-            Guardar Borrador
-          </Button>
-
-          <Button
-            onClick={onGenerateReport}
-            disabled={isLoadingFinalReport || observations.length === 0}
-          >
+          <Button onClick={onGenerateReport} disabled={isLoadingFinalReport}>
             <FileTextIcon className="h-4 w-4" />
-            <span className="sm:hidden">{isLoadingFinalReport ? 'Generando...' : 'Generar'}</span>
-            <span className="hidden sm:inline">
-              {isLoadingFinalReport ? 'Generando...' : 'Generar Informe Final'}
-            </span>
+            <span className="sm:hidden">Generar</span>
+            <span className="hidden sm:inline">Generar Informe Final</span>
           </Button>
         </div>
       </div>
+
+      <LoadingModal isOpen={isLoadingFinalReport} message="Generando informe final" />
+      <ConfirmFaultModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmFault}
+        possibleReasons={diagnosis.preliminary?.possibleReasons || []}
+      />
     </div>
   );
 };

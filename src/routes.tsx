@@ -10,11 +10,13 @@ import Configuration from '@/pages/Configuration';
 import Diagnoses from '@/pages/Diagnoses';
 import Vehicles from '@/pages/Vehicles';
 import PreliminaryDiagnosis from '@/pages/PreliminaryDiagnosis';
-import FinalReport from './pages/FinalReport';
-import ErrorBoundary from './components/ErrorBoundary';
-import NotFound from './pages/NotFound';
-import AiEvaluations from './pages/Diagnoses/AiEvaluations';
-import AiEvaluationDetails from './pages/Diagnoses/AiEvaluationDetails';
+import FinalReport from '@/pages/FinalReport';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import NotFound from '@/pages/NotFound';
+import AiEvaluations from '@/pages/AiEvaluations';
+import AiEvaluationDetails from '@/pages/AiEvaluationDetails';
+import PromptManager from '@/pages/PromptManager';
+import PromptDetail from '@/pages/PromptDetails';
 
 const router = createBrowserRouter([
   {
@@ -58,10 +60,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/audits/evaluations/:evaluationId',
+        path: '/prompts',
         element: (
           <ErrorBoundary>
-            <AiEvaluationDetails />
+            <PromptManager />
           </ErrorBoundary>
         ),
       },
@@ -84,7 +86,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/cars/:carId/diagnosis/:diagnosisId',
+    path: '/cars/:carId/diagnosis/:diagnosisId/preliminary-report',
     element: (
       <ErrorBoundary>
         <PreliminaryDiagnosis />
@@ -104,6 +106,22 @@ const router = createBrowserRouter([
     element: (
       <ErrorBoundary>
         <CarDetails />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/prompts/:phase',
+    element: (
+      <ErrorBoundary>
+        <PromptDetail />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/audits/evaluations/:evaluationId',
+    element: (
+      <ErrorBoundary>
+        <AiEvaluationDetails />
       </ErrorBoundary>
     ),
   },

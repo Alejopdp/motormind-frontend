@@ -3,7 +3,10 @@ export type Diagnosis = {
   carId: string;
   fault: string;
   notes: string;
+  answers: string;
+  processedAnswers: string;
   questions: string[];
+  status: string;
   processedFault: {
     symptomCleaned: string;
     category: string;
@@ -12,6 +15,7 @@ export type Diagnosis = {
   };
   preliminary: {
     possibleReasons: {
+      _id: string;
       title: string;
       probability: string;
       reasonDetails: string;
@@ -61,6 +65,11 @@ export type Diagnosis = {
   wasUseful?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  rating?: {
+    _id: string;
+    notes: string;
+    scoreStrictFormat: number;
+  };
   car?: {
     _id: string;
     model: string;
@@ -76,44 +85,5 @@ export type Diagnosis = {
     name: string;
     avatar?: string;
   };
-};
-
-export type AiDiagnosisEvaluation = {
-  _id: string;
-  diagnosisId: string | { _id: string } | Diagnosis;
-  carId: string | { _id: string };
-  phase: 'RECEPTION' | 'PRELIMINARY_DIAGNOSIS' | 'FINAL_REPORT';
-  evaluatorModel: string;
-  evaluatedModel?: string;
-  scores: {
-    scoreStrictFormat: number;
-    scoreClarityProfessionalism: number;
-    scoreAntiHallucinationPrecision: number;
-
-    scoreQuestionRelevance?: number | null;
-    scoreQuestionPrioritization?: number | null;
-    scoreQuestionCount?: number | null;
-
-    scoreHypothesisAccuracy?: number | null;
-    scoreReasoningQuality?: number | null;
-    scoreVerificationStepsQuality?: number | null;
-
-    scoreRepairPlan?: number | null;
-    scorePartsList?: number | null;
-    scoreBudget?: number | null;
-    scoreAlternativeFailuresConclusion?: number | null;
-
-    scoreGlobalAverage: number;
-  };
-  comment: string;
-  detailedEvaluation: {
-    strengths: string[];
-    weaknesses: string[];
-    scoreJustification: string;
-    improvementSuggestions: string[];
-    criticalErrorsDetected: string[];
-  };
-  createdAt: Date;
-  updatedAt: Date;
-  diagnosis?: Diagnosis;
+  markedAsRepairedBy?: string;
 };

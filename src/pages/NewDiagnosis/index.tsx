@@ -11,7 +11,7 @@ import VehicleInformation from '@/components/molecules/VehicleInformation/Vehicl
 import SymptomInputForm from '@/components/molecules/SymptomInputForm';
 import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
-import HeaderPage from '@/components/molecules/HeaderPage/HeaderPage';
+import HeaderPage from '@/components/molecules/HeaderPage';
 
 const NewDiagnosis = () => {
   const params = useParams();

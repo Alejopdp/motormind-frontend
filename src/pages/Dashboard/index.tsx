@@ -4,10 +4,11 @@ import { FileSearch, PlusIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 
-import { formatDate } from '@/utils';
+import { diagnosisLink, formatDate } from '@/utils';
 import { Diagnosis } from '@/types/Diagnosis';
 import { useApi } from '@/hooks/useApi';
 import { DiagnosticListItem } from '@/components/molecules/DiagnosticListItem';
+import { DIAGNOSIS_STATUS } from '@/constants';
 import Spinner from '@/components/atoms/Spinner';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 import { Button } from '@/components/atoms/Button';
@@ -71,19 +72,23 @@ const Dashboard = () => {
                 <Spinner className="mt-5" />
               </div>
             ) : diagnoses.length > 0 ? (
-              <div className="mt-5 space-y-3 sm:mt-0 sm:space-y-4">
-                {diagnoses
-                  .filter((diagnosis) => diagnosis.preliminary)
-                  .map((diagnosis, index) => (
-                    <DiagnosticListItem
-                      key={index}
-                      diagnosisLink={`${window.location.origin}/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}/${diagnosis.diagnosis?.confirmedFailures?.length > 0 ? 'final-report' : ''}`}
-                      vehicle={diagnosis.car}
-                      problems={diagnosis.preliminary.possibleReasons.map(({ title }) => title)}
-                      technician={diagnosis.createdBy}
-                      timestamp={formatDate(diagnosis.createdAt)}
-                    />
-                  ))}
+              <div className="mt-5 sm:mt-0">
+                {diagnoses.map((diagnosis, index) => (
+                  <DiagnosticListItem
+                    key={index}
+                    diagnosisLink={diagnosisLink(diagnosis, true)}
+                    vehicle={diagnosis.car}
+                    problems={
+                      diagnosis.preliminary?.possibleReasons.map(({ title }) => title) || []
+                    }
+                    questions={diagnosis.questions || []}
+                    technician={diagnosis.createdBy}
+                    status={
+                      diagnosis.status as (typeof DIAGNOSIS_STATUS)[keyof typeof DIAGNOSIS_STATUS]
+                    }
+                    timestamp={formatDate(diagnosis.createdAt)}
+                  />
+                ))}
               </div>
             ) : (
               <div className="flex h-64 flex-col items-center justify-center text-center">
