@@ -14,6 +14,13 @@ import { Input } from '@/components/atoms/Input';
 import { Button } from '@/components/atoms/Button';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 import { DIAGNOSIS_STATUS } from '@/constants';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/atoms/Select';
 
 const LIMIT = 1000;
 
@@ -22,6 +29,7 @@ const Diagnoses = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
   const { execute: getDiagnosesRequest } = useApi<{ data: Diagnosis[]; total: number }>(
     'get',
     '/diagnoses',
@@ -45,12 +53,13 @@ const Diagnoses = () => {
     isError,
     error,
   } = useQuery<{ data: Diagnosis[]; total: number }>({
-    queryKey: ['diagnoses', debouncedSearchTerm, currentPage],
+    queryKey: ['diagnoses', debouncedSearchTerm, currentPage, selectedStatus],
     queryFn: async () => {
       const response = await getDiagnosesRequest(
         undefined,
         {
           ...(debouncedSearchTerm.trim() ? { search: debouncedSearchTerm } : {}),
+          ...(selectedStatus !== 'ALL' ? { status: selectedStatus } : {}),
           limit: LIMIT.toString(),
           page: currentPage.toString(),
         },
@@ -82,19 +91,34 @@ const Diagnoses = () => {
     }
   };
 
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case DIAGNOSIS_STATUS.GUIDED_QUESTIONS:
+        return 'Preguntas Guíadas';
+      case DIAGNOSIS_STATUS.PRELIMINARY:
+        return 'Pre-Diagnóstico';
+      case DIAGNOSIS_STATUS.IN_REPARATION:
+        return 'En Reparación';
+      case DIAGNOSIS_STATUS.REPAIRED:
+        return 'Reparado';
+      default:
+        return status;
+    }
+  };
+
   return (
     <div className="flex flex-grow flex-col">
       {/* Fixed Header */}
       <div className="sticky top-0 z-10 flex flex-col items-center justify-between bg-white px-6 py-2 shadow-xs sm:flex-row sm:px-8 sm:py-4 lg:flex-row">
         <div className="lg:w-1/3">
-          <h1 className="py-0.5 text-xl font-semibold sm:py-0 lg:text-2xl">Diagnósticos</h1>
+          <h1 className="mr-2 py-0.5 text-xl font-semibold sm:py-0 lg:text-2xl">Diagnósticos</h1>
           <p className="text-muted hidden xl:block">
             Gestiona y revisa todos los diagnósticos del taller
           </p>
         </div>
 
-        <div className="mt-2 flex w-full gap-2 space-y-2 sm:mt-0 sm:w-auto sm:space-y-0 sm:space-x-2 lg:w-2/3">
-          <div className="relative flex-grow lg:min-w-[300px]">
+        <div className="mt-2 flex w-full flex-col gap-2 space-y-2 sm:mt-0 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-2 lg:w-2/3">
+          <div className="relative mb-0 flex-grow lg:min-w-[300px]">
             <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
             <Input
               className="h-8 w-full rounded-md py-2 pr-4 pl-9 sm:h-10"
@@ -103,6 +127,26 @@ const Diagnoses = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="h-8 w-full sm:h-10 sm:w-[200px]">
+              <SelectValue placeholder="Filtrar por estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todos los estados</SelectItem>
+              <SelectItem value={DIAGNOSIS_STATUS.GUIDED_QUESTIONS}>
+                {getStatusText(DIAGNOSIS_STATUS.GUIDED_QUESTIONS)}
+              </SelectItem>
+              <SelectItem value={DIAGNOSIS_STATUS.PRELIMINARY}>
+                {getStatusText(DIAGNOSIS_STATUS.PRELIMINARY)}
+              </SelectItem>
+              <SelectItem value={DIAGNOSIS_STATUS.IN_REPARATION}>
+                {getStatusText(DIAGNOSIS_STATUS.IN_REPARATION)}
+              </SelectItem>
+              <SelectItem value={DIAGNOSIS_STATUS.REPAIRED}>
+                {getStatusText(DIAGNOSIS_STATUS.REPAIRED)}
+              </SelectItem>
+            </SelectContent>
+          </Select>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
             className="h-8 w-8 sm:h-auto sm:w-auto"
