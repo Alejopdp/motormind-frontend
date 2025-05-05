@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getScoreColor } from '@/utils/scoreColors';
+import { Info } from 'lucide-react';
 
-interface MetricCardProps {
+interface MetricItemProps {
   title: string;
   value: number | string;
   unit?: string;
@@ -11,7 +12,7 @@ interface MetricCardProps {
   isScore?: boolean;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({
+const MetricItem: React.FC<MetricItemProps> = ({
   title,
   value,
   unit,
@@ -53,20 +54,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
               onMouseLeave={() => setShowTooltip(false)}
               aria-label="Información"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-7 w-7"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+              <Info className="h-5 w-5" />
             </button>
             {showTooltip && (
               <div
@@ -109,4 +97,4 @@ const MetricCard: React.FC<MetricCardProps> = ({
   );
 };
 
-export default MetricCard;
+export default MetricItem;

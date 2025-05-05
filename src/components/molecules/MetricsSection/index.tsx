@@ -1,19 +1,10 @@
 import React from 'react';
-import MetricCard from '../../atoms/MetricCard';
-
-interface MetricItem {
-  title: string;
-  value: number;
-  unit?: string;
-  description?: string;
-  percentage?: boolean;
-  tooltip?: string;
-  isScore?: boolean;
-}
+import MetricItem from '../MetricItem';
+import { DiagnosisMetric } from '../../../types/DiagnosisMetric';
 
 interface MetricsSectionProps {
   title: string;
-  metrics: MetricItem[];
+  metrics: DiagnosisMetric[];
   columns?: number;
 }
 
@@ -30,7 +21,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({ title, metrics, columns
       <h2 className="text-primary mb-6 text-2xl font-semibold">{title}</h2>
       <div className={`grid gap-6 ${gridCols[columns as keyof typeof gridCols]}`}>
         {metrics.map((metric, index) => (
-          <MetricCard
+          <MetricItem
             key={index}
             title={metric.title}
             value={metric.value}

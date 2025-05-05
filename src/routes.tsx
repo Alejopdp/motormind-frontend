@@ -17,7 +17,7 @@ import AiEvaluations from '@/pages/AiEvaluations';
 import AiEvaluationDetails from '@/pages/AiEvaluationDetails';
 import PromptManager from '@/pages/PromptManager';
 import PromptDetail from '@/pages/PromptDetails';
-import Metrics from '@/pages/Metrics/Metrics';
+import Metrics from '@/pages/Metrics';
 
 const router = createBrowserRouter([
   {

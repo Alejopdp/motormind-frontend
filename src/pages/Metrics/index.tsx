@@ -149,7 +149,7 @@ export default function Metrics() {
   ];
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto px-4 py-8 md:px-8">
       <h1 className="mb-8 text-3xl font-bold">Métricas de Diagnóstico</h1>
 
       <MetricsSection title="Uso de Motormind" metrics={usageMetrics} columns={4} />
