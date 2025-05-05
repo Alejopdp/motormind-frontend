@@ -66,10 +66,6 @@ const EvaluationListItem = ({ evaluation }: EvaluationListItemProps) => {
             <ScoreBar label="Plan de reparación" score={evaluation.scores.scoreRepairPlan || 0} />
             <ScoreBar label="Lista de piezas" score={evaluation.scores.scorePartsList || 0} />
             <ScoreBar label="Presupuesto" score={evaluation.scores.scoreBudget || 0} />
-            <ScoreBar
-              label="Otras averías"
-              score={evaluation.scores.scoreAlternativeFailuresConclusion || 0}
-            />
           </>
         );
       default:
@@ -109,7 +105,7 @@ const EvaluationListItem = ({ evaluation }: EvaluationListItemProps) => {
         <div className="flex flex-col items-center justify-between sm:flex-row sm:items-start">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-100 sm:h-10 sm:w-10">
-              <TestTubeDiagonal className="h-5 w-5 text-blue-600" />
+              <TestTubeDiagonal className="text-primary h-5 w-5" />
             </div>
             <div className="max-w-[200px] sm:max-w-[300px]">
               <p className="truncate text-sm font-medium sm:text-base">
@@ -148,7 +144,7 @@ const EvaluationListItem = ({ evaluation }: EvaluationListItemProps) => {
           </div>
 
           <h1 className="text-muted sm:text-md mb-2 text-sm font-medium">Específicos</h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{renderSpecificScores()}</div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">{renderSpecificScores()}</div>
 
           <div className="flex flex-col border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-muted text-sm">Creada el {formatDate(evaluation.createdAt)}</p>

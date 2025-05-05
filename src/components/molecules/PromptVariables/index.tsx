@@ -19,7 +19,7 @@ export const PromptVariables = ({ variables, className }: PromptVariablesProps) 
       <h3 className="text-md font-medium sm:text-lg">Variables Input</h3>
       <div className="flex flex-wrap gap-2">
         {variables.map((variable, index) => (
-          <Badge variant="outline" key={index} className="px-3 py-2">
+          <Badge variant="outline" key={index} className="px-2 py-1 sm:px-3 sm:py-2">
             {variable}
           </Badge>
         ))}

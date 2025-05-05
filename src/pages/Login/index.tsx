@@ -1,4 +1,4 @@
-import { CarIcon, CircleCheckBig } from 'lucide-react';
+import { CircleCheckBig } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -58,16 +58,13 @@ const Login: React.FC = () => {
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="container mx-auto max-w-md px-4">
         <div className="mb-8 text-center">
-          <div className="mb-8 flex items-center justify-center gap-2 px-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#2A7DE1]">
-              <CarIcon className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-lg font-semibold md:text-xl">Motormind</span>
+          <div className="mx-auto mb-4 flex w-60 justify-center px-3 text-center">
+            <img src="/logo_motormind.png" alt="Motormind" />
           </div>
           <h1 className="mb-2 text-xl font-bold md:text-2xl">
             {linkSent ? 'Enlace enviado' : 'Accede a tu cuenta'}
           </h1>
-          <p className="text-sm text-gray-600 md:text-base">
+          <p className="text-muted text-sm md:text-base">
             {linkSent
               ? 'Revisa tu correo electrónico para continuar'
               : 'Te enviaremos un enlace a tu correo para iniciar sesión'}
@@ -88,7 +85,7 @@ const Login: React.FC = () => {
                 </p>
               </div>
 
-              <p className="text-center text-xs text-gray-600 md:text-sm">
+              <p className="text-muted text-center text-xs md:text-sm">
                 ¿No encuentras nuestro email?
               </p>
 
@@ -121,13 +118,7 @@ const Login: React.FC = () => {
                 />
               </div>
 
-              <Button
-                variant="default"
-                size="lg"
-                className="w-full"
-                type="submit"
-                disabled={isSendingMagicLink}
-              >
+              <Button className="w-full" type="submit" disabled={isSendingMagicLink}>
                 {isSendingMagicLink ? 'Enviando...' : 'Enviar enlace'}
               </Button>
             </form>

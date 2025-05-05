@@ -118,7 +118,7 @@ const Diagnoses = () => {
         </div>
 
         <div className="mt-2 flex w-full flex-col gap-2 space-y-2 sm:mt-0 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-2 lg:w-2/3">
-          <div className="relative mb-0 flex-grow lg:min-w-[300px]">
+          <div className="relative mb-0 flex-grow xl:min-w-[300px]">
             <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
             <Input
               className="h-8 w-full rounded-md py-2 pr-4 pl-9 sm:h-10"
@@ -127,33 +127,35 @@ const Diagnoses = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="h-8 w-full sm:h-10 sm:w-[200px]">
-              <SelectValue placeholder="Filtrar por estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Todos los estados</SelectItem>
-              <SelectItem value={DIAGNOSIS_STATUS.GUIDED_QUESTIONS}>
-                {getStatusText(DIAGNOSIS_STATUS.GUIDED_QUESTIONS)}
-              </SelectItem>
-              <SelectItem value={DIAGNOSIS_STATUS.PRELIMINARY}>
-                {getStatusText(DIAGNOSIS_STATUS.PRELIMINARY)}
-              </SelectItem>
-              <SelectItem value={DIAGNOSIS_STATUS.IN_REPARATION}>
-                {getStatusText(DIAGNOSIS_STATUS.IN_REPARATION)}
-              </SelectItem>
-              <SelectItem value={DIAGNOSIS_STATUS.REPAIRED}>
-                {getStatusText(DIAGNOSIS_STATUS.REPAIRED)}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="h-8 w-8 sm:h-auto sm:w-auto"
-          >
-            <PlusIcon className="!h-5 !w-5" />
-            <span className="hidden lg:inline">Nuevo diagnóstico</span>
-          </Button>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="h-8 w-full sm:h-10">
+                <SelectValue placeholder="Filtrar por estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Todos los estados</SelectItem>
+                <SelectItem value={DIAGNOSIS_STATUS.GUIDED_QUESTIONS}>
+                  {getStatusText(DIAGNOSIS_STATUS.GUIDED_QUESTIONS)}
+                </SelectItem>
+                <SelectItem value={DIAGNOSIS_STATUS.PRELIMINARY}>
+                  {getStatusText(DIAGNOSIS_STATUS.PRELIMINARY)}
+                </SelectItem>
+                <SelectItem value={DIAGNOSIS_STATUS.IN_REPARATION}>
+                  {getStatusText(DIAGNOSIS_STATUS.IN_REPARATION)}
+                </SelectItem>
+                <SelectItem value={DIAGNOSIS_STATUS.REPAIRED}>
+                  {getStatusText(DIAGNOSIS_STATUS.REPAIRED)}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="h-8 w-8 sm:h-auto sm:w-auto"
+            >
+              <PlusIcon className="!h-5 !w-5" />
+              <span className="hidden xl:inline">Nuevo diagnóstico</span>
+            </Button>
+          </div>
         </div>
       </div>
 

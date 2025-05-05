@@ -18,13 +18,13 @@ export const VehicleListItem = ({ vehicle }: VehicleListItemProps) => {
 
   return (
     <Link to={`/cars/${vehicle._id}`}>
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-2 transition-colors duration-200 hover:bg-[#EAF2FD] sm:p-4">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-100">
-            <Car className="h-4 w-4 text-blue-600" />
+            <Car className="text-primary h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-medium">
+            <h3 className="text-xs font-medium sm:text-sm">
               {vehicle.brand} {vehicle.model}
             </h3>
             <p className="text-muted text-xs">{vehicle.plate || vehicle.vinCode || '—'}</p>

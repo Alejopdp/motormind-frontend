@@ -47,7 +47,7 @@ export default function OBDCodeInput({ initialCodes = [], onChange, disabled }: 
 
   return (
     <div className="space-y-2">
-      <p className="block text-base font-medium">
+      <p className="block text-sm font-medium sm:text-base">
         Códigos OBD Leídos <span className="text-muted font-normal">(Opcional)</span>
       </p>
 

@@ -85,7 +85,7 @@ export const DiagnosticListItem = ({
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-100 sm:h-10 sm:w-10">
-              <CarIcon className="h-5 w-5 text-blue-600" />
+              <CarIcon className="text-primary h-5 w-5" />
             </div>
             <div>
               <p className="text-sm font-medium sm:text-base">
@@ -101,7 +101,7 @@ export const DiagnosticListItem = ({
             {status && (
               <Badge
                 variant="outline"
-                className={`${getStatusColor(status)} px-2 py-0.5 text-xs font-medium`}
+                className={`${getStatusColor(status)} truncate px-2 py-0.5 text-xs font-medium`}
               >
                 {getStatusText(status)}
               </Badge>
@@ -149,7 +149,7 @@ export const DiagnosticListItem = ({
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6 sm:h-9 sm:w-9">
               <AvatarImage alt={technician?.name || 'Unknown'} />
-              <AvatarFallback>
+              <AvatarFallback className="text-xs sm:text-base">
                 {technician?.name ? getInitials(technician.name) : 'NN'}
               </AvatarFallback>
             </Avatar>
