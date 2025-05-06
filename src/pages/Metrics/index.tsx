@@ -1,61 +1,43 @@
-import { useEffect, useState } from 'react';
 import Spinner from '@/components/atoms/Spinner';
 import MetricsSection from '@/components/molecules/MetricsSection';
 import apiService from '@/service/api.service';
 import { DiagnosisMetrics } from '@/types/DiagnosisMetrics';
+import { AlertCircle, LineChartIcon } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/atoms/Button';
+
+const defaultMetrics: DiagnosisMetrics = {
+  timeSavedInHours: 0,
+  totalDiagnoses: 0,
+  completedDiagnoses: 0,
+  repairedDiagnoses: 0,
+  timeToPreliminary: 0,
+  timeToFinal: 0,
+  averageTimeToFinal: 0,
+  averageTimeToRepaired: 0,
+  modelQuality: {
+    averageScoreByPhase: {
+      preliminary: 0,
+      final: 0,
+    },
+    obdCodePercentage: 0,
+    videoRecommendationPercentage: 0,
+  },
+};
 
 export default function Metrics() {
-  const [metrics, setMetrics] = useState<DiagnosisMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        setLoading(true);
-        const response = await apiService.get<DiagnosisMetrics>('/diagnoses/metrics');
-        setMetrics(response.data);
-        setError(null);
-      } catch (err) {
-        console.error('Error al cargar métricas:', err);
-        setError('No se pudieron cargar las métricas. Intenta de nuevo más tarde.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMetrics();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner className="h-12 w-12" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-500">Error</h2>
-          <p className="mt-2">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!metrics) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold">No hay datos disponibles</h2>
-          <p className="mt-2">No se encontraron métricas para mostrar.</p>
-        </div>
-      </div>
-    );
-  }
+  const {
+    data: metrics = defaultMetrics,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<DiagnosisMetrics>({
+    queryKey: ['diagnosisMetrics'],
+    queryFn: async () => {
+      const response = await apiService.get<DiagnosisMetrics>('/diagnoses/metrics');
+      return response.data;
+    },
+  });
 
   const usageMetrics = [
     {
@@ -148,13 +130,53 @@ export default function Metrics() {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Spinner label="Cargando métricas..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4">
+        <div className="text-destructive flex items-center gap-2 rounded-lg bg-red-50 p-4">
+          <AlertCircle className="h-5 w-5" />
+          <span>Error al cargar las métricas</span>
+        </div>
+        <Button variant="outline" onClick={() => refetch()}>
+          Reintentar
+        </Button>
+      </div>
+    );
+  }
+
+  if (!metrics) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center">
+        <div className="mb-4 rounded-full bg-gray-100 p-4">
+          <LineChartIcon className="h-10 w-10 text-gray-500" />
+        </div>
+        <h3 className="text-muted mb-1 text-lg font-medium">No hay métricas disponibles</h3>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8 md:px-8">
-      <h1 className="mb-8 text-3xl font-bold">Métricas de Diagnóstico</h1>
+    <div className="flex h-full flex-grow flex-col">
+      <div className="sticky top-0 z-10 flex flex-col items-center justify-between bg-white px-6 py-2 shadow-xs sm:flex-row sm:px-8 sm:py-4 lg:flex-row">
+        <div className="lg:w-1/3">
+          <h1 className="py-0.5 text-xl font-semibold sm:py-0 lg:text-2xl">
+            Métricas de Diagnóstico
+          </h1>
+        </div>
+      </div>
 
-      <MetricsSection title="Uso de Motormind" metrics={usageMetrics} columns={4} />
-
-      <MetricsSection title="Calidad del Modelo" metrics={modelQualityMetrics} columns={3} />
+      <div className="px-4 py-4 sm:px-8">
+        <MetricsSection title="Uso de Motormind" metrics={usageMetrics} columns={4} />
+        <MetricsSection title="Calidad del Modelo" metrics={modelQualityMetrics} columns={3} />
+      </div>
     </div>
   );
 }

@@ -1,12 +1,6 @@
 import React from 'react';
 import MetricItem from '../MetricItem';
-import { DiagnosisMetric } from '../../../types/DiagnosisMetric';
-
-interface MetricsSectionProps {
-  title: string;
-  metrics: DiagnosisMetric[];
-  columns?: number;
-}
+import { MetricsSectionProps } from '@/types/DiagnosisMetric';
 
 const MetricsSection: React.FC<MetricsSectionProps> = ({ title, metrics, columns = 4 }) => {
   const gridCols = {
@@ -17,9 +11,9 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({ title, metrics, columns
   };
 
   return (
-    <div className="mb-12">
-      <h2 className="text-primary mb-6 text-2xl font-semibold">{title}</h2>
-      <div className={`grid gap-6 ${gridCols[columns as keyof typeof gridCols]}`}>
+    <div className="mb-6 sm:mb-12">
+      <h2 className="mb-4 text-lg font-semibold sm:text-xl">{title}</h2>
+      <div className={`grid gap-3 sm:gap-4 ${gridCols[columns as keyof typeof gridCols]}`}>
         {metrics.map((metric, index) => (
           <MetricItem
             key={index}
