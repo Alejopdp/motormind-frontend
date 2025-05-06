@@ -12,7 +12,7 @@ import Vehicles from '@/pages/Vehicles';
 import PreliminaryDiagnosis from '@/pages/PreliminaryDiagnosis';
 import FinalReport from '@/pages/FinalReport';
 import ErrorBoundary from '@/components/organisms/ErrorBoundary';
-import NotFound from '@/pages/NotFound/NotFound';
+import NotFound from '@/pages/NotFound';
 import AiEvaluations from '@/pages/AiEvaluations';
 import AiEvaluationDetails from '@/pages/AiEvaluationDetails';
 import PromptManager from '@/pages/PromptManager';
