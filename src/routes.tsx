@@ -11,12 +11,13 @@ import Diagnoses from '@/pages/Diagnoses';
 import Vehicles from '@/pages/Vehicles';
 import PreliminaryDiagnosis from '@/pages/PreliminaryDiagnosis';
 import FinalReport from '@/pages/FinalReport';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import ErrorBoundary from '@/components/organisms/ErrorBoundary';
 import NotFound from '@/pages/NotFound';
 import AiEvaluations from '@/pages/AiEvaluations';
 import AiEvaluationDetails from '@/pages/AiEvaluationDetails';
 import PromptManager from '@/pages/PromptManager';
 import PromptDetail from '@/pages/PromptDetails';
+import Metrics from '@/pages/Metrics';
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,14 @@ const router = createBrowserRouter([
         element: (
           <ErrorBoundary>
             <Diagnoses />
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/metrics',
+        element: (
+          <ErrorBoundary>
+            <Metrics />
           </ErrorBoundary>
         ),
       },

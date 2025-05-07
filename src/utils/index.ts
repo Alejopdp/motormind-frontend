@@ -56,6 +56,7 @@ export const diagnosisLink = (diagnosis: Diagnosis, back?: boolean) => {
   const mainLink = `/cars/${diagnosis.carId}/diagnosis/${diagnosis._id}`;
 
   let path = '';
+
   if (diagnosis.status === DIAGNOSIS_STATUS.GUIDED_QUESTIONS) {
     path = back ? 'questions?back=true' : 'questions';
   } else if (diagnosis.status === DIAGNOSIS_STATUS.PRELIMINARY) {

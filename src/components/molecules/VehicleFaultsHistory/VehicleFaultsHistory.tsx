@@ -43,10 +43,10 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
 
   return (
     <div className="mt-4 rounded-lg bg-white p-4 shadow-sm sm:p-6">
-      <h3 className="mb-4 text-lg font-bold sm:text-xl">Historial de Averías Reciente</h3>
+      <h3 className="text-md mb-3 font-medium sm:text-lg">Historial de Averías Reciente</h3>
 
       {isLoadingDiagnoses ? (
-        <div className="flex items-center justify-center">
+        <div className="mt-4 flex items-center justify-center">
           <Spinner />
         </div>
       ) : (
