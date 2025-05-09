@@ -214,7 +214,10 @@ const FinalReport = () => {
 
         <AlternativeFailures alternativeFailures={diagnosis.diagnosis?.alternativeFailures || []} />
 
-        <EstimatedResources estimatedResources={diagnosis.diagnosis?.estimatedBudget || {}} />
+        <EstimatedResources
+          diagnosisId={params.diagnosisId as string}
+          estimatedResources={diagnosis.diagnosis?.estimatedBudget || {}}
+        />
 
         <Conclusion
           recommendations={diagnosis.diagnosis?.conclusion?.recommendations || []}
