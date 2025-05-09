@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
-import { ResourceLinkItems } from '@/components/atoms/ResourceLinkItems';
 import { useApi } from '@/hooks/useApi';
 import { DocumentLink } from '@/types/Diagnosis';
+import PartDiagramItem from '@/components/molecules/PartDiagramItem';
 
 export const EstimatedResources = ({
   estimatedResources,
@@ -26,10 +26,9 @@ export const EstimatedResources = ({
   const [showDiagrams, setShowDiagrams] = useState(false);
   const [diagramResults, setDiagramResults] = useState<{ label: string; url: string }[]>([]);
   const [error, setError] = useState(false);
-  const [mockSpinner, setMockSpinner] = useState(false);
   const { execute: getDiagrams } = useApi<DocumentLink[]>(
     'get',
-    `/diagnoses/${diagnosisId}/parts-diagrams`,
+    `/diagnoses/${diagnosisId}/failure-diagrams`,
   );
   const { mutate: fetchDiagrams, isPending } = useMutation({
     mutationFn: async () => {
@@ -58,19 +57,6 @@ export const EstimatedResources = ({
     },
   });
 
-  console.log(fetchDiagrams);
-
-  const fetchDiagramsMock = () => {
-    setShowDiagrams(true);
-    setMockSpinner(true);
-    setTimeout(() => {
-      setDiagramResults([
-        { label: 'Diagrama de Repuesto 1', url: 'https://www.google.com' },
-        { label: 'Diagrama de Repuesto 2', url: 'https://www.google.com' },
-      ]);
-      setMockSpinner(false);
-    }, 5000);
-  };
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center gap-2">
@@ -112,32 +98,40 @@ export const EstimatedResources = ({
         <div style={{ minHeight: 40 }} className="relative">
           <Button
             variant="outline"
-            onClick={() => fetchDiagramsMock()}
+            onClick={() => fetchDiagrams()}
             disabled={isPending}
             className="mb-2 w-full"
-            style={{ display: showDiagrams ? 'none' : 'block' }}
+            style={{ display: showDiagrams || isPending ? 'none' : 'block' }}
           >
             Buscar diagramas
           </Button>
           <div className="absolute inset-x-0 top-0">
-            {mockSpinner && (
+            {isPending && (
               <div className="flex h-10 items-center justify-center">
                 <Spinner className="h-5 w-5" />
               </div>
             )}
-            {showDiagrams &&
-              !mockSpinner &&
-              !isPending &&
-              (error || diagramResults.length === 0) && (
-                <div className="text-xs text-gray-500 italic" style={{ fontSize: 14 }}>
-                  No encontramos manuales para este vehículo.
-                </div>
-              )}
+            {showDiagrams && !isPending && (error || diagramResults.length === 0) && (
+              <div className="text-xs text-gray-500 italic" style={{ fontSize: 14 }}>
+                No encontramos manuales para este vehículo.
+              </div>
+            )}
           </div>
-          {showDiagrams && !mockSpinner && !isPending && diagramResults.length > 0 && (
-            <div className="mt-2">
-              <ResourceLinkItems resources={diagramResults} />
-            </div>
+          {showDiagrams && !isPending && diagramResults.length > 0 && (
+            <>
+              <h3 className="mb-3 text-sm font-medium sm:text-base">Diagramas de las partes</h3>
+              <div className="mt-2 grid grid-cols-2 gap-4">
+                {diagramResults.map((result) => (
+                  <PartDiagramItem
+                    key={result.label}
+                    title={result.label}
+                    onClick={() => {
+                      window.open(result.url, '_blank');
+                    }}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
