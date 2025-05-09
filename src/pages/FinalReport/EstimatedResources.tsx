@@ -7,10 +7,7 @@ import { useApi } from '@/hooks/useApi';
 import { DocumentLink } from '@/types/Diagnosis';
 import PartDiagramItem from '@/components/molecules/PartDiagramItem';
 
-export const EstimatedResources = ({
-  estimatedResources,
-  diagnosisId,
-}: {
+type EstimatedResourcesProps = {
   estimatedResources: {
     parts: [
       {
@@ -20,11 +17,16 @@ export const EstimatedResources = ({
       },
     ];
     laborHours: number;
+    partsDiagrams: DocumentLink[];
   };
   diagnosisId: string;
-}) => {
-  const [showDiagrams, setShowDiagrams] = useState(false);
-  const [diagramResults, setDiagramResults] = useState<{ label: string; url: string }[]>([]);
+};
+
+export const EstimatedResources = ({
+  estimatedResources,
+  diagnosisId,
+}: EstimatedResourcesProps) => {
+  const [diagramResults, setDiagramResults] = useState<DocumentLink[] | undefined>(undefined);
   const [error, setError] = useState(false);
   const { execute: getDiagrams } = useApi<DocumentLink[]>(
     'get',
@@ -34,12 +36,10 @@ export const EstimatedResources = ({
     mutationFn: async () => {
       setError(false);
       setDiagramResults([]);
-      // Ajusta el endpoint según tu backend
       const res = await getDiagrams();
 
       if (res.status !== 200) throw new Error('No se pudo buscar diagramas');
       const data = res.data;
-      // Espera que el backend devuelva un array de { title, link }
       return (
         data.map((doc: DocumentLink) => ({
           label: doc.label,
@@ -49,13 +49,16 @@ export const EstimatedResources = ({
     },
     onSuccess: (results) => {
       setDiagramResults(results);
-      setShowDiagrams(true);
     },
     onError: () => {
       setError(true);
-      setShowDiagrams(true);
     },
   });
+
+  const hasSearchedDiagrams = !!estimatedResources.partsDiagrams || !!diagramResults;
+  const partsDiagrams = hasSearchedDiagrams
+    ? estimatedResources.partsDiagrams
+    : diagramResults || [];
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
@@ -101,7 +104,7 @@ export const EstimatedResources = ({
             onClick={() => fetchDiagrams()}
             disabled={isPending}
             className="mb-2 w-full"
-            style={{ display: showDiagrams || isPending ? 'none' : 'block' }}
+            style={{ display: hasSearchedDiagrams || isPending ? 'none' : 'block' }}
           >
             Buscar diagramas
           </Button>
@@ -111,17 +114,17 @@ export const EstimatedResources = ({
                 <Spinner className="h-5 w-5" />
               </div>
             )}
-            {showDiagrams && !isPending && (error || diagramResults.length === 0) && (
+            {hasSearchedDiagrams && (error || partsDiagrams.length === 0) && (
               <div className="text-xs text-gray-500 italic" style={{ fontSize: 14 }}>
                 No encontramos manuales para este vehículo.
               </div>
             )}
           </div>
-          {showDiagrams && !isPending && diagramResults.length > 0 && (
+          {hasSearchedDiagrams && !isPending && partsDiagrams.length > 0 && (
             <>
               <h3 className="mb-3 text-sm font-medium sm:text-base">Diagramas de las partes</h3>
-              <div className="mt-2 grid grid-cols-2 gap-4">
-                {diagramResults.map((result) => (
+              <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {partsDiagrams.map((result) => (
                   <PartDiagramItem
                     key={result.label}
                     title={result.label}
