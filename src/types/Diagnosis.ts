@@ -90,6 +90,6 @@ export type Diagnosis = {
 };
 
 export type DocumentLink = {
-  title: string;
-  link: string;
+  label: string;
+  url: string;
 };
