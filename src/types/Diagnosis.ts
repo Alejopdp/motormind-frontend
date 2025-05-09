@@ -86,4 +86,10 @@ export type Diagnosis = {
     avatar?: string;
   };
   markedAsRepairedBy?: string;
+  partsDiagrams?: DocumentLink[];
+};
+
+export type DocumentLink = {
+  title: string;
+  link: string;
 };
