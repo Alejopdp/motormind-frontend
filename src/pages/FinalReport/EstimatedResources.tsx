@@ -7,10 +7,7 @@ import { useApi } from '@/hooks/useApi';
 import { DocumentLink } from '@/types/Diagnosis';
 import PartDiagramItem from '@/components/molecules/PartDiagramItem';
 
-export const EstimatedResources = ({
-  estimatedResources,
-  diagnosisId,
-}: {
+type EstimatedResourcesProps = {
   estimatedResources: {
     parts: [
       {
@@ -20,26 +17,27 @@ export const EstimatedResources = ({
       },
     ];
     laborHours: number;
+    partsDiagrams: DocumentLink[];
   };
   diagnosisId: string;
-}) => {
-  const [showDiagrams, setShowDiagrams] = useState(false);
-  const [diagramResults, setDiagramResults] = useState<{ label: string; url: string }[]>([]);
-  const [error, setError] = useState(false);
+};
+
+export const EstimatedResources = ({
+  estimatedResources,
+  diagnosisId,
+}: EstimatedResourcesProps) => {
+  const [diagramResults, setDiagramResults] = useState<DocumentLink[] | null>(null);
   const { execute: getDiagrams } = useApi<DocumentLink[]>(
     'get',
     `/diagnoses/${diagnosisId}/failure-diagrams`,
   );
   const { mutate: fetchDiagrams, isPending } = useMutation({
     mutationFn: async () => {
-      setError(false);
       setDiagramResults([]);
-      // Ajusta el endpoint según tu backend
       const res = await getDiagrams();
 
       if (res.status !== 200) throw new Error('No se pudo buscar diagramas');
       const data = res.data;
-      // Espera que el backend devuelva un array de { title, link }
       return (
         data.map((doc: DocumentLink) => ({
           label: doc.label,
@@ -49,14 +47,25 @@ export const EstimatedResources = ({
     },
     onSuccess: (results) => {
       setDiagramResults(results);
-      setShowDiagrams(true);
     },
-    onError: () => {
-      setError(true);
-      setShowDiagrams(true);
+    onError: (error) => {
+      console.error('Error fetching diagrams:', error);
+      setDiagramResults([]);
+    },
+    onSettled: () => {
+      // Esto asegura que isLoading se resetee después de que la operación se complete
     },
   });
 
+  const hasSearchedDiagrams =
+    diagramResults !== null || estimatedResources.partsDiagrams !== undefined;
+  const partsDiagrams = estimatedResources.partsDiagrams ?? diagramResults ?? [];
+
+  console.log({
+    diagramResults,
+    partsDiagrams,
+    estimatedResources: estimatedResources.partsDiagrams,
+  });
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center gap-2">
@@ -100,28 +109,28 @@ export const EstimatedResources = ({
             variant="outline"
             onClick={() => fetchDiagrams()}
             disabled={isPending}
-            className="mb-2 w-full"
-            style={{ display: showDiagrams || isPending ? 'none' : 'block' }}
+            className="mb-2 min-h-12 w-full"
+            style={{ display: hasSearchedDiagrams || isPending ? 'none' : 'block' }}
           >
             Buscar diagramas
           </Button>
           <div className="absolute inset-x-0 top-0">
             {isPending && (
-              <div className="flex h-10 items-center justify-center">
+              <div className="flex h-12 items-center justify-center">
                 <Spinner className="h-5 w-5" />
               </div>
             )}
-            {showDiagrams && !isPending && (error || diagramResults.length === 0) && (
+            {!isPending && hasSearchedDiagrams && partsDiagrams?.length === 0 && (
               <div className="text-xs text-gray-500 italic" style={{ fontSize: 14 }}>
                 No encontramos manuales para este vehículo.
               </div>
             )}
           </div>
-          {showDiagrams && !isPending && diagramResults.length > 0 && (
+          {!isPending && hasSearchedDiagrams && partsDiagrams?.length > 0 && (
             <>
               <h3 className="mb-3 text-sm font-medium sm:text-base">Diagramas de las partes</h3>
-              <div className="mt-2 grid grid-cols-2 gap-4">
-                {diagramResults.map((result) => (
+              <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {partsDiagrams.map((result) => (
                   <PartDiagramItem
                     key={result.label}
                     title={result.label}
