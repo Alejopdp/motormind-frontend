@@ -5,7 +5,7 @@ import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
 import { ResourceLinkItems } from '@/components/atoms/ResourceLinkItems';
 import { useApi } from '@/hooks/useApi';
-import { FailureDiagram } from '@/types/Diagnosis';
+import { DocumentLink } from '@/types/Diagnosis';
 
 export const EstimatedResources = ({
   estimatedResources,
@@ -26,9 +26,10 @@ export const EstimatedResources = ({
   const [showDiagrams, setShowDiagrams] = useState(false);
   const [diagramResults, setDiagramResults] = useState<{ label: string; url: string }[]>([]);
   const [error, setError] = useState(false);
-  const { execute: getDiagrams } = useApi<FailureDiagram[]>(
+  const [mockSpinner, setMockSpinner] = useState(false);
+  const { execute: getDiagrams } = useApi<DocumentLink[]>(
     'get',
-    `/diagnoses/${diagnosisId}/failure-diagrams`,
+    `/diagnoses/${diagnosisId}/parts-diagrams`,
   );
   const { mutate: fetchDiagrams, isPending } = useMutation({
     mutationFn: async () => {
@@ -41,9 +42,9 @@ export const EstimatedResources = ({
       const data = res.data;
       // Espera que el backend devuelva un array de { title, link }
       return (
-        data.map((doc: FailureDiagram) => ({
-          label: doc.title,
-          url: doc.link,
+        data.map((doc: DocumentLink) => ({
+          label: doc.label,
+          url: doc.url,
         })) || []
       );
     },
@@ -57,6 +58,19 @@ export const EstimatedResources = ({
     },
   });
 
+  console.log(fetchDiagrams);
+
+  const fetchDiagramsMock = () => {
+    setShowDiagrams(true);
+    setMockSpinner(true);
+    setTimeout(() => {
+      setDiagramResults([
+        { label: 'Diagrama de Repuesto 1', url: 'https://www.google.com' },
+        { label: 'Diagrama de Repuesto 2', url: 'https://www.google.com' },
+      ]);
+      setMockSpinner(false);
+    }, 5000);
+  };
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center gap-2">
@@ -94,25 +108,36 @@ export const EstimatedResources = ({
         </div>
       </div>
 
-      {/* CTA Buscar diagramas */}
-      <div className="mt-6">
-        <Button
-          variant="outline"
-          onClick={() => fetchDiagrams()}
-          disabled={isPending}
-          className="mb-2"
-        >
-          Buscar diagramas
-        </Button>
-        <div style={{ minHeight: 32 }}>
-          {isPending && <Spinner className="inline-block h-5 w-5 align-middle" />}
-          {showDiagrams && !isPending && (error || diagramResults.length === 0) && (
-            <div className="text-xs text-gray-500 italic" style={{ fontSize: 14 }}>
-              No encontramos manuales para este vehículo.
+      <div className="mt-8">
+        <div style={{ minHeight: 40 }} className="relative">
+          <Button
+            variant="outline"
+            onClick={() => fetchDiagramsMock()}
+            disabled={isPending}
+            className="mb-2 w-full"
+            style={{ display: showDiagrams ? 'none' : 'block' }}
+          >
+            Buscar diagramas
+          </Button>
+          <div className="absolute inset-x-0 top-0">
+            {mockSpinner && (
+              <div className="flex h-10 items-center justify-center">
+                <Spinner className="h-5 w-5" />
+              </div>
+            )}
+            {showDiagrams &&
+              !mockSpinner &&
+              !isPending &&
+              (error || diagramResults.length === 0) && (
+                <div className="text-xs text-gray-500 italic" style={{ fontSize: 14 }}>
+                  No encontramos manuales para este vehículo.
+                </div>
+              )}
+          </div>
+          {showDiagrams && !mockSpinner && !isPending && diagramResults.length > 0 && (
+            <div className="mt-2">
+              <ResourceLinkItems resources={diagramResults} />
             </div>
-          )}
-          {showDiagrams && !isPending && diagramResults.length > 0 && (
-            <ResourceLinkItems resources={diagramResults} />
           )}
         </div>
       </div>
