@@ -7,6 +7,14 @@ import { useApi } from '@/hooks/useApi';
 import { DocumentLink } from '@/types/Diagnosis';
 import PartDiagramItem from '@/components/molecules/PartDiagramItem';
 
+const messages = [
+  'Buscando diagramas... esta operación puede tardar varios segundos',
+  'Accediendo a documentación técnica del fabricante...',
+  'Analizando la avería y localizando manuales relevantes...',
+  'Explorando secciones técnicas en busca de instrucciones de diagnóstico...',
+  'Preparando recursos visuales para reparar más rápido y mejor...',
+];
+
 type EstimatedResourcesProps = {
   estimatedResources: {
     parts: [
@@ -52,9 +60,7 @@ export const EstimatedResources = ({
       console.error('Error fetching diagrams:', error);
       setDiagramResults([]);
     },
-    onSettled: () => {
-      // Esto asegura que isLoading se resetee después de que la operación se complete
-    },
+    onSettled: () => {},
   });
 
   const hasSearchedDiagrams =
@@ -68,13 +74,6 @@ export const EstimatedResources = ({
   });
 
   const [currentMessage, setCurrentMessage] = useState(0);
-  const messages = [
-    'Buscando diagramas... esta operación puede tardar varios segundos',
-    'Accediendo a documentación técnica del fabricante...',
-    'Analizando la avería y localizando manuales relevantes...',
-    'Explorando secciones técnicas en busca de instrucciones de diagnóstico...',
-    'Preparando recursos visuales para reparar más rápido y mejor...',
-  ];
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
