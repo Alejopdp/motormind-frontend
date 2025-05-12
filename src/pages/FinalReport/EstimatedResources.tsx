@@ -1,5 +1,5 @@
 import { BarChartIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
@@ -66,6 +66,28 @@ export const EstimatedResources = ({
     partsDiagrams,
     estimatedResources: estimatedResources.partsDiagrams,
   });
+
+  const [currentMessage, setCurrentMessage] = useState(0);
+  const messages = [
+    'Buscando diagramas... esta operación puede tardar varios segundos',
+    'Accediendo a documentación técnica del fabricante...',
+    'Analizando la avería y localizando manuales relevantes...',
+    'Explorando secciones técnicas en busca de instrucciones de diagnóstico...',
+    'Preparando recursos visuales para reparar más rápido y mejor...',
+  ];
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPending) {
+      interval = setInterval(() => {
+        setCurrentMessage((prev) => (prev + 1) % messages.length);
+      }, 10000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPending]);
+
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center gap-2">
@@ -116,8 +138,8 @@ export const EstimatedResources = ({
           </Button>
           <div className="absolute inset-x-0 top-0">
             {isPending && (
-              <div className="flex h-12 items-center justify-center">
-                <Spinner className="h-5 w-5" />
+              <div className="flex h-12 flex-col items-center justify-center gap-2">
+                <Spinner className="h-5 w-5" label={messages[currentMessage]} />
               </div>
             )}
             {!isPending && hasSearchedDiagrams && partsDiagrams?.length === 0 && (
