@@ -128,7 +128,7 @@ export const EstimatedResources = ({
           </div>
           {!isPending && hasSearchedDiagrams && partsDiagrams?.length > 0 && (
             <>
-              <h3 className="mb-3 text-sm font-medium sm:text-base">Diagramas de las partes</h3>
+              <h3 className="mb-3 text-sm font-medium sm:text-base">Diagramas de las piezas</h3>
               <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {partsDiagrams.map((result) => (
                   <PartDiagramItem

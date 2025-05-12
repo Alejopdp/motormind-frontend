@@ -7,7 +7,7 @@ interface PartDiagramItemProps {
 
 const PartDiagramItem: React.FC<PartDiagramItemProps> = ({ title, onClick }) => (
   <div
-    className="border-primary flex cursor-pointer items-center justify-center rounded-lg border bg-white p-4"
+    className="border-primary flex cursor-pointer items-center justify-center rounded-lg border bg-white p-4 transition-colors hover:bg-gray-100"
     onClick={onClick}
   >
     <div className="flex items-center">
