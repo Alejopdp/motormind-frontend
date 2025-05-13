@@ -12,6 +12,7 @@ import { QuestionsList } from '@/components/atoms/QuestionsList';
 import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage';
+import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
 
 const DiagnosisQuestions = () => {
   const params = useParams();
@@ -106,6 +107,8 @@ const DiagnosisQuestions = () => {
       },
     });
 
+  const carDescription = useCarPlateOrVin(car);
+
   if (isLoadingCar || isLoadingDiagnosis)
     return (
       <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
@@ -145,7 +148,7 @@ const DiagnosisQuestions = () => {
         onBack={onBack}
         data={{
           title: 'Nuevo diagnóstico - Preguntas guiadas',
-          description: `Matricula: ${car.plate || car.vinCode}`,
+          description: carDescription,
         }}
       />
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-3 sm:space-y-6 sm:px-6 sm:py-6">

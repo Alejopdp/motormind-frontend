@@ -19,6 +19,7 @@ import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
 import { ConfirmFaultModal } from './ConfirmFaultModal';
+import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
 
 const PreliminaryDiagnosis = () => {
   const params = useParams();
@@ -89,6 +90,8 @@ const PreliminaryDiagnosis = () => {
     },
   });
 
+  const carDescription = useCarPlateOrVin(diagnosis.car);
+
   if (isLoadingDiagnosis)
     return (
       <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
@@ -141,7 +144,7 @@ const PreliminaryDiagnosis = () => {
         onBack={onBack}
         data={{
           title: 'Informe Preliminar IA',
-          description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,
+          description: carDescription,
         }}
       />
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">

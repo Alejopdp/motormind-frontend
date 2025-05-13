@@ -11,6 +11,7 @@ import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import { PlusIcon } from 'lucide-react';
+import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
 
 const CarDetails = () => {
   const params = useParams();
@@ -40,6 +41,8 @@ const CarDetails = () => {
     retry: 0,
   });
 
+  const carDescription = useCarPlateOrVin(car);
+
   if (isLoadingCar)
     return (
       <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
@@ -67,7 +70,7 @@ const CarDetails = () => {
         onBack={() => navigate('/cars')}
         data={{
           title: 'Detalles del Vehículo',
-          description: `Matricula: ${car.plate || car.vinCode}`,
+          description: carDescription,
         }}
         headerActions={
           <Button onClick={() => navigate(`/cars/${params.carId}/new-diagnosis`)}>
