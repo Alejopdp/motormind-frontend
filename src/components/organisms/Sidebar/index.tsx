@@ -57,12 +57,13 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
       icon: LineChartIcon,
       label: 'Métricas',
       href: '/metrics',
+      roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
     },
     {
       icon: TestTubeDiagonal,
       label: 'Evaluaciones',
       href: '/audits/evaluations',
-      roles: [UserRole.SUPER_ADMIN],
+      roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
     },
     {
       icon: FileTextIcon,
