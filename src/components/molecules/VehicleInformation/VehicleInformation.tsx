@@ -27,7 +27,7 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({
 
   if (minimized) {
     return (
-      <div className="rounded-lg bg-white p-4 shadow-md sm:mt-4 sm:p-6">
+      <div className="rounded-lg bg-white p-4 shadow-md sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
           <div className="flex items-center gap-3">
             <div className="rounded-md bg-blue-100 p-2">
@@ -80,7 +80,7 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({
   }
 
   return (
-    <div className="mt-4 rounded-lg bg-white p-4 shadow-md sm:p-6">
+    <div className="rounded-lg bg-white p-4 shadow-md sm:p-6">
       <div className="flex items-center justify-between">
         <h5 className="text-md mb-2 font-medium sm:text-lg">Información del vehículo</h5>
         {editMode && car && (

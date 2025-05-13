@@ -195,16 +195,16 @@ const AiEvaluationDetails: React.FC = () => {
         data={{ title: 'Detalles de la Evaluación' }}
         onBack={() => navigate('/audits/evaluations')}
         headerActions={
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex gap-2">
             <Button variant="outline" onClick={() => copyDiagnosis(evaluation?.diagnosisId)}>
-              <Copy className="hidden h-4 w-4 sm:inline" />
-              Copiar ID diagnóstico
+              <Copy className="h-4 w-4" />
+              Copiar ID <span className="hidden sm:inline">diagnóstico</span>
             </Button>
             <Button
               onClick={() => navigate(diagnosisLink(evaluation?.diagnosis as Diagnosis, true))}
             >
-              <ExternalLink className="hidden h-4 w-4 sm:inline" />
-              Ver Diagnóstico
+              <ExternalLink className="h-4 w-4" />
+              Ver <span className="hidden sm:inline">Diagnóstico</span>
             </Button>
           </div>
         }

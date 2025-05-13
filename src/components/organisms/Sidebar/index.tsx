@@ -8,6 +8,7 @@ import {
   MenuIcon,
   FileTextIcon,
   TestTubeDiagonal,
+  LineChartIcon,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -53,6 +54,11 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
       href: '/diagnoses',
     },
     {
+      icon: LineChartIcon,
+      label: 'Métricas',
+      href: '/metrics',
+    },
+    {
       icon: TestTubeDiagonal,
       label: 'Evaluaciones',
       href: '/audits/evaluations',
@@ -75,6 +81,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
             (item.href === '/' && currentPath === '/') ||
             (item.href === '/cars' && currentPath.startsWith('/cars')) ||
             (item.href === '/diagnoses' && currentPath.startsWith('/diagnoses')) ||
+            (item.href === '/metrics' && currentPath.startsWith('/metrics')) ||
             (item.href === '/audits/evaluations' &&
               currentPath.startsWith('/audits/evaluations')) ||
             (item.href === '/prompts' && currentPath.startsWith('/prompts'));
@@ -115,7 +122,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
       <div className="flex flex-col gap-2 sm:mt-2 sm:flex-row">
         {(user.role === UserRole.ADMIN || user.role === UserRole.SUPER_ADMIN) && (
           <Link
-            to="/configuration"
+            to="/settings"
             className="flex-1 justify-start"
             onClick={() => setIsMobileMenuOpen(false)}
           >
@@ -146,11 +153,8 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
           </DialogTrigger>
           <DialogContent className="sidebar-dialog fixed top-0 left-0 h-full w-[280px] translate-x-0 translate-y-0 p-0">
             <div className="bg-background flex h-full flex-col px-3 py-6 sm:py-4">
-              <div className="mb-6 flex items-center gap-2 px-1 sm:mb-8">
-                <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-md sm:h-10 sm:w-10">
-                  <CarIcon className="h-5 w-5 text-white sm:h-6 sm:w-6" />
-                </div>
-                <span className="text-lg font-semibold sm:text-xl">Motormind</span>
+              <div className="mb-6 flex w-50 items-center gap-2 px-1 sm:mb-8">
+                <img src="/logo_motormind.png" alt="Motormind" />
               </div>
               {renderNavItems()}
               {renderUserSection()}
@@ -167,10 +171,7 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
         )}
       >
         <div className="mb-8 flex items-center gap-2 px-3">
-          <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-md">
-            <CarIcon className="h-6 w-6 text-white" />
-          </div>
-          <span className="text-xl font-semibold md:text-base lg:text-xl">Motormind</span>
+          <img src="/logo_motormind.png" alt="Motormind" />
         </div>
         {renderNavItems()}
         {renderUserSection()}
