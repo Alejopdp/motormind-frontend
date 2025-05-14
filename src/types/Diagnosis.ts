@@ -37,6 +37,7 @@ export type Diagnosis = {
           quality: string;
         },
       ];
+      partsDiagrams: DocumentLink[];
       laborHours: number;
     };
     confirmedFailures: [
@@ -86,4 +87,9 @@ export type Diagnosis = {
     avatar?: string;
   };
   markedAsRepairedBy?: string;
+};
+
+export type DocumentLink = {
+  label: string;
+  url: string;
 };
