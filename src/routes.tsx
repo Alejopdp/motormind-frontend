@@ -18,6 +18,7 @@ import AiEvaluationDetails from '@/pages/AiEvaluationDetails';
 import PromptManager from '@/pages/PromptManager';
 import PromptDetail from '@/pages/PromptDetails';
 import Metrics from '@/pages/Metrics';
+import DamageAssessments from './pages/DamageAssessments';
 
 const router = createBrowserRouter([
   {
@@ -73,6 +74,14 @@ const router = createBrowserRouter([
         element: (
           <ErrorBoundary>
             <PromptManager />
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/damage-assessments',
+        element: (
+          <ErrorBoundary>
+            <DamageAssessments />
           </ErrorBoundary>
         ),
       },
