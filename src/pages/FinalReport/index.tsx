@@ -29,6 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/atoms/Dialog';
+import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
 
 const FinalReport = () => {
   const params = useParams();
@@ -72,6 +73,7 @@ const FinalReport = () => {
     retry: false,
   });
   const { symptom } = useSymptom(diagnosis);
+  const carDescription = useCarPlateOrVin(diagnosis.car);
 
   useEffect(() => {
     if (diagnosis?.finalNotes) {
@@ -202,13 +204,18 @@ const FinalReport = () => {
         onBack={onBack}
         data={{
           title: 'Informe Final',
-          description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,
+          description: carDescription,
         }}
       />
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
 
-        <DiagnosticContextSection symptoms={symptom} notes={diagnosis.notes} />
+        <DiagnosticContextSection
+          symptoms={symptom}
+          notes={diagnosis.notes}
+          questions={diagnosis.questions}
+          answers={diagnosis.processedAnswers ?? ''}
+        />
 
         <PrimaryRepairSection confirmedFailures={diagnosis.diagnosis?.confirmedFailures || []} />
 
