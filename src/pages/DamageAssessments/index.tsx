@@ -1,9 +1,10 @@
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { FileSearch, PlusIcon } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
+import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 
 const DamageAssessments = () => {
-  const navigate = useNavigate();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   // TODO: fetch peritajes, por ahora simula vacío
   const damageAssessments: unknown[] = [];
 
@@ -20,7 +21,7 @@ const DamageAssessments = () => {
           </div>
           <div className="mt-2 flex w-full flex-col justify-end gap-2 space-y-2 sm:mt-0 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-2 lg:w-2/3">
             <Button
-              onClick={() => navigate('/damage-assessments/create')}
+              onClick={() => setIsCreateModalOpen(true)}
               className="h-8 w-8 sm:h-auto sm:w-auto"
             >
               <PlusIcon className="!h-5 !w-5" />
@@ -37,10 +38,18 @@ const DamageAssessments = () => {
               </div>
               <h3 className="mb-1 text-lg font-medium">No hay peritajes</h3>
               <p className="text-muted mb-4">Aún no se ha creado ningún peritaje en el sistema.</p>
-              <Button onClick={() => navigate('/damage-assessments/create')}>Crear peritaje</Button>
+              <Button onClick={() => setIsCreateModalOpen(true)}>Crear peritaje</Button>
             </div>
           )}
         </div>
+        <CreateDiagnosticModal
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          title="Crear Nuevo Peritaje"
+          allowManualCar={false}
+          submitButtonText="Comenzar peritaje"
+          redirectTo="damage-assessment"
+        />
       </div>
     </div>
   );

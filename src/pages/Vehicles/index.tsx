@@ -109,6 +109,7 @@ const Vehicles = () => {
             open={isCreateModalOpen}
             onOpenChange={setIsCreateModalOpen}
             createOnly
+            submitButtonText="Comenzar diagnóstico"
           />
         </div>
       </div>
