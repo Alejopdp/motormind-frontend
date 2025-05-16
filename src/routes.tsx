@@ -19,6 +19,7 @@ import PromptManager from '@/pages/PromptManager';
 import PromptDetail from '@/pages/PromptDetails';
 import Metrics from '@/pages/Metrics';
 import DamageAssessments from './pages/DamageAssessments';
+import CreateDamageAssessment from './pages/DamageAssessments/CreateDamageAssessment';
 
 const router = createBrowserRouter([
   {
@@ -164,6 +165,14 @@ const router = createBrowserRouter([
     element: (
       <ErrorBoundary>
         <VerifyMagicLink />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/damage-assessments/create',
+    element: (
+      <ErrorBoundary>
+        <CreateDamageAssessment />
       </ErrorBoundary>
     ),
   },
