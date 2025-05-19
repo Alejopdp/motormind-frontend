@@ -1,3 +1,4 @@
+import { apiUrl } from '@/constants/env';
 import axios from 'axios';
 
 export interface UploadResult {
@@ -18,7 +19,7 @@ export async function uploadImages({
     formData.append('context', context);
 
     try {
-        const res = await axios.post<UploadResult>('/upload', formData, {
+        const res = await axios.post<UploadResult>(`${apiUrl}/upload`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

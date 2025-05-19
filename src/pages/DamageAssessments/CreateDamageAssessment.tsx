@@ -1,121 +1,106 @@
-import { useState } from 'react';
-import { Input } from '@/components/atoms/Input';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import { useApi } from '@/hooks/useApi';
 import Spinner from '@/components/atoms/Spinner';
 import { Car } from '@/types/Car';
 import { ImageUploadStep } from '@/components/molecules/ImageUploadStep';
+import { useSnackbar } from 'notistack';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/context/Auth.context';
+import { UserRole } from '@/types/User';
+import { Navigate } from 'react-router-dom';
 
 const CreateDamageAssessment = () => {
-  const [activeTab, setActiveTab] = useState<'vin' | 'plate'>('plate');
-  const [vin, setVin] = useState('');
-  const [plate, setPlate] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [car, setCar] = useState<Car | null>(null);
+  const [searchParams] = useSearchParams();
+  const carId = searchParams.get('carId');
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const [images, setImages] = useState<File[]>([]);
-  const { execute: getOrCreateCar } = useApi<Car>('get', '/cars/vin-or-plate');
+  const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
+  const { user } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      const params = activeTab === 'vin' ? { vinCode: vin } : { plate };
-      const res = await getOrCreateCar(undefined, params);
-      setCar(res.data);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Error buscando el vehículo');
-    } finally {
-      setLoading(false);
+  // Usar useQuery para manejar la carga del auto
+  const {
+    data: car,
+    isLoading,
+    isError,
+  } = useQuery<Car>({
+    queryKey: ['car', carId],
+    queryFn: async () => {
+      if (!carId) throw new Error('No car ID provided');
+      const res = await getCarById(undefined, undefined, { carId });
+      return res.data;
+    },
+    enabled: !!carId,
+    retry: false,
+  });
+
+  // Manejar errores
+  useEffect(() => {
+    if (isError) {
+      enqueueSnackbar('Error cargando el vehículo', { variant: 'error' });
+      navigate('/damage-assessments');
     }
-  };
+  }, [isError, navigate, enqueueSnackbar]);
+
+  // Redirigir si no hay carId
+  useEffect(() => {
+    if (!carId) {
+      navigate('/damage-assessments');
+    }
+  }, [carId, navigate]);
+
+  // Redirigir si no es admin
+  if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleContinue = () => {
-    console.log('Imágenes seleccionadas:', images);
-    // Aquí iría el siguiente paso del flujo
+    // Redirigir a la pantalla de detalles con las imágenes en el estado
+    navigate(`/damage-assessments/${carId}/details`, {
+      state: { images },
+    });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner label="Cargando vehículo..." />
+      </div>
+    );
+  }
+
+  if (isError || !car) {
+    return null; // La redirección se maneja en el efecto
+  }
 
   return (
     <div className="bg-background flex min-h-screen w-full flex-row">
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
         <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
           <h2 className="mb-6 text-center text-2xl font-semibold">Nuevo Peritaje</h2>
-          {!car ? (
-            <>
-              <div className="mb-6 flex justify-center gap-2">
-                <Button
-                  variant={activeTab === 'plate' ? 'default' : 'outline'}
-                  onClick={() => setActiveTab('plate')}
-                  className="w-1/2"
-                >
-                  Matrícula
-                </Button>
-                <Button
-                  variant={activeTab === 'vin' ? 'default' : 'outline'}
-                  onClick={() => setActiveTab('vin')}
-                  className="w-1/2"
-                >
-                  VIN
-                </Button>
+          <div className="mb-6">
+            <div className="mb-2 text-center text-lg font-medium">Vehículo seleccionado:</div>
+            <div className="rounded bg-gray-50 p-3 text-center text-sm">
+              <div>
+                <b>Marca:</b> {car.brand}
               </div>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {activeTab === 'plate' ? (
-                  <Input
-                    placeholder="Introduce la matrícula"
-                    value={plate}
-                    onChange={(e) => setPlate(e.target.value)}
-                    autoFocus
-                    maxLength={12}
-                    required
-                    disabled={loading}
-                  />
-                ) : (
-                  <Input
-                    placeholder="Introduce el VIN"
-                    value={vin}
-                    onChange={(e) => setVin(e.target.value)}
-                    autoFocus
-                    maxLength={20}
-                    required
-                    disabled={loading}
-                  />
-                )}
-                <Button type="submit" className="mt-2 w-full" disabled={loading}>
-                  {loading ? <Spinner label="Buscando..." /> : 'Buscar vehículo'}
-                </Button>
-                {error && <div className="text-destructive mt-2 text-center text-sm">{error}</div>}
-              </form>
-            </>
-          ) : (
-            <>
-              <div className="mb-6">
-                <div className="mb-2 text-center text-lg font-medium">Vehículo seleccionado:</div>
-                <div className="rounded bg-gray-50 p-3 text-center text-sm">
-                  <div>
-                    <b>Marca:</b> {car.brand}
-                  </div>
-                  <div>
-                    <b>Modelo:</b> {car.model}
-                  </div>
-                  <div>
-                    <b>Matrícula:</b> {car.plate}
-                  </div>
-                  <div>
-                    <b>VIN:</b> {car.vinCode}
-                  </div>
-                </div>
+              <div>
+                <b>Modelo:</b> {car.model}
               </div>
-              <ImageUploadStep images={images} onImagesChange={setImages} />
-              <Button
-                className="mt-6 w-full"
-                onClick={handleContinue}
-                disabled={images.length === 0}
-              >
-                Continuar
-              </Button>
-            </>
-          )}
+              <div>
+                <b>Matrícula:</b> {car.plate}
+              </div>
+              <div>
+                <b>VIN:</b> {car.vinCode}
+              </div>
+            </div>
+          </div>
+          <ImageUploadStep images={images} onImagesChange={setImages} />
+          <Button className="mt-6 w-full" onClick={handleContinue} disabled={images.length === 0}>
+            Continuar
+          </Button>
         </div>
       </div>
     </div>

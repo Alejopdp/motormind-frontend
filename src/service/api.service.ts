@@ -2,13 +2,14 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { apiUrl } from '@/constants/env';
 import { AiDiagnosisEvaluation } from '@/types/AiDiagnosisEvaluation';
 
-class ApiService {
+export class ApiService {
   private static instance: ApiService;
   private api: AxiosInstance;
 
   private constructor() {
     this.api = axios.create({
       baseURL: apiUrl,
+      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -85,9 +86,10 @@ class ApiService {
     evaluations: AiDiagnosisEvaluation[];
     total: number;
   }> {
-    const response = await this.get<{ evaluations: AiDiagnosisEvaluation[]; total: number }>(
-      `/audits/evaluations`,
-    );
+    const response = await this.get<{
+      evaluations: AiDiagnosisEvaluation[];
+      total: number;
+    }>('/audits/evaluations');
     return response.data;
   }
 

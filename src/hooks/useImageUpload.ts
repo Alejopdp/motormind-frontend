@@ -1,26 +1,28 @@
-import { useState } from 'react';
-import { uploadImages, UploadResult } from '../service/upload.service';
+import { useApi } from './useApi';
+import { UploadResult } from '@/service/upload.service';
+import { AxiosError } from 'axios';
 
 export function useImageUpload() {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [result, setResult] = useState<UploadResult | null>(null);
+    const { execute: uploadRequest } = useApi<UploadResult>('post', '/upload');
 
     const upload = async (files: File[], context = 'damage-assessment') => {
-        setLoading(true);
-        setError(null);
-        setResult(null);
+        const formData = new FormData();
+
+        // Asegurarnos de que se envíen los archivos con el nombre correcto
+        files.forEach((file) => {
+            formData.append('files', file, file.name);
+        });
+        formData.append('context', context);
+
         try {
-            const res = await uploadImages({ files, context });
-            setResult(res);
-            return res;
-        } catch (err: any) {
-            setError(err.message || 'Error subiendo imágenes');
-            throw err;
-        } finally {
-            setLoading(false);
+            // Enviar el FormData directamente
+            const response = await uploadRequest(formData);
+            return response.data;
+        } catch (error) {
+            const axiosError = error as AxiosError<{ message: string }>;
+            throw new Error(axiosError.response?.data?.message || 'Error subiendo imágenes');
         }
     };
 
-    return { upload, loading, error, result };
+    return { upload };
 } 

@@ -20,6 +20,7 @@ import PromptDetail from '@/pages/PromptDetails';
 import Metrics from '@/pages/Metrics';
 import DamageAssessments from './pages/DamageAssessments';
 import CreateDamageAssessment from './pages/DamageAssessments/CreateDamageAssessment';
+import DamageDetails from './pages/DamageAssessments/DamageDetails';
 
 const router = createBrowserRouter([
   {
@@ -173,6 +174,14 @@ const router = createBrowserRouter([
     element: (
       <ErrorBoundary>
         <CreateDamageAssessment />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/damage-assessments/:carId/details',
+    element: (
+      <ErrorBoundary>
+        <DamageDetails />
       </ErrorBoundary>
     ),
   },

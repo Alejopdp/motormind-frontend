@@ -2,11 +2,20 @@ import { useState } from 'react';
 import { FileSearch, PlusIcon } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
+import { useAuth } from '@/context/Auth.context';
+import { UserRole } from '@/types/User';
+import { Navigate } from 'react-router-dom';
 
 const DamageAssessments = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { user } = useAuth();
   // TODO: fetch peritajes, por ahora simula vacío
   const damageAssessments: unknown[] = [];
+
+  // Redirigir si no es admin
+  if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="bg-background flex min-h-screen w-full flex-row">
