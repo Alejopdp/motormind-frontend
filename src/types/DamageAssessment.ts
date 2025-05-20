@@ -1,5 +1,12 @@
 import { Car } from './Car';
 
+export interface Damage {
+    description: string;
+    area: string;
+    type: string;
+    severity: string;
+}
+
 export interface DamageAssessment {
     _id: string;
     carId: string;
@@ -9,6 +16,7 @@ export interface DamageAssessment {
     repairTimes?: string;
     prices?: string;
     createdBy: string;
+    damages: Damage[];
     createdAt: string;
     updatedAt: string;
 } 

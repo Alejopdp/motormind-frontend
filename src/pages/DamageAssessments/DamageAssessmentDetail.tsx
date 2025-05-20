@@ -1,7 +1,7 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { useApi } from '@/hooks/useApi';
 import { useEffect } from 'react';
-import { DamageAssessment } from '@/types/DamageAssessment';
+import { DamageAssessment, Damage } from '@/types/DamageAssessment';
 import Spinner from '@/components/atoms/Spinner';
 import { ImageIcon } from 'lucide-react';
 import { UserRole } from '@/types/User';
@@ -9,6 +9,33 @@ import { useAuth } from '@/context/Auth.context';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
+
+const DamageCard = ({ damage }: { damage: Damage }) => {
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'grave':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'moderado':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'leve':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default:
+        return 'bg-gray-100 border-gray-200';
+    }
+  };
+  return (
+    <div className={`mb-2 flex flex-col gap-2 rounded-md border bg-white p-4 shadow-sm`}>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold">{damage.area}</span>
+        <span className={`rounded px-2 py-1 text-xs ${getSeverityColor(damage.severity)}`}>
+          {damage.severity}
+        </span>
+      </div>
+      <div className="text-xs text-gray-700">{damage.description}</div>
+      <div className="text-xs text-gray-500">Tipo: {damage.type}</div>
+    </div>
+  );
+};
 
 const DamageAssessmentDetail = () => {
   const { damageAssessmentId } = useParams();
@@ -42,7 +69,7 @@ const DamageAssessmentDetail = () => {
     );
   }
 
-  const { car, description, images, createdAt } = data;
+  const { car, description, images, createdAt, damages = [] } = data;
 
   return (
     <div className="bg-background min-h-screen w-full">
@@ -79,6 +106,18 @@ const DamageAssessmentDetail = () => {
               ))}
             </div>
           )}
+
+          {/* Damages section */}
+          <div className="mt-6">
+            <h3 className="mb-2 text-base font-semibold">Daños detectados</h3>
+            {damages.length === 0 && (
+              <div className="text-xs text-gray-400 italic">No se detectaron daños</div>
+            )}
+            {damages.map((damage, idx) => (
+              <DamageCard key={idx} damage={damage} />
+            ))}
+          </div>
+
           <div className="flex items-center justify-between border-t border-gray-100 pt-3">
             <span className="text-xs text-gray-400">
               Creado: {new Date(createdAt).toLocaleString()}
