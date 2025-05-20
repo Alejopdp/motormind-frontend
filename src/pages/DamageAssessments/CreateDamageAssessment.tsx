@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import { useApi } from '@/hooks/useApi';
@@ -10,17 +10,26 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/Auth.context';
 import { UserRole } from '@/types/User';
 import { Navigate } from 'react-router-dom';
+import { useDamageAssessment } from '@/context/DamageAssessment.context';
+import { Textarea } from '@/components/atoms/Textarea';
+import { useFileUpload } from '@/hooks/useFileUpload';
 
 const CreateDamageAssessment = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const carId = searchParams.get('carId');
+  const step = Number(searchParams.get('step') || 1);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const [images, setImages] = useState<File[]>([]);
+  const { data, setImages, setDetails, reset } = useDamageAssessment();
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
+  const { execute: createDamageAssessment } = useApi<{ _id: string }>(
+    'post',
+    '/damage-assessments',
+  );
+  const { upload, isLoading: isUploading } = useFileUpload();
   const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Usar useQuery para manejar la carga del auto
   const {
     data: car,
     isLoading,
@@ -36,7 +45,6 @@ const CreateDamageAssessment = () => {
     retry: false,
   });
 
-  // Manejar errores
   useEffect(() => {
     if (isError) {
       enqueueSnackbar('Error cargando el vehículo', { variant: 'error' });
@@ -44,35 +52,58 @@ const CreateDamageAssessment = () => {
     }
   }, [isError, navigate, enqueueSnackbar]);
 
-  // Redirigir si no hay carId
   useEffect(() => {
     if (!carId) {
       navigate('/damage-assessments');
     }
   }, [carId, navigate]);
 
-  // Redirigir si no es admin
-  if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
-    return <Navigate to="/" replace />;
-  }
+  const isAdmin = [UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role);
+  if (!isAdmin) return <Navigate to="/" replace />;
 
-  const handleContinue = () => {
-    // Redirigir a la pantalla de detalles con las imágenes en el estado
-    navigate(`/damage-assessments/${carId}/details`, {
-      state: { images },
+  const goToStep = (n: number) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set('step', String(n));
+      return params;
     });
   };
 
-  if (isLoading) {
+  const handleNext = () => goToStep(step + 1);
+  const handleBack = () => goToStep(step - 1);
+
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      // 1. Subir imágenes
+      const uploadResult = await upload(data.images, { carId: carId! });
+      // 2. Crear el peritaje
+      const response = await createDamageAssessment({
+        carId,
+        details: data.details,
+        images: uploadResult.keys,
+      });
+      enqueueSnackbar('Peritaje creado exitosamente', { variant: 'success' });
+      reset();
+      navigate(`/damage-assessments/${response.data._id}`);
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar('Error al crear el peritaje', { variant: 'error' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading || isUploading || isSubmitting) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner label="Cargando vehículo..." />
+        <Spinner label="Cargando..." />
       </div>
     );
   }
 
   if (isError || !car) {
-    return null; // La redirección se maneja en el efecto
+    return null;
   }
 
   return (
@@ -97,10 +128,43 @@ const CreateDamageAssessment = () => {
               </div>
             </div>
           </div>
-          <ImageUploadStep images={images} onImagesChange={setImages} />
-          <Button className="mt-6 w-full" onClick={handleContinue} disabled={images.length === 0}>
-            Continuar
-          </Button>
+
+          {/* Paso 1: Cargar imágenes */}
+          {step === 1 && (
+            <>
+              <ImageUploadStep images={data.images} onImagesChange={setImages} />
+              <div className="mt-6 flex w-full gap-2">
+                <Button className="w-full" onClick={handleNext} disabled={data.images.length === 0}>
+                  Siguiente
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* Paso 2: Descripción */}
+          {step === 2 && (
+            <>
+              <div className="mb-6">
+                <label className="mb-2 block text-sm font-medium text-gray-900">
+                  Detalles de la avería (opcional)
+                </label>
+                <Textarea
+                  value={data.details}
+                  onChange={(e) => setDetails(e.target.value)}
+                  placeholder="Describe los detalles de la avería..."
+                  className="min-h-[120px]"
+                />
+              </div>
+              <div className="mt-6 flex w-full gap-2">
+                <Button className="w-1/2" variant="outline" onClick={handleBack}>
+                  Atrás
+                </Button>
+                <Button className="w-1/2" onClick={handleSubmit}>
+                  Crear Peritaje
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

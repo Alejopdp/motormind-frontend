@@ -23,7 +23,6 @@ export async function uploadImages({
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
-            withCredentials: true,
         });
         return res.data;
     } catch (err: any) {

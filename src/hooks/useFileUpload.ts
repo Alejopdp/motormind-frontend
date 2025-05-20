@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { AxiosError } from 'axios';
-import ApiService from '@/service/api.service';
+import apiService from '@/service/api.service';
 
 interface UploadResult {
     keys: string[];
 }
 
 interface UseFileUploadResponse {
-    upload: (files: File[], context?: string) => Promise<UploadResult>;
+    upload: (
+        files: File[],
+        extraFields?: Record<string, string>,
+        context?: string
+    ) => Promise<UploadResult>;
     isLoading: boolean;
     error: Error | null;
 }
@@ -16,7 +20,11 @@ export function useFileUpload(): UseFileUploadResponse {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
-    const upload = async (files: File[], context = 'damage-assessment'): Promise<UploadResult> => {
+    const upload = async (
+        files: File[],
+        extraFields: Record<string, string> = {},
+        context = 'damage-assessment'
+    ): Promise<UploadResult> => {
         setIsLoading(true);
         setError(null);
 
@@ -25,16 +33,19 @@ export function useFileUpload(): UseFileUploadResponse {
             formData.append('files', file, file.name);
         });
         formData.append('context', context);
+        Object.entries(extraFields).forEach(([key, value]) => {
+            formData.append(key, value);
+        });
 
         try {
-            const response = await ApiService.getInstance().post<UploadResult>('/upload', formData, {
+            const response = await apiService.post<UploadResult>('/upload', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-
             return response.data;
         } catch (err) {
+            console.log(err);
             const axiosError = err as AxiosError<{ message: string }>;
             const errorMessage = axiosError.response?.data?.message || 'Error subiendo archivos';
             const error = new Error(errorMessage);

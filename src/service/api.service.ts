@@ -9,7 +9,6 @@ export class ApiService {
   private constructor() {
     this.api = axios.create({
       baseURL: apiUrl,
-      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -108,4 +107,6 @@ export class ApiService {
   }
 }
 
-export default ApiService.getInstance();
+// Exporta la instancia singleton por defecto
+const apiService = ApiService.getInstance();
+export default apiService;

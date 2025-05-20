@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileSearch, PlusIcon } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 import { useAuth } from '@/context/Auth.context';
 import { UserRole } from '@/types/User';
 import { Navigate } from 'react-router-dom';
+import { DamageAssessment } from '@/types/DamageAssessment';
+import { useApi } from '@/hooks/useApi';
+import { DamageAssessmentCard } from '@/components/molecules/DamageAssessmentCard';
 
 const DamageAssessments = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { user } = useAuth();
-  // TODO: fetch peritajes, por ahora simula vacío
-  const damageAssessments: unknown[] = [];
+  const [damageAssessments, setDamageAssessments] = useState<DamageAssessment[]>([]);
+  const { execute, loading, error } = useApi<DamageAssessment[]>('get', '/damage-assessments');
+
+  useEffect(() => {
+    execute()
+      .then((res) => setDamageAssessments(res.data))
+      .catch(() => {});
+  }, []);
 
   // Redirigir si no es admin
   if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
@@ -40,7 +49,15 @@ const DamageAssessments = () => {
         </div>
         {/* Empty state o lista */}
         <div className="mx-auto max-w-2xl px-4 py-12">
-          {damageAssessments.length === 0 && (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <span>Cargando peritajes...</span>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <span>Error al cargar peritajes</span>
+            </div>
+          ) : damageAssessments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <div className="mb-4 rounded-full bg-gray-100 p-4">
                 <FileSearch className="h-10 w-10 text-gray-500" />
@@ -49,6 +66,14 @@ const DamageAssessments = () => {
               <p className="text-muted mb-4">Aún no se ha creado ningún peritaje en el sistema.</p>
               <Button onClick={() => setIsCreateModalOpen(true)}>Crear peritaje</Button>
             </div>
+          ) : (
+            <ul className="divide-y divide-gray-200">
+              {damageAssessments.map((a) => (
+                <li key={a._id} className="py-0">
+                  <DamageAssessmentCard assessment={a} />
+                </li>
+              ))}
+            </ul>
           )}
         </div>
         <CreateDiagnosticModal

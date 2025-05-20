@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import { Textarea } from '@/components/atoms/Textarea';
 import { useSnackbar } from 'notistack';
@@ -9,50 +9,47 @@ import Spinner from '@/components/atoms/Spinner';
 import { useAuth } from '@/context/Auth.context';
 import { UserRole } from '@/types/User';
 import { Navigate } from 'react-router-dom';
-
-interface LocationState {
-  images: File[];
-}
+import { useDamageAssessment } from '@/context/DamageAssessment.context';
 
 const DamageDetails = () => {
   const { carId } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [details, setDetails] = useState('');
+  const { data, setDetails, reset } = useDamageAssessment();
   const { execute: createDamageAssessment } = useApi<{ id: string }>('post', '/damage-assessments');
   const { upload, isLoading: isUploading } = useFileUpload();
   const { user } = useAuth();
 
-  // Verificar que tengamos las imágenes en el estado
-  const state = location.state as LocationState;
-  if (!state?.images?.length) {
+  const isAdmin = [UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role);
+
+  if (!isAdmin) return <Navigate to="/" replace />;
+
+  const noImages = !data.images.length;
+
+  if (noImages) {
     navigate(`/damage-assessments/${carId}/create`);
     return null;
-  }
-
-  // Redirigir si no es admin
-  if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
-    return <Navigate to="/" replace />;
   }
 
   const handleCreateAssessment = async () => {
     try {
       setIsSubmitting(true);
 
+      console.log({ data });
       // 1. Subir imágenes
-      const uploadResult = await upload(state.images);
+      const uploadResult = await upload(data.images, { carId: carId! });
 
       // 2. Crear el peritaje con los links de las imágenes
       const response = await createDamageAssessment({
         carId,
-        details,
+        details: data.details,
         images: uploadResult.keys,
       });
 
       enqueueSnackbar('Peritaje creado exitosamente', { variant: 'success' });
       navigate(`/damage-assessments/${response.data.id}`);
+      reset();
     } catch (error) {
       console.error('Error al crear el peritaje:', error);
       enqueueSnackbar('Error al crear el peritaje', { variant: 'error' });
@@ -80,7 +77,7 @@ const DamageDetails = () => {
               Detalles de la avería (opcional)
             </label>
             <Textarea
-              value={details}
+              value={data.details}
               onChange={(e) => setDetails(e.target.value)}
               placeholder="Describe los detalles de la avería..."
               className="min-h-[120px]"
