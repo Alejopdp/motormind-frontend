@@ -71,6 +71,7 @@ export const AuthContextProvider: React.FC<PropsWithChildren> = ({ children }) =
       const token = localStorage.getItem('token');
 
       if (!token) {
+        setIsAuthenticated(false);
         setIsVeryfiyingToken(false);
         return;
       }

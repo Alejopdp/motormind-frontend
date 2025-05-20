@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, RouteObject } from 'react-router-dom';
 import Layout from '@/Layout';
 import Dashboard from '@/pages/Dashboard';
 import CarDetails from '@/pages/CarDetails';
@@ -18,157 +18,42 @@ import AiEvaluationDetails from '@/pages/AiEvaluationDetails';
 import PromptManager from '@/pages/PromptManager';
 import PromptDetail from '@/pages/PromptDetails';
 import Metrics from '@/pages/Metrics';
-import DamageAssessments from './pages/DamageAssessments';
-import CreateDamageAssessment from './pages/DamageAssessments/CreateDamageAssessment';
-import DamageAssessmentDetail from './pages/DamageAssessments/DamageAssessmentDetail';
-import { DamageAssessmentProvider } from '@/context/DamageAssessment.context';
+import ProtectedRoute from '@/components/organisms/ProtectedRoute';
+import AppointmentDiagnosis from '@/pages/AppointmentDiagnosis';
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: (
+const wrapRoute = (route: RouteObject, withAuth: boolean = false): RouteObject => {
+  const wrappedRoute: RouteObject = {
+    ...route,
+    element: route.element ? (
       <ErrorBoundary>
-        <Layout />
+        {withAuth ? <ProtectedRoute>{route.element}</ProtectedRoute> : route.element}
       </ErrorBoundary>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <ErrorBoundary>
-            <Dashboard />
-          </ErrorBoundary>
-        ),
-      },
-      {
-        path: '/cars',
-        element: (
-          <ErrorBoundary>
-            <Vehicles />
-          </ErrorBoundary>
-        ),
-      },
-      {
-        path: '/diagnoses',
-        element: (
-          <ErrorBoundary>
-            <Diagnoses />
-          </ErrorBoundary>
-        ),
-      },
-      {
-        path: '/metrics',
-        element: (
-          <ErrorBoundary>
-            <Metrics />
-          </ErrorBoundary>
-        ),
-      },
-      {
-        path: '/audits/evaluations',
-        element: (
-          <ErrorBoundary>
-            <AiEvaluations />
-          </ErrorBoundary>
-        ),
-      },
-      {
-        path: '/prompts',
-        element: (
-          <ErrorBoundary>
-            <PromptManager />
-          </ErrorBoundary>
-        ),
-      },
-      {
-        path: '/damage-assessments',
-        element: (
-          <ErrorBoundary>
-            <DamageAssessments />
-          </ErrorBoundary>
-        ),
-      },
-    ],
-  },
+    ) : undefined,
+  };
+
+  if (route.children) {
+    wrappedRoute.children = route.children.map((child) => wrapRoute(child, withAuth));
+  }
+
+  return wrappedRoute;
+};
+
+const wrapRoutes = (routes: RouteObject[], withAuth: boolean = false): RouteObject[] => {
+  return routes.map((route) => wrapRoute(route, withAuth));
+};
+
+const publicRoutes = wrapRoutes([
   {
-    path: '/cars/:carId/diagnosis/:diagnosisId/final-report',
-    element: (
-      <ErrorBoundary>
-        <FinalReport />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/cars/:carId/diagnosis/:diagnosisId/questions',
-    element: (
-      <ErrorBoundary>
-        <DiagnosisQuestions />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/cars/:carId/diagnosis/:diagnosisId/preliminary-report',
-    element: (
-      <ErrorBoundary>
-        <PreliminaryDiagnosis />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/cars/:carId/new-diagnosis',
-    element: (
-      <ErrorBoundary>
-        <NewDiagnosis />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/cars/:carId',
-    element: (
-      <ErrorBoundary>
-        <CarDetails />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/prompts/:phase',
-    element: (
-      <ErrorBoundary>
-        <PromptDetail />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/audits/evaluations/:evaluationId',
-    element: (
-      <ErrorBoundary>
-        <AiEvaluationDetails />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/settings',
-    element: (
-      <ErrorBoundary>
-        <Settings />
-      </ErrorBoundary>
-    ),
+    path: '/appointments/:appointmentId/cars/:carId/new-diagnosis',
+    element: <AppointmentDiagnosis />,
   },
   {
     path: '/login',
-    element: (
-      <ErrorBoundary>
-        <Login />
-      </ErrorBoundary>
-    ),
+    element: <Login />,
   },
   {
     path: '/login/verify',
-    element: (
-      <ErrorBoundary>
-        <VerifyMagicLink />
-      </ErrorBoundary>
-    ),
+    element: <VerifyMagicLink />,
   },
   {
     path: '/damage-assessments/create',
@@ -192,12 +77,78 @@ const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: (
-      <ErrorBoundary>
-        <NotFound />
-      </ErrorBoundary>
-    ),
+    element: <NotFound />,
   },
 ]);
+
+const authenticatedRoutes = wrapRoutes(
+  [
+    {
+      path: '/',
+      element: <Layout />,
+      children: [
+        {
+          index: true,
+          element: <Dashboard />,
+        },
+        {
+          path: '/cars',
+          element: <Vehicles />,
+        },
+        {
+          path: '/diagnoses',
+          element: <Diagnoses />,
+        },
+        {
+          path: '/metrics',
+          element: <Metrics />,
+        },
+        {
+          path: '/audits/evaluations',
+          element: <AiEvaluations />,
+        },
+        {
+          path: '/prompts',
+          element: <PromptManager />,
+        },
+      ],
+    },
+    {
+      path: '/cars/:carId/diagnosis/:diagnosisId/final-report',
+      element: <FinalReport />,
+    },
+    {
+      path: '/cars/:carId/diagnosis/:diagnosisId/questions',
+      element: <DiagnosisQuestions />,
+    },
+    {
+      path: '/cars/:carId/diagnosis/:diagnosisId/preliminary-report',
+      element: <PreliminaryDiagnosis />,
+    },
+    {
+      path: '/cars/:carId/new-diagnosis',
+      element: <NewDiagnosis />,
+    },
+    {
+      path: '/cars/:carId',
+      element: <CarDetails />,
+    },
+    {
+      path: '/prompts/:phase',
+      element: <PromptDetail />,
+    },
+    {
+      path: '/audits/evaluations/:evaluationId',
+      element: <AiEvaluationDetails />,
+    },
+    {
+      path: '/settings',
+      element: <Settings />,
+    },
+  ],
+  true,
+);
+
+const router = createBrowserRouter([...publicRoutes, ...authenticatedRoutes]);
 
 export default router;

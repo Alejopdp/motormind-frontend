@@ -5,6 +5,7 @@ export type Diagnosis = {
   notes: string;
   answers: string;
   processedAnswers: string;
+  appointmentStatus: string;
   questions: string[];
   status: string;
   processedFault: {

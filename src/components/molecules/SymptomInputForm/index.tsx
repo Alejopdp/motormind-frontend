@@ -11,6 +11,7 @@ interface SymptomInputFormProps {
   licensePlate?: string;
   isLoading?: boolean;
   onSubmit: (data: { symptoms: string; notes: string }) => void;
+  context?: 'appointment' | 'normal';
 }
 
 export default function SymptomInputForm({
@@ -19,11 +20,18 @@ export default function SymptomInputForm({
   licensePlate,
   onSubmit,
   isLoading = false,
+  context = 'normal',
 }: SymptomInputFormProps) {
   const [symptoms, setSymptoms] = useState(initialSymptoms);
   const [notes, setNotes] = useState(initialNotes);
   const [showNotes, setShowNotes] = useState(false);
   const navigate = useNavigate();
+
+  const loadingMessage =
+    context === 'appointment' ? 'Generando pre-diagnóstico' : 'Generando preguntas guiadas';
+
+  const submitButtonText =
+    context === 'appointment' ? 'Generar pre-diagnóstico' : 'Continuar a Preguntas Guiadas';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,12 +107,12 @@ export default function SymptomInputForm({
 
         <div className="flex justify-end rounded-b-lg border-t border-gray-200 bg-gray-50 px-6 py-4">
           <Button type="submit" disabled={isLoading || symptoms.length === 0}>
-            Continuar a Preguntas Guiadas
+            {submitButtonText}
           </Button>
         </div>
       </form>
 
-      <LoadingModal isOpen={isLoading} message="Generando preguntas guiadas" />
+      <LoadingModal isOpen={isLoading} message={loadingMessage} />
     </>
   );
 }
