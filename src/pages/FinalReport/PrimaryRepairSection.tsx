@@ -1,7 +1,7 @@
 import { WrenchIcon } from 'lucide-react';
 import { Badge } from '@/components/atoms/Badge';
 import { ResourceLinkItems } from '@/components/atoms/ResourceLinkItems';
-
+import { DocumentLink } from '@/types/Diagnosis';
 export const PrimaryRepairSection = ({
   confirmedFailures,
 }: {
@@ -9,10 +9,7 @@ export const PrimaryRepairSection = ({
     title: string;
     steps: string[];
     tools: string[];
-    resources: {
-      label: string;
-      url: string;
-    }[];
+    resources: DocumentLink[];
   }[];
 }) => {
   return (

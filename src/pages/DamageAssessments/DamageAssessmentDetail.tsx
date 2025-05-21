@@ -10,6 +10,7 @@ import VehicleInformation from '@/components/molecules/VehicleInformation/Vehicl
 import HeaderPage from '@/components/molecules/HeaderPage';
 import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
 import DetailsContainer from '@/components/atoms/DetailsContainer';
+import PartDiagramItem from '@/components/molecules/PartDiagramItem';
 
 const severityLabelMap = {
   [DamageSeverity.HIGH]: 'Alto',
@@ -47,6 +48,20 @@ const DamageCard = ({ damage }: { damage: Damage }) => {
       </div>
       <div className="font-medium text-gray-600">Tipo: {typeLabelMap[damage.type]}</div>
       <div className="mt-2 text-gray-600 italic">{damage.description}</div>
+      {damage.resources && damage.resources.length > 0 && (
+        <div className="mt-3">
+          <h4 className="text-sm font-semibold text-gray-700">Tiempos de Baremo:</h4>
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+            {damage.resources.map((resource, index) => (
+              <PartDiagramItem
+                key={index}
+                title={resource.label}
+                onClick={() => window.open(resource.url, '_blank')}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

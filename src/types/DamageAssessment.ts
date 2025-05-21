@@ -1,4 +1,5 @@
 import { Car } from './Car';
+import { DocumentLink } from './Diagnosis';
 
 export enum DamageType {
     SCRATCH = 'scratch',
@@ -17,6 +18,7 @@ export interface Damage {
     description: string;
     type: DamageType;
     severity: DamageSeverity;
+    resources: DocumentLink[];
 }
 
 export interface DamageAssessment {
