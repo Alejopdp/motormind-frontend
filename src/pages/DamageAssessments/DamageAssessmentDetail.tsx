@@ -18,7 +18,7 @@ const severityLabelMap = {
 };
 
 const typeLabelMap = {
-  [DamageType.DENT]: 'Diente',
+  [DamageType.DENT]: 'Abolladura',
   [DamageType.SCRATCH]: 'Rayón',
 };
 
@@ -38,7 +38,9 @@ const DamageCard = ({ damage }: { damage: Damage }) => {
   return (
     <div className="mb-4 rounded border border-gray-100 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <span className="font-semibold text-gray-700">Área: {damage.area}</span>
+        <span className="font-semibold text-gray-700">
+          Área: {damage.area} - {damage.subarea}
+        </span>
         <span className={`rounded border px-2 py-1 text-xs ${getSeverityColor(damage.severity)}`}>
           {severityLabelMap[damage.severity]}
         </span>

@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Button } from '@/components/atoms/Button';
 
 const MAX_IMAGES = 15;
 
@@ -84,17 +83,7 @@ export const ImageUploadStep: React.FC<ImageUploadStepProps> = ({ images, onImag
         >
           <input {...getInputProps()} />
           <p className="mb-2">Arrastra imágenes aquí o haz click para seleccionar</p>
-          <Button
-            type="button"
-            onClick={() => {
-              // Forzar click en input
-              const input = document.querySelector<HTMLInputElement>('input[type="file"]');
-              input?.click();
-            }}
-            disabled={images.length >= MAX_IMAGES}
-          >
-            Seleccionar imágenes
-          </Button>
+          {/* El div padre ya es clickable gracias a getRootProps() */}
         </div>
       )}
       <p className="mt-2 text-center text-xs text-gray-400">

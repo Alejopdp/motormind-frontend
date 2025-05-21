@@ -13,7 +13,9 @@ import { Navigate } from 'react-router-dom';
 import { useDamageAssessment } from '@/context/DamageAssessment.context';
 import { Textarea } from '@/components/atoms/Textarea';
 import { useFileUpload } from '@/hooks/useFileUpload';
-
+import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
+import HeaderPage from '@/components/molecules/HeaderPage';
+import DetailsContainer from '@/components/atoms/DetailsContainer';
 const CreateDamageAssessment = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const carId = searchParams.get('carId');
@@ -107,66 +109,52 @@ const CreateDamageAssessment = () => {
   }
 
   return (
-    <div className="bg-background flex min-h-screen w-full flex-row">
-      <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-          <h2 className="mb-6 text-center text-2xl font-semibold">Nuevo Peritaje</h2>
-          <div className="mb-6">
-            <div className="mb-2 text-center text-lg font-medium">Vehículo seleccionado:</div>
-            <div className="rounded bg-gray-50 p-3 text-center text-sm">
-              <div>
-                <b>Marca:</b> {car.brand}
-              </div>
-              <div>
-                <b>Modelo:</b> {car.model}
-              </div>
-              <div>
-                <b>Matrícula:</b> {car.plate}
-              </div>
-              <div>
-                <b>VIN:</b> {car.vinCode}
-              </div>
+    <div className="bg-background min-h-screen">
+      <HeaderPage
+        data={{ title: 'Nuevo Peritaje' }}
+        onBack={() => navigate('/damage-assessments')}
+      />
+      <DetailsContainer>
+        {step === 1 && (
+          <div className="w-full rounded-lg bg-white p-8 shadow-md">
+            <ImageUploadStep images={data.images} onImagesChange={setImages} />
+            <div className="mt-6 flex w-full gap-2">
+              <Button
+                className="w-full md:mx-auto md:w-1/2"
+                onClick={handleNext}
+                disabled={data.images.length === 0}
+              >
+                Siguiente
+              </Button>
             </div>
           </div>
+        )}
 
-          {/* Paso 1: Cargar imágenes */}
-          {step === 1 && (
-            <>
-              <ImageUploadStep images={data.images} onImagesChange={setImages} />
-              <div className="mt-6 flex w-full gap-2">
-                <Button className="w-full" onClick={handleNext} disabled={data.images.length === 0}>
-                  Siguiente
-                </Button>
-              </div>
-            </>
-          )}
-
-          {/* Paso 2: Descripción */}
-          {step === 2 && (
-            <>
-              <div className="mb-6">
-                <label className="mb-2 block text-sm font-medium text-gray-900">
-                  Detalles de la avería (opcional)
-                </label>
-                <Textarea
-                  value={data.details}
-                  onChange={(e) => setDetails(e.target.value)}
-                  placeholder="Describe los detalles de la avería..."
-                  className="min-h-[120px]"
-                />
-              </div>
-              <div className="mt-6 flex w-full gap-2">
-                <Button className="w-1/2" variant="outline" onClick={handleBack}>
-                  Atrás
-                </Button>
-                <Button className="w-1/2" onClick={handleSubmit}>
-                  Crear Peritaje
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+        {step === 2 && (
+          <>
+            <VehicleInformation car={car} editMode={false} />
+            <div className="mb-6">
+              <label className="mb-2 block text-sm font-medium text-gray-900">
+                Detalles de los daños (opcional)
+              </label>
+              <Textarea
+                value={data.details}
+                onChange={(e) => setDetails(e.target.value)}
+                placeholder="Describe los detalles de los daños..."
+                className="min-h-[120px]"
+              />
+            </div>
+            <div className="mt-6 ml-auto flex max-w-md gap-2">
+              <Button className="w-1/2" variant="outline" onClick={handleBack}>
+                Atrás
+              </Button>
+              <Button className="w-1/2" onClick={handleSubmit}>
+                Crear Peritaje
+              </Button>
+            </div>
+          </>
+        )}
+      </DetailsContainer>
     </div>
   );
 };
