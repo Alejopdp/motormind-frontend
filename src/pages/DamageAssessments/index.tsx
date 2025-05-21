@@ -27,7 +27,7 @@ const DamageAssessments = () => {
   }
 
   return (
-    <div className="bg-background flex min-h-screen w-full flex-row">
+    <div className="flex min-h-screen w-full flex-row">
       <div className="flex flex-1 flex-col">
         {/* Header manual sticky, igual que Diagnósticos */}
         <div className="sticky top-0 z-10 flex flex-col items-center justify-between bg-white px-6 py-2 shadow-xs sm:flex-row sm:px-8 sm:py-4 lg:flex-row">
@@ -48,7 +48,7 @@ const DamageAssessments = () => {
           </div>
         </div>
         {/* Empty state o lista */}
-        <div className="mx-auto max-w-2xl px-4 py-12">
+        <div className="mx-auto w-full px-4 py-12">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <span>Cargando peritajes...</span>
@@ -67,7 +67,7 @@ const DamageAssessments = () => {
               <Button onClick={() => setIsCreateModalOpen(true)}>Crear peritaje</Button>
             </div>
           ) : (
-            <ul className="divide-y divide-gray-200">
+            <ul className="flex w-full flex-col gap-4 divide-y divide-gray-200">
               {damageAssessments.map((a) => (
                 <li key={a._id} className="py-0">
                   <DamageAssessmentCard assessment={a} />

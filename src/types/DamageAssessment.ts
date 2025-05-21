@@ -1,10 +1,22 @@
 import { Car } from './Car';
 
+export enum DamageType {
+    SCRATCH = 'scratch',
+    DENT = 'dent',
+}
+
+export enum DamageSeverity {
+    LOW = 'low',
+    MEDIUM = 'medium',
+    HIGH = 'high'
+}
+
 export interface Damage {
-    description: string;
     area: string;
-    type: string;
-    severity: string;
+    subarea: string;
+    description: string;
+    type: DamageType;
+    severity: DamageSeverity;
 }
 
 export interface DamageAssessment {

@@ -1,7 +1,7 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { useApi } from '@/hooks/useApi';
 import { useEffect } from 'react';
-import { DamageAssessment, Damage } from '@/types/DamageAssessment';
+import { DamageAssessment, Damage, DamageSeverity, DamageType } from '@/types/DamageAssessment';
 import Spinner from '@/components/atoms/Spinner';
 import { ImageIcon } from 'lucide-react';
 import { UserRole } from '@/types/User';
@@ -9,30 +9,42 @@ import { useAuth } from '@/context/Auth.context';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
+import DetailsContainer from '@/components/atoms/DetailsContainer';
+
+const severityLabelMap = {
+  [DamageSeverity.HIGH]: 'Alto',
+  [DamageSeverity.MEDIUM]: 'Medio',
+  [DamageSeverity.LOW]: 'Bajo',
+};
+
+const typeLabelMap = {
+  [DamageType.DENT]: 'Diente',
+  [DamageType.SCRATCH]: 'Rayón',
+};
 
 const DamageCard = ({ damage }: { damage: Damage }) => {
-  const getSeverityColor = (severity: string) => {
+  const getSeverityColor = (severity: DamageSeverity) => {
     switch (severity) {
-      case 'grave':
+      case DamageSeverity.HIGH:
         return 'bg-red-100 text-red-800 border-red-200';
-      case 'moderado':
+      case DamageSeverity.MEDIUM:
         return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'leve':
+      case DamageSeverity.LOW:
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       default:
         return 'bg-gray-100 border-gray-200';
     }
   };
   return (
-    <div className={`mb-2 flex flex-col gap-2 rounded-md border bg-white p-4 shadow-sm`}>
+    <div className="mb-4 rounded border border-gray-100 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold">{damage.area}</span>
-        <span className={`rounded px-2 py-1 text-xs ${getSeverityColor(damage.severity)}`}>
-          {damage.severity}
+        <span className="font-semibold text-gray-700">Área: {damage.area}</span>
+        <span className={`rounded border px-2 py-1 text-xs ${getSeverityColor(damage.severity)}`}>
+          {severityLabelMap[damage.severity]}
         </span>
       </div>
-      <div className="text-xs text-gray-700">{damage.description}</div>
-      <div className="text-xs text-gray-500">Tipo: {damage.type}</div>
+      <div className="font-medium text-gray-600">Tipo: {typeLabelMap[damage.type]}</div>
+      <div className="mt-2 text-gray-600 italic">{damage.description}</div>
     </div>
   );
 };
@@ -82,7 +94,7 @@ const DamageAssessmentDetail = () => {
         onBack={() => window.history.back()}
       />
 
-      <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8">
+      <DetailsContainer>
         <VehicleInformation car={car} editMode={false} />
 
         <div className="rounded-lg bg-white p-6 shadow-md">
@@ -101,7 +113,7 @@ const DamageAssessmentDetail = () => {
                   key={idx}
                   src={img}
                   alt={`img-${idx}`}
-                  className="h-20 w-full rounded border object-cover"
+                  className="h-20 w-full rounded border border-gray-200 object-cover"
                 />
               ))}
             </div>
@@ -124,7 +136,7 @@ const DamageAssessmentDetail = () => {
             </span>
           </div>
         </div>
-      </div>
+      </DetailsContainer>
     </div>
   );
 };
