@@ -8,7 +8,7 @@ import { Diagnosis } from '@/types/Diagnosis';
 import Spinner from '@/components/atoms/Spinner';
 import { DiagnosticListItem } from '@/components/molecules/DiagnosticListItem';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
-import { DIAGNOSIS_STATUS } from '@/constants';
+import { DIAGNOSIS_STATUS, STALE_TIME } from '@/constants';
 import {
   Select,
   SelectContent,
@@ -67,7 +67,7 @@ const Diagnoses = () => {
       return response.data;
     },
     enabled: true,
-    staleTime: 60000,
+    staleTime: STALE_TIME.ONE_MINUTE,
     retry: false,
   });
 

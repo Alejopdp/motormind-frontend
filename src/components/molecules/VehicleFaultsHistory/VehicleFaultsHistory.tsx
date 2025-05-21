@@ -6,6 +6,7 @@ import { enqueueSnackbar } from 'notistack';
 import { useEffect } from 'react';
 import { AlertCircleIcon } from 'lucide-react';
 import { FaultsHistoryItem } from './FaultsHistoryItem';
+import { STALE_TIME } from '@/constants';
 
 const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
   const queryClient = useQueryClient();
@@ -25,7 +26,7 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
       return { data: response.data };
     },
     enabled: !!carId,
-    staleTime: 60000,
+    staleTime: STALE_TIME.ONE_MINUTE,
   });
 
   useEffect(() => {

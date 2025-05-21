@@ -13,6 +13,7 @@ import { Badge } from '@/components/atoms/Badge';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import { diagnosisLink } from '@/utils';
 import { Diagnosis } from '@/types/Diagnosis';
+import { STALE_TIME } from '@/constants';
 
 const AiEvaluationDetails: React.FC = () => {
   const { evaluationId } = useParams<{ evaluationId: string }>();
@@ -36,7 +37,7 @@ const AiEvaluationDetails: React.FC = () => {
       return { data: response.data };
     },
     enabled: !!evaluationId,
-    staleTime: 60000, // 1 minute
+    staleTime: STALE_TIME.ONE_MINUTE,
     retry: 0,
   });
 

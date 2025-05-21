@@ -7,7 +7,7 @@ import { diagnosisLink, formatDate } from '@/utils';
 import { Diagnosis } from '@/types/Diagnosis';
 import { useApi } from '@/hooks/useApi';
 import { DiagnosticListItem } from '@/components/molecules/DiagnosticListItem';
-import { DIAGNOSIS_STATUS } from '@/constants';
+import { DIAGNOSIS_STATUS, STALE_TIME } from '@/constants';
 import Spinner from '@/components/atoms/Spinner';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 import { Button } from '@/components/atoms/Button';
@@ -30,7 +30,7 @@ const Dashboard = () => {
       return response.data;
     },
     enabled: true,
-    staleTime: 60000,
+    staleTime: STALE_TIME.ONE_MINUTE,
     retry: false,
   });
 

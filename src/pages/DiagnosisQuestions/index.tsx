@@ -13,6 +13,7 @@ import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
+import { STALE_TIME } from '@/constants';
 
 const DiagnosisQuestions = () => {
   const params = useParams();
@@ -41,7 +42,7 @@ const DiagnosisQuestions = () => {
       return { data: response.data };
     },
     enabled: !!params.carId,
-    staleTime: 60000, // 1 minute
+    staleTime: STALE_TIME.ONE_MINUTE,
     retry: 0,
   });
 
@@ -58,7 +59,7 @@ const DiagnosisQuestions = () => {
       return { data: response.data };
     },
     enabled: !!params.diagnosisId,
-    staleTime: 60000,
+    staleTime: STALE_TIME.ONE_MINUTE,
     retry: 0,
   });
 

@@ -11,6 +11,7 @@ import { Car } from '@/types/Car';
 import Spinner from '@/components/atoms/Spinner';
 import { VehicleList } from '@/components/molecules/VehiceList';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
+import { STALE_TIME } from '@/constants';
 import { FloatingButton } from '@/components/atoms/FloatingButton';
 
 // const LIMIT = 1000;
@@ -55,7 +56,7 @@ const Vehicles = () => {
       return response.data;
     },
     enabled: true,
-    staleTime: 60000,
+    staleTime: STALE_TIME.ONE_MINUTE,
   });
 
   useEffect(() => {

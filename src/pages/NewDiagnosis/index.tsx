@@ -12,6 +12,7 @@ import SymptomInputForm from '@/components/molecules/SymptomInputForm';
 import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage';
+import { STALE_TIME } from '@/constants';
 
 const NewDiagnosis = () => {
   const params = useParams();
@@ -41,7 +42,7 @@ const NewDiagnosis = () => {
       });
       return { data: response.data };
     },
-    staleTime: 60000, // 1 minute
+    staleTime: STALE_TIME.ONE_MINUTE,
     retry: 0,
   });
 

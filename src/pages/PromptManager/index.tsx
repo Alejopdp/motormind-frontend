@@ -7,6 +7,7 @@ import { Button } from '@/components/atoms/Button';
 import { PromptCard } from '@/components/molecules/PromptCard';
 import Spinner from '@/components/atoms/Spinner';
 import { Prompt } from '@/types/prompt';
+import { STALE_TIME } from '@/constants';
 
 const PromptManager: React.FC = () => {
   const {
@@ -20,7 +21,7 @@ const PromptManager: React.FC = () => {
       const data = await promptService.getAllPrompts();
       return data;
     },
-    staleTime: 60000, // 1 minute
+    staleTime: STALE_TIME.ONE_MINUTE,
     retry: false,
   });
 

@@ -14,6 +14,7 @@ import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import { Appointment } from '@/types/Appointment';
 import AppointmentInformation from '@/components/molecules/AppointmentInformation';
+import { STALE_TIME } from '@/constants';
 
 const AppointmentDiagnosis = () => {
   const params = useParams();
@@ -53,7 +54,7 @@ const AppointmentDiagnosis = () => {
       setAppointmentStatus(response.data?.appointment?.status);
       return response.data;
     },
-    staleTime: 60000, // 1 minute
+    staleTime: STALE_TIME.ONE_MINUTE,
     retry: 0,
   });
 

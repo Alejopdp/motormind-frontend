@@ -12,7 +12,9 @@ import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import { PlusIcon } from 'lucide-react';
 import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
+import { STALE_TIME } from '@/constants';
 import DetailsContainer from '@/components/atoms/DetailsContainer';
+
 const CarDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
@@ -37,7 +39,7 @@ const CarDetails = () => {
       });
       return { data: response.data };
     },
-    staleTime: 60000, // 1 minute
+    staleTime: STALE_TIME.ONE_MINUTE,
     retry: 0,
   });
 

@@ -5,6 +5,7 @@ import Spinner from '@/components/atoms/Spinner';
 import EvaluationCard from '@/components/molecules/EvaluationListItem';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
+import { STALE_TIME } from '@/constants';
 
 const AiEvaluations = () => {
   const {
@@ -18,7 +19,7 @@ const AiEvaluations = () => {
       const response = await apiService.getDiagnosisEvaluations();
       return response.evaluations;
     },
-    staleTime: 60000, // 1 minute
+    staleTime: STALE_TIME.ONE_MINUTE,
     retry: false,
   });
 
