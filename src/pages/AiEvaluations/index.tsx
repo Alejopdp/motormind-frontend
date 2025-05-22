@@ -77,7 +77,7 @@ const AiEvaluations = () => {
       )}
 
       {!evaluations.length && (
-        <div className="flex h-full flex-col items-center justify-center">
+        <div className="absolute top-0 left-0 flex h-full w-full flex-col items-center justify-center">
           <div className="mb-4 rounded-full bg-gray-100 p-4">
             <FileChartPie className="h-10 w-10 text-gray-500" />
           </div>
