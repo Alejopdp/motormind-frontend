@@ -7,19 +7,23 @@ import {
   GaugeIcon,
   PencilIcon,
   FileSpreadsheet,
+  User2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Car } from '@/types/Car';
 import { format } from 'date-fns';
+import { Appointment } from '@/types/Appointment';
 
 type VehicleInformationProps = {
   car?: Car;
+  appointment?: Appointment;
   editMode?: boolean;
   minimized?: boolean;
 };
 
 const VehicleInformation: React.FC<VehicleInformationProps> = ({
   car,
+  appointment,
   editMode = true,
   minimized = false,
 }) => {
@@ -65,15 +69,15 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({
             </div>
           )}
 
-          {car?.lastRevision && (
+          {appointment?.client && (
             <div className="flex items-center gap-3">
-              <div className="rounded-md bg-blue-100 p-2">
-                <CalendarIcon className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
+              <div className="rounded-md bg-green-100 p-2">
+                <User2 className="h-4 w-4 text-green-600 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <p className="text-muted text-xs sm:text-sm">Última Revisión</p>
+                <p className="text-muted text-xs sm:text-sm">Cliente</p>
                 <p className="text-sm font-medium sm:text-base">
-                  {car?.lastRevision ? format(new Date(car.lastRevision), 'dd/MM/yyyy') : '-'}
+                  {appointment.client.firstName} {appointment.client.lastName}
                 </p>
               </div>
             </div>

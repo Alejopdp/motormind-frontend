@@ -177,6 +177,7 @@ const Diagnoses = () => {
                   status={
                     diagnosis.status as (typeof DIAGNOSIS_STATUS)[keyof typeof DIAGNOSIS_STATUS]
                   }
+                  appointment={diagnosis.appointment}
                   timestamp={formatDate(diagnosis.createdAt)}
                   diagnosisLink={diagnosisLink(diagnosis, true)}
                 />

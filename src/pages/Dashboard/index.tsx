@@ -88,6 +88,7 @@ const Dashboard = () => {
                     status={
                       diagnosis.status as (typeof DIAGNOSIS_STATUS)[keyof typeof DIAGNOSIS_STATUS]
                     }
+                    appointment={diagnosis.appointment}
                     timestamp={formatDate(diagnosis.createdAt)}
                   />
                 ))}

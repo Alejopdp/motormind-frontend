@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
 import { DIAGNOSIS_STATUS } from '@/constants';
+import { Appointment } from '@/types/Appointment';
 
 interface DiagnosticListItemProps {
   vehicle?: {
@@ -24,6 +25,7 @@ interface DiagnosticListItemProps {
     avatar?: string;
   };
   status: (typeof DIAGNOSIS_STATUS)[keyof typeof DIAGNOSIS_STATUS];
+  appointment?: Appointment;
   timestamp: string;
   className?: string;
   diagnosisLink: string;
@@ -38,6 +40,7 @@ export const DiagnosticListItem = ({
   className,
   diagnosisLink,
   status,
+  appointment,
 }: DiagnosticListItemProps) => {
   const copyDiagnosis = (link: string) => {
     navigator.clipboard.writeText(link);
@@ -78,7 +81,7 @@ export const DiagnosticListItem = ({
     <Link to={`/cars${diagnosisLink.split('/cars')[1]}`}>
       <div
         className={cn(
-          'mb-4 rounded-lg border border-gray-300 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]',
+          `mb-4 rounded-lg border border-gray-300 ${appointment?._id ? 'bg-green-100/30' : 'bg-white'} p-4 transition-colors duration-200 hover:bg-[#EAF2FD]`,
           className,
         )}
       >
@@ -98,6 +101,13 @@ export const DiagnosticListItem = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {appointment?._id && (
+              <Badge variant="selected" className={`truncate px-2 py-0.5 text-xs font-medium`}>
+                Cliente: {appointment.client?.firstName || ''} {appointment.client?.lastName || ''}
+                {' - '}
+                Fecha: {appointment.reception?.date || '-'} {appointment.reception?.time || '-'}hs
+              </Badge>
+            )}
             {status && (
               <Badge
                 variant="outline"

@@ -1,3 +1,6 @@
+import { Appointment } from './Appointment';
+import { Car } from './Car';
+
 export type Diagnosis = {
   _id?: string;
   carId: string;
@@ -72,17 +75,8 @@ export type Diagnosis = {
     notes: string;
     scoreStrictFormat: number;
   };
-  car?: {
-    _id: string;
-    model: string;
-    brand: string;
-    plate: string;
-    vinCode: string;
-    workshopId: string;
-    kilometers: number;
-    fuel: string;
-    lastRevision: Date;
-  };
+  car?: Car;
+  appointment?: Appointment;
   createdBy?: {
     name: string;
     avatar?: string;
