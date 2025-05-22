@@ -160,11 +160,15 @@ export const DiagnosticListItem = ({
             <Avatar className="h-6 w-6 sm:h-9 sm:w-9">
               <AvatarImage alt={technician?.name || 'Unknown'} />
               <AvatarFallback className="text-xs sm:text-base">
-                {technician?.name ? getInitials(technician.name) : 'NN'}
+                {technician?.name || appointment?.reception?.agent?.name
+                  ? getInitials(technician?.name || appointment?.reception?.agent?.name || '')
+                  : 'NN'}
               </AvatarFallback>
             </Avatar>
             <span className="text-xs font-medium sm:text-sm">
-              {technician?.name || 'Sin asignar'}
+              {technician?.name ||
+                'Recepción de ' + appointment?.reception?.agent?.name ||
+                'Sin asignar'}
             </span>
           </div>
           <span className="text-xs text-gray-500">{timestamp}</span>

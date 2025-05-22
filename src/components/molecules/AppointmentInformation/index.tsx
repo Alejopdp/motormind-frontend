@@ -12,20 +12,20 @@ const AppointmentInformation: React.FC<AppointmentInformationProps> = ({ appoint
     <div className="rounded-lg bg-white p-4 shadow-md sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
         <div className="flex items-center gap-3">
-          <div className="rounded-md bg-blue-100 p-2">
-            <User className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
+          <div className="rounded-md bg-green-100 p-2">
+            <User className="h-4 w-4 text-green-600 sm:h-5 sm:w-5" />
           </div>
           <div>
             <p className="text-muted text-xs sm:text-sm">Cliente</p>
             <p className="text-sm font-medium sm:text-base">
-              {client?.firstName || ''} {client?.lastName || ''}
+              {client?.lastName || client?.firstName || '-'}
             </p>
           </div>
         </div>
 
         <div className="flex hidden items-center gap-3 md:flex">
-          <div className="rounded-md bg-blue-100 p-2">
-            <UserPen className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
+          <div className="rounded-md bg-green-100 p-2">
+            <UserPen className="h-4 w-4 text-green-600 sm:h-5 sm:w-5" />
           </div>
           <div>
             <p className="text-muted text-xs sm:text-sm">Agente</p>
@@ -34,8 +34,8 @@ const AppointmentInformation: React.FC<AppointmentInformationProps> = ({ appoint
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
-          <div className="rounded-md bg-blue-100 p-2">
-            <Calendar1 className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
+          <div className="rounded-md bg-green-100 p-2">
+            <Calendar1 className="h-4 w-4 text-green-600 sm:h-5 sm:w-5" />
           </div>
           <div>
             <p className="text-muted text-xs sm:text-sm">Fecha Recepción</p>
@@ -44,8 +44,8 @@ const AppointmentInformation: React.FC<AppointmentInformationProps> = ({ appoint
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="rounded-md bg-blue-100 p-2">
-            <Timer className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
+          <div className="rounded-md bg-green-100 p-2">
+            <Timer className="h-4 w-4 text-green-600 sm:h-5 sm:w-5" />
           </div>
           <div>
             <p className="text-muted text-xs sm:text-sm">Hora Recepción</p>
