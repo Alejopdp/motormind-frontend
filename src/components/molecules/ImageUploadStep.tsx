@@ -1,8 +1,9 @@
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Camera, Trash2, UploadCloud, Image as ImageIcon } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { ImageCarousel } from './ImageCarousel';
+import { MobileImageUploadView } from './MobileImageUploadView';
+import { DesktopImageUploadView } from './DesktopImageUploadView';
 
 const MAX_IMAGES = 15;
 
@@ -38,7 +39,6 @@ export const ImageUploadStep: React.FC<ImageUploadStepProps> = ({ images, onImag
     const remainingSlots = MAX_IMAGES - imageCount;
     const filesToAdd = selectedFiles.slice(0, remainingSlots);
     onImagesChange([...images, ...filesToAdd]);
-    // Reset input value to allow selecting the same file again if removed
     event.target.value = '';
   };
 
@@ -87,93 +87,28 @@ export const ImageUploadStep: React.FC<ImageUploadStepProps> = ({ images, onImag
 
   if (isMobile) {
     return (
-      <div className="flex flex-grow flex-col items-center justify-center px-4 pt-4">
-        <div className="mb-4 flex w-full flex-col items-center gap-4">
-          <label
-            htmlFor="take-photo-input"
-            className={`flex w-full max-w-xs cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed bg-gray-50 p-6 text-center ${canUploadMore ? 'border-gray-300 hover:bg-gray-100' : 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400'}`}
-          >
-            <Camera
-              className={`mb-2 h-10 w-10 ${canUploadMore ? 'text-gray-500' : 'text-gray-400'}`}
-            />
-            <span
-              className={`text-sm font-medium ${canUploadMore ? 'text-gray-700' : 'text-gray-400'}`}
-            >
-              Tomar Foto
-            </span>
-            <input
-              id="take-photo-input"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileSelection}
-              className="hidden"
-              disabled={!canUploadMore}
-            />
-          </label>
-          <label
-            htmlFor="select-gallery-input"
-            className={`flex w-full max-w-xs cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed bg-gray-50 p-6 text-center ${canUploadMore ? 'border-gray-300 hover:bg-gray-100' : 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400'}`}
-          >
-            <ImageIcon
-              className={`mb-2 h-10 w-10 ${canUploadMore ? 'text-gray-500' : 'text-gray-400'}`}
-            />
-            <span
-              className={`text-sm font-medium ${canUploadMore ? 'text-gray-700' : 'text-gray-400'}`}
-            >
-              Desde Galería
-            </span>
-            <input
-              id="select-gallery-input"
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileSelection}
-              className="hidden"
-              disabled={!canUploadMore}
-            />
-          </label>
-        </div>
-        {images.length > 0 && imageCounterText}
-        {images.length > 0 ? (
-          <ImageCarousel images={images} onRemove={removeImage} />
-        ) : (
-          emptyStateMessage
-        )}
-      </div>
+      <MobileImageUploadView
+        images={images}
+        canUploadMore={canUploadMore}
+        handleFileSelection={handleFileSelection}
+        onRemoveImage={removeImage}
+        imageCounterText={imageCounterText}
+        emptyStateMessage={emptyStateMessage}
+      />
     );
   }
 
-  // Desktop view
   return (
-    <div className="w-full">
-      <div
-        {...getRootProps()}
-        className={`dropzone flex h-64 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center ${canUploadMore ? (isDragActive ? 'border-blue-500 bg-blue-50' : 'cursor-pointer border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100') : 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400'}`}
-      >
-        <input {...getInputProps()} disabled={!canUploadMore} />
-        <UploadCloud
-          className={`mb-3 h-12 w-12 ${canUploadMore ? 'text-gray-400' : 'text-gray-300'}`}
-        />
-        {isDragActive && canUploadMore ? (
-          <p className="text-lg font-semibold text-blue-600">Suelta las imágenes aquí...</p>
-        ) : canUploadMore ? (
-          <>
-            <p className="text-lg font-semibold text-gray-700">
-              Arrastra y suelta las imágenes aquí, o haz clic para seleccionar
-            </p>
-            <p className="text-sm text-gray-500">Soportamos JPG, PNG, WebP, etc.</p>
-          </>
-        ) : (
-          <p className="text-lg font-semibold">Límite de {MAX_IMAGES} imágenes alcanzado.</p>
-        )}
-      </div>
-      {imageCounterText}
-      {images.length > 0 ? (
-        <aside className="mt-4 flex flex-wrap justify-start">{thumbs}</aside>
-      ) : (
-        emptyStateMessage
-      )}
-    </div>
+    <DesktopImageUploadView
+      getRootProps={getRootProps}
+      getInputProps={getInputProps}
+      isDragActive={isDragActive}
+      canUploadMore={canUploadMore}
+      MAX_IMAGES={MAX_IMAGES}
+      imageCounterText={imageCounterText}
+      images={images}
+      thumbs={thumbs}
+      emptyStateMessage={emptyStateMessage}
+    />
   );
 };
