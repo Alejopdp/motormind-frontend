@@ -120,7 +120,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
             <img
               src={getImageUrl(image)}
               alt={`preview-${index}`}
-              className="h-full w-full rounded-lg object-contain"
+              className="h-full w-full rounded-lg object-cover"
               onLoad={(e) => {
                 const target = e.target as HTMLImageElement;
                 if (target.src.startsWith('blob:')) {

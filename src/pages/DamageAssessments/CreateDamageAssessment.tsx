@@ -77,10 +77,10 @@ const CreateDamageAssessment = () => {
   useEffect(() => {
     let intervalId: NodeJS.Timeout | undefined = undefined;
     if (isLoading || isUploading || isSubmitting) {
-      setCurrentLoadingMessageIndex(0); // Resetear al primer mensaje al iniciar la carga
+      setCurrentLoadingMessageIndex(0);
       intervalId = setInterval(() => {
         setCurrentLoadingMessageIndex((prevIndex) => (prevIndex + 1) % loadingMessages.length);
-      }, 20000); // Cambia cada 20 segundos
+      }, 20000);
     }
     return () => {
       if (intervalId) {
@@ -127,7 +127,7 @@ const CreateDamageAssessment = () => {
 
   if (isLoading || isUploading || isSubmitting) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex min-h-screen items-center justify-center">
         <Spinner label={loadingMessages[currentLoadingMessageIndex]} />
       </div>
     );
@@ -137,8 +137,16 @@ const CreateDamageAssessment = () => {
     return null;
   }
 
+  const mainContainerMobilePaddingBottom = isMobile
+    ? step === 1
+      ? 'pb-20'
+      : step === 2
+        ? 'pb-36'
+        : ''
+    : '';
+
   return (
-    <div className={`bg-background min-h-screen ${isMobile && step === 1 ? 'pb-20' : ''}`}>
+    <div className={`bg-background min-h-screen ${mainContainerMobilePaddingBottom}`}>
       <HeaderPage
         data={{ title: 'Nuevo Peritaje' }}
         onBack={() => navigate('/damage-assessments')}
@@ -150,12 +158,14 @@ const CreateDamageAssessment = () => {
           >
             <ImageUploadStep images={data.images} onImagesChange={setImages} />
             <div
-              className={`mt-6 flex w-full gap-2 ${
-                isMobile ? 'shadow-t-md fixed bottom-0 left-0 z-10 w-full bg-white p-4' : ''
+              className={`flex w-full gap-2 ${
+                isMobile
+                  ? 'shadow-t-md fixed bottom-0 left-0 z-10 mt-auto w-full bg-white p-4'
+                  : 'mt-6'
               }`}
             >
               <Button
-                className="w-full md:mx-auto md:w-1/2"
+                className={`w-full md:mx-auto md:w-1/2 ${isMobile ? '' : ''}`}
                 onClick={handleNext}
                 disabled={data.images.length === 0}
                 size={isMobile ? 'lg' : 'default'}
@@ -181,7 +191,11 @@ const CreateDamageAssessment = () => {
               />
             </div>
             <div
-              className={`flex gap-2 ${isMobile ? 'mt-4 w-full flex-col' : 'mt-6 ml-auto max-w-md'}`}
+              className={`flex gap-2 ${
+                isMobile
+                  ? 'shadow-t-md fixed bottom-0 left-0 z-10 w-full flex-col bg-white p-4'
+                  : 'mt-6 ml-auto max-w-md flex-row-reverse'
+              }`}
             >
               <Button
                 className={`${isMobile ? 'w-full' : 'w-1/2'}`}

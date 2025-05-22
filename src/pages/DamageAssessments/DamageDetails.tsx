@@ -36,11 +36,8 @@ const DamageDetails = () => {
     try {
       setIsSubmitting(true);
 
-      console.log({ data });
-      // 1. Subir imágenes
       const uploadResult = await upload(data.images, { carId: carId! });
 
-      // 2. Crear el peritaje con los links de las imágenes
       const response = await createDamageAssessment({
         carId,
         details: data.details,

@@ -1,4 +1,4 @@
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { useApi } from '@/hooks/useApi';
 import { useEffect } from 'react';
 import { DamageAssessment, Damage, DamageSeverity, DamageType } from '@/types/DamageAssessment';
@@ -81,9 +81,12 @@ const DamageAssessmentDetail = () => {
   );
   const carPlateOrVin = useCarPlateOrVin(data?.car);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (damageAssessmentId) execute();
+    if (damageAssessmentId) {
+      execute();
+    }
   }, [damageAssessmentId]);
 
   if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
@@ -114,7 +117,7 @@ const DamageAssessmentDetail = () => {
           title: 'Detalles del Peritaje',
           description: carPlateOrVin,
         }}
-        onBack={() => window.history.back()}
+        onBack={() => navigate('/damage-assessments')}
       />
 
       <DetailsContainer>
