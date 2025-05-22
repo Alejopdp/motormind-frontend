@@ -127,7 +127,7 @@ const CreateDamageAssessment = () => {
 
   if (isLoading || isUploading || isSubmitting) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center p-4">
         <Spinner label={loadingMessages[currentLoadingMessageIndex]} />
       </div>
     );
@@ -180,12 +180,23 @@ const CreateDamageAssessment = () => {
                 className="min-h-[120px]"
               />
             </div>
-            <div className="mt-6 ml-auto flex max-w-md gap-2">
-              <Button className="w-1/2" variant="outline" onClick={handleBack}>
-                Atrás
-              </Button>
-              <Button className="w-1/2" onClick={handleSubmit}>
+            <div
+              className={`flex gap-2 ${isMobile ? 'mt-4 w-full flex-col' : 'mt-6 ml-auto max-w-md'}`}
+            >
+              <Button
+                className={`${isMobile ? 'w-full' : 'w-1/2'}`}
+                onClick={handleSubmit}
+                size={isMobile ? 'lg' : 'default'}
+              >
                 Crear Peritaje
+              </Button>
+              <Button
+                className={`${isMobile ? 'w-full' : 'w-1/2'}`}
+                variant="outline"
+                onClick={handleBack}
+                size={isMobile ? 'lg' : 'default'}
+              >
+                Atrás
               </Button>
             </div>
           </>
