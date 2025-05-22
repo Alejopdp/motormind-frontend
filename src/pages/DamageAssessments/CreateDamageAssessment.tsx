@@ -16,6 +16,7 @@ import { useFileUpload } from '@/hooks/useFileUpload';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import DetailsContainer from '@/components/atoms/DetailsContainer';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 const loadingMessages = [
   'Este proceso puede tardar unos minutos, por favor espere...',
@@ -43,6 +44,7 @@ const CreateDamageAssessment = () => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentLoadingMessageIndex, setCurrentLoadingMessageIndex] = useState(0);
+  const isMobile = useIsMobile();
 
   const {
     data: car,
@@ -136,20 +138,27 @@ const CreateDamageAssessment = () => {
   }
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className={`bg-background min-h-screen ${isMobile && step === 1 ? 'pb-20' : ''}`}>
       <HeaderPage
         data={{ title: 'Nuevo Peritaje' }}
         onBack={() => navigate('/damage-assessments')}
       />
       <DetailsContainer>
         {step === 1 && (
-          <div className="w-full rounded-lg bg-white p-8 shadow-md">
+          <div
+            className={`w-full ${isMobile ? 'flex flex-grow flex-col' : 'rounded-lg bg-white p-8 shadow-md'}`}
+          >
             <ImageUploadStep images={data.images} onImagesChange={setImages} />
-            <div className="mt-6 flex w-full gap-2">
+            <div
+              className={`mt-6 flex w-full gap-2 ${
+                isMobile ? 'shadow-t-md fixed bottom-0 left-0 z-10 w-full bg-white p-4' : ''
+              }`}
+            >
               <Button
                 className="w-full md:mx-auto md:w-1/2"
                 onClick={handleNext}
                 disabled={data.images.length === 0}
+                size={isMobile ? 'lg' : 'default'}
               >
                 Siguiente
               </Button>

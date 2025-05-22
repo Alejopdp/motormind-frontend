@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "serve -s dist -l $PORT",
+    "start": "serve -s dist -l 5173",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md}\""
   },
   "dependencies": {
