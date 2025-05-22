@@ -16,6 +16,17 @@ import { useFileUpload } from '@/hooks/useFileUpload';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import DetailsContainer from '@/components/atoms/DetailsContainer';
+
+const loadingMessages = [
+  'Este proceso puede tardar unos minutos, por favor espere...',
+  'Recibimos los datos y los estamos procesando para crear el peritaje',
+  'Analizando las imágenes del auto',
+  'Detectando los daños del auto',
+  'Buscando recursos para obtener más información',
+  'Creando el peritaje con toda la información recabada',
+  'Ya casi terminamos, por favor espere un poco más',
+];
+
 const CreateDamageAssessment = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const carId = searchParams.get('carId');
@@ -31,6 +42,7 @@ const CreateDamageAssessment = () => {
   const { upload, isLoading: isUploading } = useFileUpload();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentLoadingMessageIndex, setCurrentLoadingMessageIndex] = useState(0);
 
   const {
     data: car,
@@ -59,6 +71,21 @@ const CreateDamageAssessment = () => {
       navigate('/damage-assessments');
     }
   }, [carId, navigate]);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | undefined = undefined;
+    if (isLoading || isUploading || isSubmitting) {
+      setCurrentLoadingMessageIndex(0); // Resetear al primer mensaje al iniciar la carga
+      intervalId = setInterval(() => {
+        setCurrentLoadingMessageIndex((prevIndex) => (prevIndex + 1) % loadingMessages.length);
+      }, 20000); // Cambia cada 20 segundos
+    }
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isLoading, isUploading, isSubmitting]);
 
   const isAdmin = [UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role);
   if (!isAdmin) return <Navigate to="/" replace />;
@@ -99,7 +126,7 @@ const CreateDamageAssessment = () => {
   if (isLoading || isUploading || isSubmitting) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner label="Cargando..." />
+        <Spinner label={loadingMessages[currentLoadingMessageIndex]} />
       </div>
     );
   }
