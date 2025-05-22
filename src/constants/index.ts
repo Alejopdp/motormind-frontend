@@ -23,6 +23,13 @@ export const PLATE_REGEX =
  */
 export const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/;
 
+/*
+ * 1er carácter: P, B, C, U (Tipo de sistema)
+ * 2do carácter: 0, 1, 2, 3 (El 0 y 1 son para códigos genéricos SAE, 2 y 3 para específicos del fabricante)
+ * 3er, 4to, y 5to carácter: Hexadecimales (0-9, A-F) que identifican el fallo específico.
+ */
+export const OBD_CODE_REGEX = /^[PBCU][0-3][0-9A-F]{3}$/;
+
 export const PROBABILITY_LEVELS = {
   HIGH: 'Alta',
   MEDIUM: 'Media',

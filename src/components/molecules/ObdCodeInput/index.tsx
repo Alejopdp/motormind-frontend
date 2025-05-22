@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 
 import { Input } from '@/components/atoms/Input';
 import { Badge } from '@/components/atoms/Badge';
+import { OBD_CODE_REGEX } from '@/constants';
 
 interface OBDCodeInputProps {
   initialCodes?: string[];
@@ -15,9 +16,7 @@ export default function OBDCodeInput({ initialCodes = [], onChange, disabled }: 
   const [inputValue, setInputValue] = useState('');
 
   const isValidOBDCode = (code: string): boolean => {
-    // Basic validation: OBD codes typically follow patterns like P0123, B1234, C0123, U1234
-    const pattern = /^[PBCU][0-9]{4}$/i;
-    return pattern.test(code);
+    return OBD_CODE_REGEX.test(code);
   };
 
   const addCode = (code: string) => {
@@ -71,10 +70,12 @@ export default function OBDCodeInput({ initialCodes = [], onChange, disabled }: 
 
         <Input
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={(e) => setInputValue(e.target.value.toUpperCase())}
           onKeyDown={handleKeyDown}
           onBlur={() => inputValue && addCode(inputValue)}
-          placeholder={codes.length ? '' : 'Ingresa códigos OBD (ej: P0301) y presiona Enter'}
+          placeholder={
+            codes.length ? 'Otro código OBD' : 'Ingresa códigos OBD (ej: P0301) y presiona Enter'
+          }
           disabled={disabled}
         />
       </div>
