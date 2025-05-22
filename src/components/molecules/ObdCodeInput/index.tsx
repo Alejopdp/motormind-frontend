@@ -1,9 +1,7 @@
 import { useState, KeyboardEvent } from 'react';
 import { X } from 'lucide-react';
-
 import { Input } from '@/components/atoms/Input';
 import { Badge } from '@/components/atoms/Badge';
-import { OBD_CODE_REGEX } from '@/constants';
 
 interface OBDCodeInputProps {
   initialCodes?: string[];
@@ -15,14 +13,10 @@ export default function OBDCodeInput({ initialCodes = [], onChange, disabled }: 
   const [codes, setCodes] = useState<string[]>(initialCodes);
   const [inputValue, setInputValue] = useState('');
 
-  const isValidOBDCode = (code: string): boolean => {
-    return OBD_CODE_REGEX.test(code);
-  };
-
   const addCode = (code: string) => {
     const trimmedCode = code.trim().toUpperCase();
 
-    if (trimmedCode && isValidOBDCode(trimmedCode) && !codes.includes(trimmedCode)) {
+    if (trimmedCode && !codes.includes(trimmedCode)) {
       const newCodes = [...codes, trimmedCode];
       setCodes(newCodes);
       if (onChange) onChange(newCodes);
