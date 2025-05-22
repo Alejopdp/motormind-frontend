@@ -147,13 +147,6 @@ const Diagnoses = () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="h-8 w-8 sm:h-auto sm:w-auto"
-            >
-              <PlusIcon className="!h-5 !w-5" />
-              <span className="hidden xl:inline">Nuevo diagnóstico</span>
-            </Button>
           </div>
           <Button
             onClick={() => setIsCreateModalOpen(true)}

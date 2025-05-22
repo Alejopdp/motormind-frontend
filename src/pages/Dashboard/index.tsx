@@ -43,11 +43,9 @@ const Dashboard = () => {
   return (
     <div className="flex flex-grow flex-col">
       {/* Fixed Header */}
-      <div className="sticky top-0 z-10 flex w-full flex-row justify-between bg-white px-4 py-2 shadow-xs sm:flex-row sm:px-8 sm:py-4 lg:flex-row">
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate py-0.5 pl-8 text-xl font-semibold sm:py-0 sm:pl-0 lg:text-2xl">
-            Panel
-          </h1>
+      <div className="sticky top-0 z-10 flex w-full flex-row items-center justify-between bg-white px-4 py-2 shadow-xs sm:px-8 sm:py-4">
+        <div className="flex-1 text-center sm:text-left lg:w-auto">
+          <h1 className="truncate py-0.5 text-xl font-semibold sm:py-0 lg:text-2xl">Panel</h1>
           <p className="text-muted hidden xl:block">Gestiona y revisa el estado del taller</p>
         </div>
         <div className="hidden items-center sm:flex">
