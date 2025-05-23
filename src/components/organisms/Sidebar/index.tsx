@@ -54,6 +54,12 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
       href: '/diagnoses',
     },
     {
+      icon: ClipboardListIcon,
+      label: 'Peritaje',
+      href: '/damage-assessments',
+      roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
+    },
+    {
       icon: LineChartIcon,
       label: 'Métricas',
       href: '/metrics',

@@ -20,6 +20,7 @@ import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
 import { ConfirmFaultModal } from './ConfirmFaultModal';
 import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
+import DetailsContainer from '@/components/atoms/DetailsContainer';
 
 const PreliminaryDiagnosis = () => {
   const params = useParams();
@@ -147,7 +148,7 @@ const PreliminaryDiagnosis = () => {
           description: carDescription,
         }}
       />
-      <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6 sm:pb-24">
+      <DetailsContainer>
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
         <DiagnosticContextSection
           symptoms={symptom}
@@ -200,7 +201,7 @@ const PreliminaryDiagnosis = () => {
             disabled={isLoadingFinalReport}
           />
         </div>
-      </div>
+      </DetailsContainer>
 
       <div className="fixed right-0 bottom-0 left-0 flex flex-col-reverse gap-3 border-t border-gray-200 bg-white p-4 sm:flex-row sm:justify-between">
         <Button

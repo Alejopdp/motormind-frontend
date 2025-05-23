@@ -18,6 +18,10 @@ import AiEvaluationDetails from '@/pages/AiEvaluationDetails';
 import PromptManager from '@/pages/PromptManager';
 import PromptDetail from '@/pages/PromptDetails';
 import Metrics from '@/pages/Metrics';
+import DamageAssessments from './pages/DamageAssessments';
+import CreateDamageAssessment from './pages/DamageAssessments/CreateDamageAssessment';
+import DamageAssessmentDetail from './pages/DamageAssessments/DamageAssessmentDetail';
+import { DamageAssessmentProvider } from '@/context/DamageAssessment.context';
 
 const router = createBrowserRouter([
   {
@@ -73,6 +77,14 @@ const router = createBrowserRouter([
         element: (
           <ErrorBoundary>
             <PromptManager />
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/damage-assessments',
+        element: (
+          <ErrorBoundary>
+            <DamageAssessments />
           </ErrorBoundary>
         ),
       },
@@ -155,6 +167,26 @@ const router = createBrowserRouter([
     element: (
       <ErrorBoundary>
         <VerifyMagicLink />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/damage-assessments/create',
+    element: (
+      <ErrorBoundary>
+        <DamageAssessmentProvider>
+          <CreateDamageAssessment />
+        </DamageAssessmentProvider>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/damage-assessments/:damageAssessmentId',
+    element: (
+      <ErrorBoundary>
+        <DamageAssessmentProvider>
+          <DamageAssessmentDetail />
+        </DamageAssessmentProvider>
       </ErrorBoundary>
     ),
   },
