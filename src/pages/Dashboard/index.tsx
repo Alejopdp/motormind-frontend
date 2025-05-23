@@ -109,9 +109,11 @@ const Dashboard = () => {
         </div>
       </main>
 
-      <CreateDiagnosticModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
-
-      {/* FloatingButton solo en mobile */}
+      <CreateDiagnosticModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        submitButtonText="Comenzar diagnóstico"
+      />
       <div className="sm:hidden">
         <FloatingButton onClick={() => setIsCreateModalOpen(true)}>
           <PlusIcon className="!h-5 !w-5" />

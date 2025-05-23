@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, SearchIcon } from 'lucide-react';
-
-// import { Badge } from '@/components/atoms/Badge';
+import { DocumentLink } from '@/types/Diagnosis';
 import { Button } from '@/components/atoms/Button';
 import { ResourceLinkItems } from '@/components/atoms/ResourceLinkItems';
 
@@ -12,10 +11,7 @@ export const AlternativeFailures = ({
     title: string;
     probability: string;
     tests: string[];
-    resources: {
-      label: string;
-      url: string;
-    }[];
+    resources: DocumentLink[];
   }[];
 }) => {
   const [isContingencyExpanded, setIsContingencyExpanded] = useState(false);

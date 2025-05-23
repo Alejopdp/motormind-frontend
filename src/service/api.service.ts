@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { apiUrl } from '@/constants/env';
 import { AiDiagnosisEvaluation } from '@/types/AiDiagnosisEvaluation';
 
-class ApiService {
+export class ApiService {
   private static instance: ApiService;
   private api: AxiosInstance;
 
@@ -85,9 +85,10 @@ class ApiService {
     evaluations: AiDiagnosisEvaluation[];
     total: number;
   }> {
-    const response = await this.get<{ evaluations: AiDiagnosisEvaluation[]; total: number }>(
-      `/audits/evaluations`,
-    );
+    const response = await this.get<{
+      evaluations: AiDiagnosisEvaluation[];
+      total: number;
+    }>('/audits/evaluations');
     return response.data;
   }
 
@@ -106,4 +107,6 @@ class ApiService {
   }
 }
 
-export default ApiService.getInstance();
+// Exporta la instancia singleton por defecto
+const apiService = ApiService.getInstance();
+export default apiService;

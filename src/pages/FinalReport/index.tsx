@@ -30,7 +30,7 @@ import {
   DialogTitle,
 } from '@/components/atoms/Dialog';
 import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
-
+import DetailsContainer from '@/components/atoms/DetailsContainer';
 const FinalReport = () => {
   const params = useParams();
   const [searchParams] = useSearchParams();
@@ -207,7 +207,7 @@ const FinalReport = () => {
           description: carDescription,
         }}
       />
-      <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
+      <DetailsContainer>
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
 
         <DiagnosticContextSection
@@ -243,7 +243,7 @@ const FinalReport = () => {
             disabled={isLoadingFinalReport}
           />
         </div>
-      </div>
+      </DetailsContainer>
 
       <div className="fixed right-0 bottom-0 left-0 flex flex-col-reverse gap-4 border-t border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
