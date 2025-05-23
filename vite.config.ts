@@ -5,6 +5,10 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    host: true,
+    port: 5173
+  },
   define: {
     'process.env': {},
   },

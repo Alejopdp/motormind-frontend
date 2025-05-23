@@ -11,8 +11,9 @@ import { Car } from '@/types/Car';
 import Spinner from '@/components/atoms/Spinner';
 import { VehicleList } from '@/components/molecules/VehiceList';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
+import { FloatingButton } from '@/components/atoms/FloatingButton';
 
-const LIMIT = 1000;
+// const LIMIT = 1000;
 
 const Vehicles = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -20,7 +21,7 @@ const Vehicles = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
-  const { execute: getCarsRequest } = useApi<{ data: Car[]; total: number }>('get', '/cars');
+  const { execute: getCarsRequest } = useApi<{ data: Car[] }>('get', '/cars');
 
   useEffect(() => {
     const handler = debounce(() => {
@@ -35,19 +36,19 @@ const Vehicles = () => {
   }, [searchTerm]);
 
   const {
-    data: { data: cars = [], total = 0 } = { cars: [], total: 0 },
+    data: { data: cars = [] } = { data: [] },
     isLoading: isLoadingCars,
     isError,
     error,
-  } = useQuery<{ data: Car[]; total: number }>({
+  } = useQuery<{ data: Car[] }>({
     queryKey: ['vehicles', debouncedSearchTerm, currentPage],
     queryFn: async () => {
       const response = await getCarsRequest(
         undefined,
         {
           ...(debouncedSearchTerm.trim() ? { search: debouncedSearchTerm } : {}),
-          limit: LIMIT.toString(),
-          page: currentPage.toString(),
+          // limit: LIMIT.toString(),
+          // page: currentPage.toString(),
         },
         undefined,
       );
@@ -63,15 +64,15 @@ const Vehicles = () => {
     }
   }, [isError, error, enqueueSnackbar]);
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+  // const handlePreviousPage = () => {
+  //   if (currentPage > 1) {
+  //     setCurrentPage(currentPage - 1);
+  //   }
+  // };
 
-  const handleNextPage = () => {
-    setCurrentPage(currentPage + 1);
-  };
+  // const handleNextPage = () => {
+  //   setCurrentPage(currentPage + 1);
+  // };
 
   return (
     <div className="flex flex-grow flex-col">
@@ -98,7 +99,7 @@ const Vehicles = () => {
           </div>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
-            className="h-8 w-8 sm:h-auto sm:w-auto"
+            className="hidden h-8 w-8 sm:flex sm:h-auto sm:w-auto"
           >
             <PlusIcon className="!h-5 !w-5" />
             <span className="hidden lg:inline">Añadir Vehículo</span>
@@ -112,6 +113,13 @@ const Vehicles = () => {
         </div>
       </div>
 
+      {/* FloatingButton solo en mobile */}
+      <div className="sm:hidden">
+        <FloatingButton onClick={() => setIsCreateModalOpen(true)}>
+          <PlusIcon className="!h-5 !w-5" />
+        </FloatingButton>
+      </div>
+
       {isLoadingCars ? (
         <div className="mt-5 flex items-center justify-center">
           <Spinner />
@@ -121,11 +129,11 @@ const Vehicles = () => {
           <VehicleList
             vehicles={cars}
             isLoading={isLoadingCars}
-            previousPage={handlePreviousPage}
-            nextPage={handleNextPage}
-            total={total}
-            currentPage={currentPage}
-            limit={LIMIT}
+            // previousPage={handlePreviousPage}
+            // nextPage={handleNextPage}
+            // total={total}
+            // currentPage={currentPage}
+            // limit={LIMIT}
           />
         </div>
       )}

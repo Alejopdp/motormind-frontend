@@ -1,16 +1,12 @@
-import { useState, useEffect } from 'react';
-import { FileSearch, PlusIcon, SearchIcon } from 'lucide-react';
-import { debounce } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
+import { debounce } from 'lodash';
+import { FileSearch, PlusIcon, SearchIcon } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
 import { diagnosisLink, formatDate } from '@/utils';
 import { useApi } from '@/hooks/useApi';
 import { Diagnosis } from '@/types/Diagnosis';
 import Spinner from '@/components/atoms/Spinner';
 import { DiagnosticListItem } from '@/components/molecules/DiagnosticListItem';
-import { Pagination } from '@/components/molecules/Pagination';
-import { Input } from '@/components/atoms/Input';
-import { Button } from '@/components/atoms/Button';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 import { DIAGNOSIS_STATUS } from '@/constants';
 import {
@@ -20,6 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/atoms/Select';
+import { FloatingButton } from '@/components/atoms/FloatingButton';
+import { useEffect, useState } from 'react';
+import { Input } from '@/components/atoms/Input';
+import { Button } from '@/components/atoms/Button';
 
 const LIMIT = 1000;
 
@@ -47,7 +47,7 @@ const Diagnoses = () => {
   }, [searchTerm]);
 
   const {
-    data: { data: diagnoses = [], total = 0 } = { data: [], total: 0 },
+    data: { data: diagnoses = [] } = { data: [] },
     isLoading: isLoadingDiagnoses,
     isError,
     error,
@@ -77,18 +77,18 @@ const Diagnoses = () => {
     }
   }, [isError, error]);
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+  // const handlePreviousPage = () => {
+  //   if (currentPage > 1) {
+  //     setCurrentPage(currentPage - 1);
+  //   }
+  // };
 
-  const handleNextPage = () => {
-    const totalPages = Math.ceil(total / LIMIT);
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+  // const handleNextPage = () => {
+  //   const totalPages = Math.ceil(total / LIMIT);
+  //   if (currentPage < totalPages) {
+  //     setCurrentPage(currentPage + 1);
+  //   }
+  // };
 
   const getStatusText = (status: string) => {
     switch (status) {
@@ -147,14 +147,14 @@ const Diagnoses = () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="h-8 w-8 sm:h-auto sm:w-auto"
-            >
-              <PlusIcon className="!h-5 !w-5" />
-              <span className="hidden xl:inline">Nuevo diagnóstico</span>
-            </Button>
           </div>
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="hidden h-8 w-8 sm:flex sm:h-auto sm:w-auto"
+          >
+            <PlusIcon className="!h-5 !w-5" />
+            <span className="hidden lg:inline">Nuevo diagnóstico</span>
+          </Button>
         </div>
       </div>
 
@@ -194,7 +194,7 @@ const Diagnoses = () => {
         </div>
 
         {/* Fixed Footer with Pagination */}
-        {diagnoses.length > 0 && (
+        {/* {diagnoses.length > 0 && (
           <div className="sticky bottom-0">
             <Pagination
               total={total}
@@ -204,10 +204,16 @@ const Diagnoses = () => {
               limit={LIMIT}
             />
           </div>
-        )}
+        )} */}
       </div>
 
       <CreateDiagnosticModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
+
+      <div className="sm:hidden">
+        <FloatingButton onClick={() => setIsCreateModalOpen(true)}>
+          <PlusIcon className="!h-5 !w-5" />
+        </FloatingButton>
+      </div>
     </div>
   );
 };

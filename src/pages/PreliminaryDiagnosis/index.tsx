@@ -132,14 +132,14 @@ const PreliminaryDiagnosis = () => {
 
   const onBack = () => {
     if (backQueryParam === 'true') {
-      navigate(-1); // Go back to the previous page
+      navigate(-1);
     } else {
-      navigate(`/cars/${params.carId}`); // Go back to the route
+      navigate(`/cars/${params.carId}`);
     }
   };
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background min-h-screen pb-32 sm:pb-0">
       <HeaderPage
         onBack={onBack}
         data={{
@@ -147,7 +147,7 @@ const PreliminaryDiagnosis = () => {
           description: carDescription,
         }}
       />
-      <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
+      <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6 sm:pb-24">
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
         <DiagnosticContextSection
           symptoms={symptom}
@@ -156,7 +156,6 @@ const PreliminaryDiagnosis = () => {
           answers={diagnosis.processedAnswers ?? ''}
         />
 
-        {/* AI Detected Faults */}
         <div className="space-y-2 sm:space-y-4">
           <div className="flex items-center gap-2">
             <div className="rounded-md bg-blue-100 p-2">
@@ -185,10 +184,9 @@ const PreliminaryDiagnosis = () => {
           </div>
         </div>
 
-        {/* OBD Codes Input */}
         <OBDCodeInput onChange={setObdCodes} disabled={isLoadingFinalReport} />
 
-        <div className="mb-20 space-y-1 sm:space-y-2">
+        <div className="space-y-1 sm:space-y-2">
           <p className="block text-sm font-medium sm:text-base">
             Observaciones Adicionales del Técnico{' '}
             <span className="text-muted font-normal">(Opcional)</span>
@@ -204,17 +202,26 @@ const PreliminaryDiagnosis = () => {
         </div>
       </div>
 
-      <div className="fixed right-0 bottom-0 left-0 flex justify-between border-t border-gray-200 bg-white p-4">
-        <Button variant="ghost" onClick={() => navigate(-1)}>
+      <div className="fixed right-0 bottom-0 left-0 flex flex-col-reverse gap-3 border-t border-gray-200 bg-white p-4 sm:flex-row sm:justify-between">
+        <Button
+          variant="outline"
+          onClick={() => navigate(-1)}
+          className="sm:hover:text-primary w-full sm:w-auto sm:border-none sm:bg-transparent sm:shadow-none sm:hover:bg-transparent"
+          size="lg"
+        >
           <ArrowLeftIcon className="h-4 w-4" />
-          <span className="hidden sm:block">Volver</span>
+          <span className="ml-2 sm:block">Volver</span>
         </Button>
 
-        <div className="flex gap-3">
-          <Button onClick={onGenerateReport} disabled={isLoadingFinalReport}>
+        <div className="flex w-full sm:w-auto sm:gap-3">
+          <Button
+            onClick={onGenerateReport}
+            disabled={isLoadingFinalReport}
+            className="w-full sm:w-auto"
+            size="lg"
+          >
             <FileTextIcon className="h-4 w-4" />
-            <span className="sm:hidden">Generar</span>
-            <span className="hidden sm:inline">Generar Informe Final</span>
+            <span className="ml-2">Generar Informe Final</span>
           </Button>
         </div>
       </div>
