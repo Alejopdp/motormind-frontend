@@ -53,28 +53,40 @@ export const TechnicanObservationsInputForm = ({
           </div>
         </div>
 
-        <div className="flex flex-wrap justify-end gap-3 rounded-b-lg border-t border-gray-200 bg-gray-50 px-6 py-4">
+        <div className="flex flex-col-reverse gap-3 rounded-b-lg border-t border-gray-200 bg-gray-50 p-4 sm:flex-row sm:flex-wrap sm:justify-end sm:px-6 sm:py-4">
           {!disableMoreQuestions && (
             <Button
               type="button"
               variant="outline"
               onClick={onGenerateMoreQuestions}
               disabled={isLoadingMoreQuestions}
+              className="w-full sm:w-auto"
+              size="lg"
             >
-              <span className="sm:hidden">
-                {isLoadingMoreQuestions ? 'Generando...' : 'Generar +'}
-              </span>
-              <span className="hidden sm:inline">
-                {isLoadingMoreQuestions ? 'Generando...' : 'Generar Más Preguntas'}
-              </span>
+              {isLoadingMoreQuestions ? (
+                'Generando...'
+              ) : (
+                <>
+                  <span className="sm:hidden">Generar Más Preguntas</span>
+                  <span className="hidden sm:inline">Generar Más Preguntas</span>
+                </>
+              )}
             </Button>
           )}
           <Button
             disabled={isLoadingMoreQuestions || isLoadingDiagnosis || details.length === 0}
             type="submit"
+            className="w-full sm:w-auto"
+            size="lg"
           >
-            <span className="sm:hidden">Crear Informe Pre.</span>
-            <span className="hidden sm:inline">Crear Informe Preliminar</span>
+            {isLoadingDiagnosis ? (
+              'Creando...'
+            ) : (
+              <>
+                <span className="sm:hidden">Crear Informe Preliminar</span>
+                <span className="hidden sm:inline">Crear Informe Preliminar</span>
+              </>
+            )}
           </Button>
         </div>
       </form>
