@@ -67,8 +67,7 @@ export const TechnicanObservationsInputForm = ({
                 'Generando...'
               ) : (
                 <>
-                  <span className="sm:hidden">Generar Más Preguntas</span>
-                  <span className="hidden sm:inline">Generar Más Preguntas</span>
+                  <span>Generar Más Preguntas</span>
                 </>
               )}
             </Button>
