@@ -20,6 +20,9 @@ import PromptDetail from '@/pages/PromptDetails';
 import Metrics from '@/pages/Metrics';
 import ProtectedRoute from '@/components/organisms/ProtectedRoute';
 import AppointmentDiagnosis from '@/pages/AppointmentDiagnosis';
+import CreateDamageAssessment from '@/pages/DamageAssessments/CreateDamageAssessment';
+import DamageAssessmentDetail from '@/pages/DamageAssessments/DamageAssessmentDetail';
+import { DamageAssessmentProvider } from '@/context/DamageAssessment.context';
 
 const wrapRoute = (route: RouteObject, withAuth: boolean = false): RouteObject => {
   const wrappedRoute: RouteObject = {
@@ -140,6 +143,22 @@ const authenticatedRoutes = wrapRoutes(
     {
       path: '/audits/evaluations/:evaluationId',
       element: <AiEvaluationDetails />,
+    },
+    {
+      path: '/damage-assessments/create',
+      element: (
+        <DamageAssessmentProvider>
+          <CreateDamageAssessment />
+        </DamageAssessmentProvider>
+      ),
+    },
+    {
+      path: '/damage-assessments/:damageAssessmentId',
+      element: (
+        <DamageAssessmentProvider>
+          <DamageAssessmentDetail />
+        </DamageAssessmentProvider>
+      ),
     },
     {
       path: '/settings',
