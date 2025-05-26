@@ -151,10 +151,7 @@ const PreliminaryDiagnosis = () => {
     });
 
     if (response.status === 200) {
-      diagnosis.preliminary.possibleReasons = [
-        ...diagnosis.preliminary.possibleReasons,
-        ...response.data.preliminary.possibleReasons,
-      ];
+      diagnosis.preliminary.possibleReasons = response.data.preliminary.possibleReasons;
     } else {
       enqueueSnackbar('Error al generar más posibles averías. Por favor, inténtalo de nuevo.', {
         variant: 'error',
