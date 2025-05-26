@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
 import { DIAGNOSIS_STATUS } from '@/constants';
+import TitledStringList from '../../atoms/TitledStringList';
 
 interface DiagnosticListItemProps {
   vehicle?: {
@@ -120,29 +121,11 @@ export const DiagnosticListItem = ({
         </div>
 
         {status === DIAGNOSIS_STATUS.GUIDED_QUESTIONS ? (
-          <div className="mb-3">
-            <p className="mb-1 text-xs sm:text-sm">Preguntas guiadas:</p>
-            <ul className="space-y-1">
-              {questions.map((question, index) => (
-                <li key={index} className="text-muted flex items-start">
-                  <span className="mr-2 text-xs sm:text-sm">•</span>
-                  <span className="text-xs sm:text-sm">{question}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <TitledStringList title="Preguntas guiadas:" items={questions} />
+        ) : status === DIAGNOSIS_STATUS.PRELIMINARY ? (
+          <TitledStringList title="Potenciales averías:" items={problems} />
         ) : (
-          <div className="mb-3">
-            <p className="mb-1 text-xs sm:text-sm">Problemas detectados:</p>
-            <ul className="space-y-1">
-              {problems.map((problem, index) => (
-                <li key={index} className="text-muted flex items-start">
-                  <span className="mr-2 text-xs sm:text-sm">•</span>
-                  <span className="text-xs sm:text-sm">{problem}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <TitledStringList title="Problemas detectados:" items={problems} />
         )}
 
         <div className="flex items-center justify-between border-t border-gray-100 pt-3">

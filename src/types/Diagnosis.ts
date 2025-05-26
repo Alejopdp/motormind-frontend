@@ -14,6 +14,7 @@ export type Diagnosis = {
     notes: string;
   };
   preliminary: {
+    moreReasonsRequestsQuantity: number;
     possibleReasons: {
       _id: string;
       title: string;

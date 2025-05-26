@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon } from 'lucide-react';
+import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, PlusIcon } from 'lucide-react';
 
 import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
@@ -30,10 +30,15 @@ const PreliminaryDiagnosis = () => {
   const [observations, setObservations] = useState('');
   const [obdCodes, setObdCodes] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoadingMorePossibleReasons, setIsLoadingMorePossibleReasons] = useState(false);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: createFinalReportRequest } = useApi<Diagnosis>(
     'post',
     '/cars/:carId/diagnosis/:diagnosisId/final',
+  );
+  const { execute: getMorePossibleReasons } = useApi<Diagnosis>(
+    'get',
+    '/diagnoses/:diagnosisId/more-possible-reasons',
   );
 
   const {
@@ -139,6 +144,25 @@ const PreliminaryDiagnosis = () => {
     }
   };
 
+  const onGenerateMorePossibleReasons = async () => {
+    setIsLoadingMorePossibleReasons(true);
+    const response = await getMorePossibleReasons(undefined, undefined, {
+      diagnosisId: params.diagnosisId as string,
+    });
+
+    if (response.status === 200) {
+      diagnosis.preliminary.possibleReasons = [
+        ...diagnosis.preliminary.possibleReasons,
+        ...response.data.preliminary.possibleReasons,
+      ];
+    } else {
+      enqueueSnackbar('Error al generar más posibles averías. Por favor, inténtalo de nuevo.', {
+        variant: 'error',
+      });
+    }
+    setIsLoadingMorePossibleReasons(false);
+  };
+
   return (
     <div className="bg-background min-h-screen pb-32 sm:pb-0">
       <HeaderPage
@@ -215,6 +239,20 @@ const PreliminaryDiagnosis = () => {
         </Button>
 
         <div className="flex w-full sm:w-auto sm:gap-3">
+          {(!diagnosis.preliminary.moreReasonsRequestsQuantity ||
+            diagnosis.preliminary.moreReasonsRequestsQuantity < 3) && (
+            <Button
+              onClick={onGenerateMorePossibleReasons}
+              disabled={isLoadingMorePossibleReasons}
+              className="w-full sm:w-auto"
+              size="lg"
+              variant="outline"
+            >
+              <PlusIcon className="h-4 w-4" />
+              <span className="ml-2">Generar más posibles averías</span>
+            </Button>
+          )}
+
           <Button
             onClick={onGenerateReport}
             disabled={isLoadingFinalReport}
@@ -228,6 +266,10 @@ const PreliminaryDiagnosis = () => {
       </div>
 
       <LoadingModal isOpen={isLoadingFinalReport} message="Generando informe final" />
+      <LoadingModal
+        isOpen={isLoadingMorePossibleReasons}
+        message="Generando más posibles averías"
+      />
       <ConfirmFaultModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
