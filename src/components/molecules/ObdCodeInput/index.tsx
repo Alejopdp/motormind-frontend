@@ -14,16 +14,10 @@ export default function OBDCodeInput({ initialCodes = [], onChange, disabled }: 
   const [codes, setCodes] = useState<string[]>(initialCodes);
   const [inputValue, setInputValue] = useState('');
 
-  const isValidOBDCode = (code: string): boolean => {
-    // Basic validation: OBD codes typically follow patterns like P0123, B1234, C0123, U1234
-    const pattern = /^[PBCU][0-9]{4}$/i;
-    return pattern.test(code);
-  };
-
   const addCode = (code: string) => {
     const trimmedCode = code.trim().toUpperCase();
 
-    if (trimmedCode && isValidOBDCode(trimmedCode) && !codes.includes(trimmedCode)) {
+    if (trimmedCode && !codes.includes(trimmedCode)) {
       const newCodes = [...codes, trimmedCode];
       setCodes(newCodes);
       if (onChange) onChange(newCodes);
@@ -39,7 +33,7 @@ export default function OBDCodeInput({ initialCodes = [], onChange, disabled }: 
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
+    if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       addCode(inputValue);
     }
@@ -64,15 +58,22 @@ export default function OBDCodeInput({ initialCodes = [], onChange, disabled }: 
               onClick={() => removeCode(code)}
               className="ml-1 rounded-full p-0.5 hover:bg-gray-200"
             >
-              <X className="h-3 w-3" />
+              <X className="h-3 w-3 cursor-pointer" />
             </button>
           </Badge>
         ))}
-
         <Input
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onChange={(e) => {
+            if (e.target.value.includes(' ')) {
+              setInputValue(e.target.value.replace(/\s/g, ''));
+              return;
+            }
+            setInputValue(e.target.value);
+          }}
+          onKeyDown={(e) => {
+            handleKeyDown(e);
+          }}
           onBlur={() => inputValue && addCode(inputValue)}
           placeholder={codes.length ? '' : 'Ingresa códigos OBD (ej: P0301) y presiona Enter'}
           disabled={disabled}
