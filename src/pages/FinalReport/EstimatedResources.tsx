@@ -6,6 +6,7 @@ import Spinner from '@/components/atoms/Spinner';
 import { useApi } from '@/hooks/useApi';
 import { DocumentLink } from '@/types/Diagnosis';
 import PartDiagramItem from '@/components/molecules/PartDiagramItem';
+import { useAuth } from '@/context/Auth.context';
 
 const messages = [
   'Buscando diagramas... esta operación puede tardar varios segundos',
@@ -35,6 +36,7 @@ export const EstimatedResources = ({
   diagnosisId,
 }: EstimatedResourcesProps) => {
   const [diagramResults, setDiagramResults] = useState<DocumentLink[] | null>(null);
+  const { user } = useAuth();
   const { execute: getDiagrams } = useApi<DocumentLink[]>(
     'get',
     `/diagnoses/${diagnosisId}/failure-diagrams`,
@@ -66,12 +68,6 @@ export const EstimatedResources = ({
   const hasSearchedDiagrams =
     diagramResults !== null || estimatedResources.partsDiagrams !== undefined;
   const partsDiagrams = estimatedResources.partsDiagrams ?? diagramResults ?? [];
-
-  console.log({
-    diagramResults,
-    partsDiagrams,
-    estimatedResources: estimatedResources.partsDiagrams,
-  });
 
   const [currentMessage, setCurrentMessage] = useState(0);
 
@@ -125,45 +121,48 @@ export const EstimatedResources = ({
       </div>
 
       <div className="mt-8">
-        <div style={{ minHeight: 40 }} className="relative">
-          <Button
-            variant="outline"
-            onClick={() => fetchDiagrams()}
-            disabled={isPending}
-            className="mb-2 min-h-12 w-full"
-            style={{ display: hasSearchedDiagrams || isPending ? 'none' : 'block' }}
-          >
-            Buscar diagramas
-          </Button>
-          <div className="absolute inset-x-0 top-0">
-            {isPending && (
-              <div className="flex h-12 flex-col items-center justify-center gap-2">
-                <Spinner className="h-5 w-5" label={messages[currentMessage]} />
-              </div>
-            )}
-            {!isPending && hasSearchedDiagrams && partsDiagrams?.length === 0 && (
-              <div className="text-xs text-gray-500 italic" style={{ fontSize: 14 }}>
-                No encontramos manuales para este vehículo.
-              </div>
+        {user.hasVendorResources && (
+          <div style={{ minHeight: 40 }} className="relative">
+            <Button
+              variant="outline"
+              onClick={() => fetchDiagrams()}
+              disabled={isPending}
+              className="mb-2 min-h-12 w-full"
+              style={{ display: hasSearchedDiagrams || isPending ? 'none' : 'block' }}
+            >
+              Buscar diagramas
+            </Button>
+            <div className="absolute inset-x-0 top-0">
+              {isPending && (
+                <div className="flex h-12 flex-col items-center justify-center gap-2">
+                  <Spinner className="h-5 w-5" label={messages[currentMessage]} />
+                </div>
+              )}
+              {!isPending && hasSearchedDiagrams && partsDiagrams?.length === 0 && (
+                <div className="text-xs text-gray-500 italic" style={{ fontSize: 14 }}>
+                  No encontramos manuales para este vehículo.
+                </div>
+              )}
+            </div>
+
+            {!isPending && hasSearchedDiagrams && partsDiagrams?.length > 0 && (
+              <>
+                <h3 className="mb-3 text-sm font-medium sm:text-base">Diagramas de las piezas</h3>
+                <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {partsDiagrams.map((result) => (
+                    <PartDiagramItem
+                      key={result.label}
+                      title={result.label}
+                      onClick={() => {
+                        window.open(result.url, '_blank');
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
-          {!isPending && hasSearchedDiagrams && partsDiagrams?.length > 0 && (
-            <>
-              <h3 className="mb-3 text-sm font-medium sm:text-base">Diagramas de las piezas</h3>
-              <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {partsDiagrams.map((result) => (
-                  <PartDiagramItem
-                    key={result.label}
-                    title={result.label}
-                    onClick={() => {
-                      window.open(result.url, '_blank');
-                    }}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

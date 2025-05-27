@@ -26,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
     name: '',
     workshopId: '',
     role: UserRole.USER,
+    hasVendorResources: false,
   },
   setUser: () => {},
   logout: async () => {},
@@ -42,6 +43,7 @@ export const AuthContextProvider: React.FC<PropsWithChildren> = ({ children }) =
     name: '',
     workshopId: '',
     role: UserRole.USER,
+    hasVendorResources: false,
   });
 
   const logout = async () => {
@@ -59,6 +61,7 @@ export const AuthContextProvider: React.FC<PropsWithChildren> = ({ children }) =
         name: '',
         workshopId: '',
         role: UserRole.USER,
+        hasVendorResources: false,
       });
       window.location.href = '/login';
     } catch (error) {
@@ -82,6 +85,7 @@ export const AuthContextProvider: React.FC<PropsWithChildren> = ({ children }) =
           },
         });
         setIsAuthenticated(true);
+        console.log(response.data.user);
         setUser(response.data.user);
       } catch (error) {
         console.error(error);
