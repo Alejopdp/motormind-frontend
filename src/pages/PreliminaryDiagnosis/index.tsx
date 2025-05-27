@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -26,6 +26,7 @@ const PreliminaryDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const queryClient = useQueryClient();
   const backQueryParam = searchParams.get('back');
   const [observations, setObservations] = useState('');
   const [obdCodes, setObdCodes] = useState<string[]>([]);
@@ -146,14 +147,41 @@ const PreliminaryDiagnosis = () => {
 
   const onGenerateMorePossibleReasons = async () => {
     setIsLoadingMorePossibleReasons(true);
-    const response = await getMorePossibleReasons(undefined, undefined, {
-      diagnosisId: params.diagnosisId as string,
-    });
+    try {
+      const response = await getMorePossibleReasons(undefined, undefined, {
+        diagnosisId: params.diagnosisId as string,
+      });
 
-    if (response.status === 200) {
-      diagnosis.preliminary.possibleReasons = response.data.preliminary.possibleReasons;
-    } else {
-      enqueueSnackbar('Error al generar más posibles averías. Por favor, inténtalo de nuevo.', {
+      if (response.status === 200 && response.data) {
+        queryClient.setQueryData(
+          ['getDiagnosisById', params.diagnosisId],
+          (oldData: { data: Diagnosis } | undefined) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                data: {
+                  ...oldData.data,
+                  preliminary: {
+                    ...oldData.data.preliminary,
+                    possibleReasons: response.data.preliminary.possibleReasons,
+                    moreReasonsRequestsQuantity:
+                      response.data.preliminary.moreReasonsRequestsQuantity ??
+                      oldData.data.preliminary.moreReasonsRequestsQuantity,
+                  },
+                },
+              };
+            }
+            return oldData;
+          },
+        );
+      } else {
+        enqueueSnackbar('Error al generar más posibles averías. Por favor, inténtalo de nuevo.', {
+          variant: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error en onGenerateMorePossibleReasons:', error);
+      enqueueSnackbar('Ocurrió un error inesperado al generar más averías.', {
         variant: 'error',
       });
     }
