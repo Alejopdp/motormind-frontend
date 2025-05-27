@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckIcon, HashIcon, FileTextIcon, XIcon, PlusIcon, ArrowLeftIcon } from 'lucide-react';
+import { CheckIcon, HashIcon, FileTextIcon, XIcon, ArrowLeftIcon } from 'lucide-react';
 import { Calendar } from '@/components/atoms/Calendar';
 import { useSnackbar } from 'notistack';
 import { useMutation } from '@tanstack/react-query';
@@ -37,12 +37,20 @@ interface CreateDiagnosticModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   createOnly?: boolean;
+  title?: string;
+  allowManualCar?: boolean;
+  submitButtonText: string;
+  redirectTo?: 'car-details' | 'damage-assessment';
 }
 
 export const CreateDiagnosticModal = ({
   open,
   onOpenChange,
   createOnly = false,
+  title = 'Crear Nuevo Diagnóstico',
+  allowManualCar = true,
+  submitButtonText,
+  redirectTo = 'car-details',
 }: CreateDiagnosticModalProps) => {
   const [licensePlate, setLicensePlate] = useState('');
   const [vin, setVin] = useState('');
@@ -72,7 +80,11 @@ export const CreateDiagnosticModal = ({
     onSuccess: (response) => {
       enqueueSnackbar('Vehículo creado exitosamente', { variant: 'success' });
       onOpenChange(false);
-      navigate(`/cars/${response.data._id}`);
+      if (redirectTo === 'damage-assessment') {
+        navigate(`/damage-assessments/create?carId=${response.data._id}`);
+      } else {
+        navigate(`/cars/${response.data._id}`);
+      }
     },
     onError: () => {
       enqueueSnackbar('Error al crear el vehículo', { variant: 'error' });
@@ -87,7 +99,11 @@ export const CreateDiagnosticModal = ({
     mutationFn: (params: { vinCode?: string; plate?: string }) =>
       getOrCreateVehicleRequest(undefined, params),
     onSuccess: (response) => {
-      navigate(`/cars/${response.data._id}`);
+      if (redirectTo === 'damage-assessment') {
+        navigate(`/damage-assessments/create?carId=${response.data._id}`);
+      } else {
+        navigate(`/cars/${response.data._id}`);
+      }
     },
     onError: () => {
       enqueueSnackbar('Error al obtener el vehículo', { variant: 'error' });
@@ -150,10 +166,6 @@ export const CreateDiagnosticModal = ({
     }
   };
 
-  const handleCreateManually = () => {
-    setIsManualMode(true);
-  };
-
   const handleBackToSearch = () => {
     setIsManualMode(false);
   };
@@ -208,7 +220,7 @@ export const CreateDiagnosticModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg sm:min-w-lg">
         <DialogHeader>
-          <DialogTitle>Crear Nuevo {createOnly ? 'Vehículo' : 'Diagnóstico'}</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="text-muted">
             {isManualMode
               ? 'Introduce los datos del vehículo manualmente'
@@ -515,16 +527,17 @@ export const CreateDiagnosticModal = ({
                 </TabsContent>
               </Tabs>
 
-              <div className="text-center">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="text-primary"
-                  onClick={handleCreateManually}
-                >
-                  <PlusIcon className="h-4 w-4" />O crear manualmente
-                </Button>
-              </div>
+              {allowManualCar && !isManualMode && (
+                <div className="my-4 flex justify-center">
+                  <button
+                    type="button"
+                    className="text-primary hover:text-primary cursor-pointer text-sm font-medium transition-colors hover:underline"
+                    onClick={() => setIsManualMode(true)}
+                  >
+                    + O crear manualmente
+                  </button>
+                </div>
+              )}
             </>
           )}
 
@@ -546,7 +559,7 @@ export const CreateDiagnosticModal = ({
                   : 'Crear Vehículo'
                 : isLoading
                   ? 'Comenzando...'
-                  : 'Comenzar Diagnóstico'}
+                  : submitButtonText}
             </Button>
           </DialogFooter>
         </form>

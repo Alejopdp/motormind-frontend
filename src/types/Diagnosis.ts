@@ -14,6 +14,7 @@ export type Diagnosis = {
     notes: string;
   };
   preliminary: {
+    moreReasonsRequestsQuantity: number;
     possibleReasons: {
       _id: string;
       title: string;
@@ -37,6 +38,7 @@ export type Diagnosis = {
           quality: string;
         },
       ];
+      partsDiagrams: DocumentLink[];
       laborHours: number;
     };
     confirmedFailures: [
@@ -86,4 +88,9 @@ export type Diagnosis = {
     avatar?: string;
   };
   markedAsRepairedBy?: string;
+};
+
+export type DocumentLink = {
+  label: string;
+  url: string;
 };

@@ -1,23 +1,24 @@
-import { useState } from 'react';
 import {
   BarChartIcon,
+  CarFrontIcon,
   CarIcon,
   ClipboardListIcon,
-  SettingsIcon,
+  FileTextIcon,
+  LineChartIcon,
   LogOutIcon,
   MenuIcon,
-  FileTextIcon,
+  SettingsIcon,
   TestTubeDiagonal,
-  LineChartIcon,
 } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/atoms/Avatar';
 import { Button } from '@/components/atoms/Button';
-import { cn } from '@/utils/cn';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/atoms/Dialog';
 import { useAuth } from '@/context/Auth.context';
 import { UserRole } from '@/types/User';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/atoms/Dialog';
+import { cn } from '@/utils/cn';
 import './styles.css';
 
 interface SidebarNavigationProps {
@@ -29,7 +30,10 @@ interface NavItem {
   label: string;
   href: string;
   roles?: UserRole[];
+  id?: string;
 }
+
+const ALLOWED_WORKSHOP_IDS_FOR_PERITAJES = ['67d9e39038fa908c6926d699', '682e84b407a8761675f03866'];
 
 export const Sidebar = ({ className }: SidebarNavigationProps) => {
   const { user, logout } = useAuth();
@@ -54,6 +58,13 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
       href: '/diagnoses',
     },
     {
+      id: 'peritajes',
+      icon: CarFrontIcon,
+      label: 'Peritajes',
+      href: '/damage-assessments',
+      roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
+    },
+    {
       icon: LineChartIcon,
       label: 'Métricas',
       href: '/metrics',
@@ -76,12 +87,30 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
   const renderNavItems = () => (
     <nav className="flex-1 sm:space-y-1">
       {navItems
-        .filter((item) => !item.roles || item.roles.includes(user.role))
+        .filter((item) => {
+          const passesRoleCheck = !item.roles || item.roles.includes(user.role);
+
+          if (item.id === 'peritajes') {
+            if (import.meta.env.MODE === 'development') {
+              return true;
+            }
+            if (import.meta.env.MODE === 'production') {
+              const isAllowedWorkshop = ALLOWED_WORKSHOP_IDS_FOR_PERITAJES.includes(
+                user.workshopId,
+              );
+              return passesRoleCheck && isAllowedWorkshop;
+            }
+            return false;
+          }
+          return passesRoleCheck;
+        })
         .map((item) => {
           const isActive =
             (item.href === '/' && currentPath === '/') ||
             (item.href === '/cars' && currentPath.startsWith('/cars')) ||
             (item.href === '/diagnoses' && currentPath.startsWith('/diagnoses')) ||
+            (item.href === '/damage-assessments' &&
+              currentPath.startsWith('/damage-assessments')) ||
             (item.href === '/metrics' && currentPath.startsWith('/metrics')) ||
             (item.href === '/audits/evaluations' &&
               currentPath.startsWith('/audits/evaluations')) ||
@@ -144,7 +173,6 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
       <div className="fixed top-[7px] left-4 z-50 block md:hidden">
         <Dialog open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <DialogTrigger asChild>
@@ -164,7 +192,6 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
         </Dialog>
       </div>
 
-      {/* Desktop Sidebar */}
       <div
         className={cn(
           'bg-background sticky top-0 hidden h-screen w-[220px] flex-shrink-0 flex-col px-3 py-4 md:flex lg:w-[280px]',

@@ -1,8 +1,8 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon } from 'lucide-react';
+import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, PlusIcon } from 'lucide-react';
 
 import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
@@ -19,19 +19,27 @@ import { Car } from '@/types/Car';
 import { Diagnosis } from '@/types/Diagnosis';
 import { ProbabilityLevel } from '@/types/Probability';
 import { ConfirmFaultModal } from './ConfirmFaultModal';
+import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
+import DetailsContainer from '@/components/atoms/DetailsContainer';
 
 const PreliminaryDiagnosis = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const queryClient = useQueryClient();
   const backQueryParam = searchParams.get('back');
   const [observations, setObservations] = useState('');
   const [obdCodes, setObdCodes] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoadingMorePossibleReasons, setIsLoadingMorePossibleReasons] = useState(false);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: createFinalReportRequest } = useApi<Diagnosis>(
     'post',
     '/cars/:carId/diagnosis/:diagnosisId/final',
+  );
+  const { execute: getMorePossibleReasons } = useApi<Diagnosis>(
+    'get',
+    '/diagnoses/:diagnosisId/more-possible-reasons',
   );
 
   const {
@@ -89,6 +97,8 @@ const PreliminaryDiagnosis = () => {
     },
   });
 
+  const carDescription = useCarPlateOrVin(diagnosis.car);
+
   if (isLoadingDiagnosis)
     return (
       <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
@@ -129,22 +139,65 @@ const PreliminaryDiagnosis = () => {
 
   const onBack = () => {
     if (backQueryParam === 'true') {
-      navigate(-1); // Go back to the previous page
+      navigate(-1);
     } else {
-      navigate(`/cars/${params.carId}`); // Go back to the route
+      navigate(`/cars/${params.carId}`);
     }
   };
 
+  const onGenerateMorePossibleReasons = async () => {
+    setIsLoadingMorePossibleReasons(true);
+    try {
+      const response = await getMorePossibleReasons(undefined, undefined, {
+        diagnosisId: params.diagnosisId as string,
+      });
+
+      if (response.status === 200 && response.data) {
+        queryClient.setQueryData(
+          ['getDiagnosisById', params.diagnosisId],
+          (oldData: { data: Diagnosis } | undefined) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                data: {
+                  ...oldData.data,
+                  preliminary: {
+                    ...oldData.data.preliminary,
+                    possibleReasons: response.data.preliminary.possibleReasons,
+                    moreReasonsRequestsQuantity:
+                      response.data.preliminary.moreReasonsRequestsQuantity ??
+                      oldData.data.preliminary.moreReasonsRequestsQuantity,
+                  },
+                },
+              };
+            }
+            return oldData;
+          },
+        );
+      } else {
+        enqueueSnackbar('Error al generar más posibles averías. Por favor, inténtalo de nuevo.', {
+          variant: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error en onGenerateMorePossibleReasons:', error);
+      enqueueSnackbar('Ocurrió un error inesperado al generar más averías.', {
+        variant: 'error',
+      });
+    }
+    setIsLoadingMorePossibleReasons(false);
+  };
+
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background min-h-screen pb-32 sm:pb-0">
       <HeaderPage
         onBack={onBack}
         data={{
           title: 'Informe Preliminar IA',
-          description: `Matricula: ${diagnosis.car?.plate || diagnosis.car?.vinCode}`,
+          description: carDescription,
         }}
       />
-      <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
+      <DetailsContainer>
         <VehicleInformation car={diagnosis.car as Car} editMode={false} minimized />
         <DiagnosticContextSection
           symptoms={symptom}
@@ -153,7 +206,6 @@ const PreliminaryDiagnosis = () => {
           answers={diagnosis.processedAnswers ?? ''}
         />
 
-        {/* AI Detected Faults */}
         <div className="space-y-2 sm:space-y-4">
           <div className="flex items-center gap-2">
             <div className="rounded-md bg-blue-100 p-2">
@@ -182,10 +234,9 @@ const PreliminaryDiagnosis = () => {
           </div>
         </div>
 
-        {/* OBD Codes Input */}
         <OBDCodeInput onChange={setObdCodes} disabled={isLoadingFinalReport} />
 
-        <div className="mb-20 space-y-1 sm:space-y-2">
+        <div className="space-y-1 sm:space-y-2">
           <p className="block text-sm font-medium sm:text-base">
             Observaciones Adicionales del Técnico{' '}
             <span className="text-muted font-normal">(Opcional)</span>
@@ -199,24 +250,51 @@ const PreliminaryDiagnosis = () => {
             disabled={isLoadingFinalReport}
           />
         </div>
-      </div>
+      </DetailsContainer>
 
-      <div className="fixed right-0 bottom-0 left-0 flex justify-between border-t border-gray-200 bg-white p-4">
-        <Button variant="ghost" onClick={() => navigate(-1)}>
+      <div className="fixed right-0 bottom-0 left-0 flex flex-col-reverse gap-3 border-t border-gray-200 bg-white p-4 sm:flex-row sm:justify-between">
+        <Button
+          variant="outline"
+          onClick={() => navigate(-1)}
+          className="sm:hover:text-primary w-full sm:w-auto sm:border-none sm:bg-transparent sm:shadow-none sm:hover:bg-transparent"
+          size="lg"
+        >
           <ArrowLeftIcon className="h-4 w-4" />
-          <span className="hidden sm:block">Volver</span>
+          <span className="ml-2 sm:block">Volver</span>
         </Button>
 
-        <div className="flex gap-3">
-          <Button onClick={onGenerateReport} disabled={isLoadingFinalReport}>
+        <div className="flex w-full sm:w-auto sm:gap-3">
+          {(!diagnosis.preliminary.moreReasonsRequestsQuantity ||
+            diagnosis.preliminary.moreReasonsRequestsQuantity < 3) && (
+            <Button
+              onClick={onGenerateMorePossibleReasons}
+              disabled={isLoadingMorePossibleReasons}
+              className="w-full sm:w-auto"
+              size="lg"
+              variant="outline"
+            >
+              <PlusIcon className="h-4 w-4" />
+              <span className="ml-2">Generar más posibles averías</span>
+            </Button>
+          )}
+
+          <Button
+            onClick={onGenerateReport}
+            disabled={isLoadingFinalReport}
+            className="w-full sm:w-auto"
+            size="lg"
+          >
             <FileTextIcon className="h-4 w-4" />
-            <span className="sm:hidden">Generar</span>
-            <span className="hidden sm:inline">Generar Informe Final</span>
+            <span className="ml-2">Generar Informe Final</span>
           </Button>
         </div>
       </div>
 
       <LoadingModal isOpen={isLoadingFinalReport} message="Generando informe final" />
+      <LoadingModal
+        isOpen={isLoadingMorePossibleReasons}
+        message="Generando más posibles averías"
+      />
       <ConfirmFaultModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

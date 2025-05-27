@@ -11,7 +11,8 @@ import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import { PlusIcon } from 'lucide-react';
-
+import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
+import DetailsContainer from '@/components/atoms/DetailsContainer';
 const CarDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
@@ -40,6 +41,8 @@ const CarDetails = () => {
     retry: 0,
   });
 
+  const carDescription = useCarPlateOrVin(car);
+
   if (isLoadingCar)
     return (
       <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
@@ -67,7 +70,7 @@ const CarDetails = () => {
         onBack={() => navigate('/cars')}
         data={{
           title: 'Detalles del Vehículo',
-          description: `Matricula: ${car.plate || car.vinCode}`,
+          description: carDescription,
         }}
         headerActions={
           <Button onClick={() => navigate(`/cars/${params.carId}/new-diagnosis`)}>
@@ -76,10 +79,10 @@ const CarDetails = () => {
           </Button>
         }
       />
-      <div className="mx-auto max-w-4xl space-y-4 px-4 py-3 sm:space-y-6 sm:px-6 sm:py-6">
+      <DetailsContainer>
         <VehicleInformation car={car} editMode={true} minimized={false} />
         <VehicleFaultsHistory carId={params.carId as string} />
-      </div>
+      </DetailsContainer>
     </div>
   );
 };

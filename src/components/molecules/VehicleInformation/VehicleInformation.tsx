@@ -46,7 +46,7 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({
               <FileSpreadsheet className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div>
-              <p className="text-muted text-xs sm:text-sm">Matrícula</p>
+              <p className="text-muted text-xs sm:text-sm">{car?.plate ? 'Matrícula' : 'VIN'}</p>
               <p className="text-sm font-medium sm:text-base">
                 {car ? car.plate || car.vinCode : '-'}
               </p>

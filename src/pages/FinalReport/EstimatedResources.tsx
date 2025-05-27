@@ -1,8 +1,22 @@
 import { BarChartIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/atoms/Button';
+import Spinner from '@/components/atoms/Spinner';
+import { useApi } from '@/hooks/useApi';
+import { DocumentLink } from '@/types/Diagnosis';
+import PartDiagramItem from '@/components/molecules/PartDiagramItem';
+import { useAuth } from '@/context/Auth.context';
 
-export const EstimatedResources = ({
-  estimatedResources,
-}: {
+const messages = [
+  'Buscando diagramas... esta operación puede tardar varios segundos',
+  'Accediendo a documentación técnica del fabricante...',
+  'Analizando la avería y localizando manuales relevantes...',
+  'Explorando secciones técnicas en busca de instrucciones de diagnóstico...',
+  'Preparando recursos visuales para reparar más rápido y mejor...',
+];
+
+type EstimatedResourcesProps = {
   estimatedResources: {
     parts: [
       {
@@ -12,8 +26,63 @@ export const EstimatedResources = ({
       },
     ];
     laborHours: number;
+    partsDiagrams: DocumentLink[];
   };
-}) => {
+  diagnosisId: string;
+};
+
+export const EstimatedResources = ({
+  estimatedResources,
+  diagnosisId,
+}: EstimatedResourcesProps) => {
+  const [diagramResults, setDiagramResults] = useState<DocumentLink[] | null>(null);
+  const { user } = useAuth();
+  const { execute: getDiagrams } = useApi<DocumentLink[]>(
+    'get',
+    `/diagnoses/${diagnosisId}/failure-diagrams`,
+  );
+  const { mutate: fetchDiagrams, isPending } = useMutation({
+    mutationFn: async () => {
+      setDiagramResults([]);
+      const res = await getDiagrams();
+
+      if (res.status !== 200) throw new Error('No se pudo buscar diagramas');
+      const data = res.data;
+      return (
+        data.map((doc: DocumentLink) => ({
+          label: doc.label,
+          url: doc.url,
+        })) || []
+      );
+    },
+    onSuccess: (results) => {
+      setDiagramResults(results);
+    },
+    onError: (error) => {
+      console.error('Error fetching diagrams:', error);
+      setDiagramResults([]);
+    },
+    onSettled: () => {},
+  });
+
+  const hasSearchedDiagrams =
+    diagramResults !== null || estimatedResources.partsDiagrams !== undefined;
+  const partsDiagrams = estimatedResources.partsDiagrams ?? diagramResults ?? [];
+
+  const [currentMessage, setCurrentMessage] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPending) {
+      interval = setInterval(() => {
+        setCurrentMessage((prev) => (prev + 1) % messages.length);
+      }, 10000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPending]);
+
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center gap-2">
@@ -49,6 +118,51 @@ export const EstimatedResources = ({
             Incluye diagnóstico, desmontaje, reemplazo y pruebas finales.
           </p>
         </div>
+      </div>
+
+      <div className="mt-8">
+        {user.hasVendorResources && (
+          <div style={{ minHeight: 40 }} className="relative">
+            <Button
+              variant="outline"
+              onClick={() => fetchDiagrams()}
+              disabled={isPending}
+              className="mb-2 min-h-12 w-full"
+              style={{ display: hasSearchedDiagrams || isPending ? 'none' : 'block' }}
+            >
+              Buscar diagramas
+            </Button>
+            <div className="absolute inset-x-0 top-0">
+              {isPending && (
+                <div className="flex h-12 flex-col items-center justify-center gap-2">
+                  <Spinner className="h-5 w-5" label={messages[currentMessage]} />
+                </div>
+              )}
+              {!isPending && hasSearchedDiagrams && partsDiagrams?.length === 0 && (
+                <div className="text-xs text-gray-500 italic" style={{ fontSize: 14 }}>
+                  No encontramos manuales para este vehículo.
+                </div>
+              )}
+            </div>
+
+            {!isPending && hasSearchedDiagrams && partsDiagrams?.length > 0 && (
+              <>
+                <h3 className="mb-3 text-sm font-medium sm:text-base">Diagramas de las piezas</h3>
+                <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {partsDiagrams.map((result) => (
+                    <PartDiagramItem
+                      key={result.label}
+                      title={result.label}
+                      onClick={() => {
+                        window.open(result.url, '_blank');
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

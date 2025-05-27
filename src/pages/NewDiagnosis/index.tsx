@@ -100,7 +100,7 @@ const NewDiagnosis = () => {
         onBack={() => navigate(`/cars/${params.carId}`)}
         data={{
           title: 'Nuevo diagnóstico',
-          description: `Matricula: ${car.plate || car.vinCode}`,
+          description: car.plate ? `Matricula: ${car.plate}` : `Vin: ${car.vinCode}`,
         }}
       />
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-3 sm:space-y-6 sm:px-6 sm:py-6">
