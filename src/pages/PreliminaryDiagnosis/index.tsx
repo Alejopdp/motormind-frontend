@@ -189,7 +189,7 @@ const PreliminaryDiagnosis = () => {
   };
 
   return (
-    <div className="bg-background min-h-screen pb-32 sm:pb-0">
+    <div className="bg-background min-h-screen pb-56 sm:pb-24">
       <HeaderPage
         onBack={onBack}
         data={{
