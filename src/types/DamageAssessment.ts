@@ -31,6 +31,7 @@ export interface DamageAssessment {
     prices?: string;
     createdBy: string;
     damages: Damage[];
+    workshopId: string;
     createdAt: string;
     updatedAt: string;
 } 
