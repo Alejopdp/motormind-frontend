@@ -98,7 +98,7 @@ export const PrimaryRepairSection = ({
 
               <ResourceLinkItems resources={fault.resources} />
               <SearchResourceButton
-                buttonText="Buscar manuales de reparación (Autodoc)"
+                buttonText="Buscar más manuales de reparación"
                 resourceName="manuales de reparación"
                 loadingMessages={manualLoadingMessages}
                 onClick={() => fetchRepairManualsMutation.mutate()}
@@ -109,6 +109,7 @@ export const PrimaryRepairSection = ({
                     key={item.label + item.url}
                     title={item.label}
                     onClick={() => window.open(item.url, '_blank')}
+                    type={item.type}
                   />
                 )}
               />

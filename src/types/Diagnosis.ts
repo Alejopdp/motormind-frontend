@@ -88,4 +88,5 @@ export type Diagnosis = {
 export type DocumentLink = {
   label: string;
   url: string;
+  type: 'video' | 'document';
 };
