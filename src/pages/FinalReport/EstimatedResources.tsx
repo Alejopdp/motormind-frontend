@@ -108,6 +108,7 @@ export const EstimatedResources = ({
             <PartDiagramItem
               key={item.label + item.url}
               title={item.label}
+              type="document"
               onClick={() => window.open(item.url, '_blank')}
             />
           )}
