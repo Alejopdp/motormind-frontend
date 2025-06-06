@@ -62,6 +62,7 @@ const DamageCard = ({ damage }: { damage: Damage }) => {
               <PartDiagramItem
                 key={index}
                 title={resource.label}
+                type="document"
                 onClick={() => window.open(resource.url, '_blank')}
               />
             ))}
