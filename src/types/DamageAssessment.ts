@@ -13,12 +13,14 @@ export enum DamageSeverity {
 }
 
 export interface Damage {
+    _id?: string;
     area: string;
     subarea: string;
     description: string;
     type: DamageType;
     severity: DamageSeverity;
     resources: DocumentLink[];
+    isConfirmed: boolean | null;
 }
 
 export interface DamageAssessment {
@@ -34,4 +36,5 @@ export interface DamageAssessment {
     workshopId: string;
     createdAt: string;
     updatedAt: string;
+    state: 'PENDING_REVIEW' | 'DAMAGES_CONFIRMED';
 } 
