@@ -1,5 +1,6 @@
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useApi } from '@/hooks/useApi';
+import { useState } from 'react';
 import { DamageAssessment, Damage } from '@/types/DamageAssessment';
 import Spinner from '@/components/atoms/Spinner';
 import { ImageIcon } from 'lucide-react';
@@ -15,9 +16,6 @@ import { ImageModal } from '@/components/molecules/ImageModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import DamageCard from '@/components/molecules/DamageCard/DamageCard';
-import { useDamageAssessmentDetailPage } from '@/hooks/useDamageAssessmentDetail.hook';
-import { CostBreakdown } from '@/components/molecules/CostBreakdown/CostBreakdown';
-import { useState } from 'react';
 
 const DamageAssessmentDetail = () => {
   const { user } = useAuth();
