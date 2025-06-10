@@ -1,15 +1,38 @@
 import { Car } from './Car';
 import { DocumentLink } from './Diagnosis';
 
+export enum DamageSeverity {
+    SEV1 = 'SEV1',
+    SEV2 = 'SEV2',
+    SEV3 = 'SEV3',
+    SEV4 = 'SEV4',
+    SEV5 = 'SEV5',
+}
+
+export enum DamageAction {
+    POLISH = 'POLISH',
+    RENOVATE = 'RENOVATE',
+    QUICK_REPAIR = 'QUICK_REPAIR',
+    PAINT = 'PAINT',
+    REPAIR_AND_PAINT = 'REPAIR_AND_PAINT',
+    REPLACE = 'REPLACE',
+}
+
 export enum DamageType {
     SCRATCH = 'scratch',
     DENT = 'dent',
 }
 
-export enum DamageSeverity {
-    LOW = 'low',
-    MEDIUM = 'medium',
-    HIGH = 'high'
+export interface SparePart {
+    description: string;
+    reference: string;
+    quantity: number;
+    price: number;
+}
+
+export interface AdditionalAction {
+    description: string;
+    time: number; // in minutes
 }
 
 export interface Damage {
@@ -21,6 +44,10 @@ export interface Damage {
     severity: DamageSeverity;
     resources: DocumentLink[];
     isConfirmed: boolean | null;
+    action?: DamageAction;
+    spareParts?: SparePart[];
+    additionalActions?: AdditionalAction[];
+    notes?: string;
 }
 
 export interface DamageAssessment {

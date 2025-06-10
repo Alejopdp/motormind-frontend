@@ -1,7 +1,7 @@
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { useApi } from '@/hooks/useApi';
 import { useState } from 'react';
-import { DamageAssessment, Damage, DamageSeverity, DamageType } from '@/types/DamageAssessment';
+import { DamageAssessment, Damage } from '@/types/DamageAssessment';
 import Spinner from '@/components/atoms/Spinner';
 import { ImageIcon } from 'lucide-react';
 import { UserRole } from '@/types/User';
@@ -10,72 +10,13 @@ import VehicleInformation from '@/components/molecules/VehicleInformation/Vehicl
 import HeaderPage from '@/components/molecules/HeaderPage';
 import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
 import DetailsContainer from '@/components/atoms/DetailsContainer';
-import PartDiagramItem from '@/components/molecules/PartDiagramItem';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { ImageCarousel } from '@/components/molecules/ImageCarousel';
 import { DamageAssessmentBottomBar } from './components/DamageAssessmentBottomBar';
 import { ConfirmDamagesModal } from './components/ConfirmDamagesModal';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
-
-const severityLabelMap = {
-  [DamageSeverity.HIGH]: 'Alto',
-  [DamageSeverity.MEDIUM]: 'Medio',
-  [DamageSeverity.LOW]: 'Bajo',
-};
-
-const typeLabelMap = {
-  [DamageType.DENT]: 'Abolladura',
-  [DamageType.SCRATCH]: 'Rayón',
-};
-
-const DamageCard = ({ damage }: { damage: Damage }) => {
-  const isMobile = useIsMobile();
-
-  const getSeverityColor = (severity: DamageSeverity) => {
-    switch (severity) {
-      case DamageSeverity.HIGH:
-        return 'bg-red-100 text-red-800 border-red-200';
-      case DamageSeverity.MEDIUM:
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      case DamageSeverity.LOW:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default:
-        return 'bg-gray-100 border-gray-200';
-    }
-  };
-  return (
-    <div
-      className={`mb-4 p-4 ${isMobile ? 'rounded-lg bg-white shadow-md' : 'rounded border border-gray-100 bg-white shadow-sm'}`}
-    >
-      <div className="flex items-center justify-between">
-        <span className="font-semibold text-gray-700">
-          Área: {damage.area} - {damage.subarea}
-        </span>
-        <span className={`rounded border px-2 py-1 text-xs ${getSeverityColor(damage.severity)}`}>
-          {severityLabelMap[damage.severity]}
-        </span>
-      </div>
-      <div className="font-medium text-gray-600">Tipo: {typeLabelMap[damage.type]}</div>
-      <div className="mt-2 text-gray-600 italic">{damage.description}</div>
-      {damage.resources && damage.resources.length > 0 && (
-        <div className="mt-3">
-          <h4 className="text-sm font-semibold text-gray-700">Tiempos de Baremo:</h4>
-          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {damage.resources.map((resource, index) => (
-              <PartDiagramItem
-                key={index}
-                title={resource.label}
-                type="document"
-                onClick={() => window.open(resource.url, '_blank')}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+import DamageCard from '@/components/molecules/DamageCard/DamageCard';
 
 const DamageAssessmentDetail = () => {
   const { damageAssessmentId } = useParams();
