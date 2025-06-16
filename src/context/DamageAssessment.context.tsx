@@ -25,7 +25,6 @@ interface DamageAssessmentContextState {
   // Estado de edición
   editingDamageId: string | null;
   isUpdating: boolean;
-  isDeleting: boolean;
 }
 
 interface DamageAssessmentContextType {
@@ -47,9 +46,6 @@ interface DamageAssessmentContextType {
   updateDamage: (damageId: string, damageData: Partial<Damage>) => Promise<void>;
   deleteDamage: (damageId: string) => Promise<void>;
 
-  // Método para actualizar notas del assessment
-  updateDamageAssessmentNotes: (notes: string) => Promise<void>;
-
   // Estados de edición
   startEditingDamage: (damageId: string) => void;
   stopEditingDamage: () => void;
@@ -63,10 +59,9 @@ const initialState: DamageAssessmentContextState = {
   isLoading: false,
   damageAssessment: null,
   error: null,
-  creationData: { images: [], details: '', insuranceCompany: '', claimNumber: '' },
+  creationData: { images: [], details: '' },
   editingDamageId: null,
   isUpdating: false,
-  isDeleting: false,
 };
 
 const DamageAssessmentContext = createContext<DamageAssessmentContextType | undefined>(undefined);
@@ -88,20 +83,6 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
     setState((prevState) => ({
       ...prevState,
       creationData: { ...prevState.creationData, details },
-    }));
-  }, []);
-
-  const setInsuranceCompany = useCallback((insuranceCompany: string) => {
-    setState((prevState) => ({
-      ...prevState,
-      creationData: { ...prevState.creationData, insuranceCompany },
-    }));
-  }, []);
-
-  const setClaimNumber = useCallback((claimNumber: string) => {
-    setState((prevState) => ({
-      ...prevState,
-      creationData: { ...prevState.creationData, claimNumber },
     }));
   }, []);
 
@@ -171,8 +152,6 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
           damageData,
         );
 
-        console.log('updatedAssessment', updatedAssessment);
-
         setState((prevState) => ({
           ...prevState,
           damageAssessment: updatedAssessment,
@@ -206,7 +185,7 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
 
       setState((prevState) => ({
         ...prevState,
-        isDeleting: true,
+        isUpdating: true,
       }));
 
       try {
@@ -218,7 +197,7 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
         setState((prevState) => ({
           ...prevState,
           damageAssessment: updatedAssessment,
-          isDeleting: false,
+          isUpdating: false,
           editingDamageId: null,
         }));
 
@@ -232,7 +211,7 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
       } catch {
         setState((prevState) => ({
           ...prevState,
-          isDeleting: false,
+          isUpdating: false,
         }));
 
         enqueueSnackbar('Error al eliminar el daño', { variant: 'error' });
@@ -271,58 +250,12 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
     [state.editingDamageId],
   );
 
-  // Método para actualizar notas del assessment
-  const updateDamageAssessmentNotes = useCallback(
-    async (notes: string) => {
-      if (!state.damageAssessment?._id) return;
-
-      setState((prevState) => ({
-        ...prevState,
-        isUpdating: true,
-      }));
-
-      try {
-        const updatedAssessment = await apiService.updateDamageAssessmentNotes(
-          state.damageAssessment._id,
-          notes,
-        );
-
-        console.log('updatedAssessment', updatedAssessment);
-
-        setState((prevState) => ({
-          ...prevState,
-          damageAssessment: updatedAssessment,
-          isUpdating: false,
-          editingDamageId: null,
-        }));
-
-        // Invalidar queries relacionadas
-        queryClient.invalidateQueries({
-          queryKey: ['damageAssessment', state.damageAssessment._id],
-        });
-        queryClient.invalidateQueries({ queryKey: ['damageAssessments'] });
-
-        enqueueSnackbar('Notas actualizadas correctamente', { variant: 'success' });
-      } catch {
-        setState((prevState) => ({
-          ...prevState,
-          isUpdating: false,
-        }));
-
-        enqueueSnackbar('Error al actualizar las notas', { variant: 'error' });
-      }
-    },
-    [apiService, state.damageAssessment?._id, queryClient],
-  );
-
   const contextValue: DamageAssessmentContextType = {
     state,
 
     // Métodos de creación (compatibilidad)
     setImages,
     setDetails,
-    setInsuranceCompany,
-    setClaimNumber,
     reset,
 
     // Métodos del damage assessment completo
@@ -332,9 +265,6 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
     // Métodos de edición
     updateDamage,
     deleteDamage,
-
-    // Método para actualizar notas del assessment
-    updateDamageAssessmentNotes,
 
     // Estados de edición
     startEditingDamage,
@@ -363,16 +293,9 @@ export const useDamageAssessmentCreation = () => {
   const ctx = useDamageAssessment();
 
   return {
-    data: ctx.state.creationData || {
-      images: [],
-      details: '',
-      insuranceCompany: '',
-      claimNumber: '',
-    },
+    data: ctx.state.creationData,
     setImages: ctx.setImages,
     setDetails: ctx.setDetails,
-    setInsuranceCompany: ctx.setInsuranceCompany,
-    setClaimNumber: ctx.setClaimNumber,
     reset: ctx.reset,
   };
 };
@@ -386,12 +309,10 @@ export const useDamageAssessmentDetail = () => {
     isLoading: ctx.state.isLoading,
     error: ctx.state.error,
     isUpdating: ctx.state.isUpdating,
-    isDeleting: ctx.state.isDeleting,
     loadDamageAssessment: ctx.loadDamageAssessment,
     refreshDamageAssessment: ctx.refreshDamageAssessment,
     updateDamage: ctx.updateDamage,
     deleteDamage: ctx.deleteDamage,
-    updateDamageAssessmentNotes: ctx.updateDamageAssessmentNotes,
     startEditingDamage: ctx.startEditingDamage,
     stopEditingDamage: ctx.stopEditingDamage,
     getDamageById: ctx.getDamageById,
