@@ -16,14 +16,14 @@ import { ImageModal } from '@/components/molecules/ImageModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import DamageCard from '@/components/molecules/DamageCard/DamageCard';
+import { ApiService } from '@/service/api.service';
 
 const DamageAssessmentDetail = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
-  const [imageModalOpen, setImageModalOpen] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const apiService = ApiService.getInstance();
 
   // Hook personalizado que maneja toda la lógica del DamageAssessment
   const {
@@ -63,6 +63,36 @@ const DamageAssessmentDetail = () => {
     },
     onError: () => {
       enqueueSnackbar('Error al confirmar los daños. Por favor, intente de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
+
+  const { mutate: updateDamageMutation } = useMutation({
+    mutationFn: ({ damageId, damageData }: { damageId: string; damageData: Partial<Damage> }) => {
+      return apiService.updateDamage(damageAssessmentId!, damageId, damageData);
+    },
+    onSuccess: () => {
+      enqueueSnackbar('Daño actualizado correctamente.', { variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['damageAssessment', damageAssessmentId] });
+    },
+    onError: () => {
+      enqueueSnackbar('Error al actualizar el daño. Por favor, intente de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
+
+  const { mutate: deleteDamageMutation } = useMutation({
+    mutationFn: (damageId: string) => {
+      return apiService.deleteDamage(damageAssessmentId!, damageId);
+    },
+    onSuccess: () => {
+      enqueueSnackbar('Daño eliminado correctamente.', { variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['damageAssessment', damageAssessmentId] });
+    },
+    onError: () => {
+      enqueueSnackbar('Error al eliminar el daño. Por favor, intente de nuevo.', {
         variant: 'error',
       });
     },
@@ -112,17 +142,20 @@ const DamageAssessmentDetail = () => {
     }
   };
 
+  const handleUpdateDamage = (updatedDamage: Damage) => {
+    if (updatedDamage._id) {
+      updateDamageMutation({
+        damageId: updatedDamage._id,
+        damageData: updatedDamage,
+      });
+    }
+  };
+
   const handleDeleteDamage = (damageId: string) => {
-    deleteDamage(damageId);
+    deleteDamageMutation(damageId);
   };
 
-  const handleConfirmDamages = () => {
-    confirmDamagesMutation();
-  };
-
-  const handleViewReport = () => {
-    navigate(`/damage-assessments/${damageAssessmentId}/report`);
-  };
+  const isEditable = state !== 'DAMAGES_CONFIRMED';
 
   return (
     <div className="bg-background min-h-screen w-full">
@@ -220,16 +253,16 @@ const DamageAssessmentDetail = () => {
                   />
                 ))}
               </div>
-
-              {/* Información de fecha de creación */}
-              {!isMobile && (
-                <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
-                  <span className="text-xs text-gray-400">
-                    Creado: {new Date(createdAt).toLocaleString()}
-                  </span>
-                </div>
-              )}
-            </div>
+            )}
+            {damagesToShow.map((damage, idx) => (
+              <DamageCard
+                key={damage._id || idx}
+                damage={damage}
+                onUpdateDamage={handleUpdateDamage}
+                onDeleteDamage={handleDeleteDamage}
+                isEditable={isEditable}
+              />
+            ))}
           </div>
 
           {/* Desglose de costes - Solo en desktop */}
