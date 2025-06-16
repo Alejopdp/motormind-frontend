@@ -293,7 +293,7 @@ export const useDamageAssessmentCreation = () => {
   const ctx = useDamageAssessment();
 
   return {
-    data: ctx.state.creationData,
+    data: ctx.state.creationData || { images: [], details: '' },
     setImages: ctx.setImages,
     setDetails: ctx.setDetails,
     reset: ctx.reset,

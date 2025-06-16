@@ -35,9 +35,6 @@ const CreateDamageAssessment = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { data, setImages, setDetails, reset } = useDamageAssessmentCreation();
-  // Obtener datos del siniestro desde el contexto
-  const { insuranceCompany, claimNumber } = data;
-
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
   const { execute: createDamageAssessment } = useApi<{ _id: string }>(
     'post',
