@@ -12,18 +12,21 @@ import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
 import DetailsContainer from '@/components/atoms/DetailsContainer';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { ImageCarousel } from '@/components/molecules/ImageCarousel';
-import { ImageModal } from '@/components/molecules/ImageModal';
+import { DamageAssessmentBottomBar } from './components/DamageAssessmentBottomBar';
+import { ConfirmDamagesModal } from './components/ConfirmDamagesModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import DamageCard from '@/components/molecules/DamageCard/DamageCard';
-import { ApiService } from '@/service/api.service';
+import { useDamageAssessmentDetailPage } from '@/hooks/useDamageAssessmentDetail.hook';
 
 const DamageAssessmentDetail = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
-  const apiService = ApiService.getInstance();
+
+  // Estado local solo para el modal de confirmación
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   // Hook personalizado que maneja toda la lógica del DamageAssessment
   const {
@@ -36,11 +39,10 @@ const DamageAssessmentDetail = () => {
     isEditable,
     updateDamage,
     deleteDamage,
-    updateDamageAssessmentNotes,
     damageAssessmentId,
   } = useDamageAssessmentDetailPage();
 
-  // Lógica de confirmación de daños
+  // Solo mantenemos la lógica específica para confirmación de daños
   const { execute: confirmDamagesRequest } = useApi<DamageAssessment>(
     'post',
     `/damage-assessments/${damageAssessmentId}/confirm-damages`,
@@ -63,36 +65,6 @@ const DamageAssessmentDetail = () => {
     },
     onError: () => {
       enqueueSnackbar('Error al confirmar los daños. Por favor, intente de nuevo.', {
-        variant: 'error',
-      });
-    },
-  });
-
-  const { mutate: updateDamageMutation } = useMutation({
-    mutationFn: ({ damageId, damageData }: { damageId: string; damageData: Partial<Damage> }) => {
-      return apiService.updateDamage(damageAssessmentId!, damageId, damageData);
-    },
-    onSuccess: () => {
-      enqueueSnackbar('Daño actualizado correctamente.', { variant: 'success' });
-      queryClient.invalidateQueries({ queryKey: ['damageAssessment', damageAssessmentId] });
-    },
-    onError: () => {
-      enqueueSnackbar('Error al actualizar el daño. Por favor, intente de nuevo.', {
-        variant: 'error',
-      });
-    },
-  });
-
-  const { mutate: deleteDamageMutation } = useMutation({
-    mutationFn: (damageId: string) => {
-      return apiService.deleteDamage(damageAssessmentId!, damageId);
-    },
-    onSuccess: () => {
-      enqueueSnackbar('Daño eliminado correctamente.', { variant: 'success' });
-      queryClient.invalidateQueries({ queryKey: ['damageAssessment', damageAssessmentId] });
-    },
-    onError: () => {
-      enqueueSnackbar('Error al eliminar el daño. Por favor, intente de nuevo.', {
         variant: 'error',
       });
     },
@@ -144,18 +116,13 @@ const DamageAssessmentDetail = () => {
 
   const handleUpdateDamage = (updatedDamage: Damage) => {
     if (updatedDamage._id) {
-      updateDamageMutation({
-        damageId: updatedDamage._id,
-        damageData: updatedDamage,
-      });
+      updateDamage(updatedDamage._id, updatedDamage);
     }
   };
 
   const handleDeleteDamage = (damageId: string) => {
-    deleteDamageMutation(damageId);
+    deleteDamage(damageId);
   };
-
-  const isEditable = state !== 'DAMAGES_CONFIRMED';
 
   return (
     <div className="bg-background min-h-screen w-full">
@@ -174,32 +141,35 @@ const DamageAssessmentDetail = () => {
           <div className={`${isMobile ? '' : 'min-w-0 flex-1'}`}>
             <VehicleInformation car={car} editMode={false} />
 
-            <div
-              className={`mt-4 ${isMobile ? 'bg-transparent' : 'rounded-lg bg-white p-6 shadow-md'}`}
-            >
-              {/* Información del peritaje */}
-              <div className={`${isMobile ? 'mb-4 rounded-lg bg-white p-4 shadow-md' : ''}`}>
-                <h2 className={`mb-4 text-lg font-semibold ${isMobile ? 'px-0 pt-0' : ''}`}>
-                  Detalles del peritaje
-                </h2>
-                <div className="mb-4 min-h-[1.5em] text-xs text-gray-700">
-                  {description || <span className="text-gray-400 italic">Sin descripción</span>}
-                </div>
-                <div className="mb-4 flex items-center gap-2 text-xs text-gray-500">
-                  <ImageIcon className="h-4 w-4" />
-                  {images.length} imagen{images.length === 1 ? '' : 'es'}
-                </div>
+        <div
+          className={`mt-4 ${isMobile ? 'bg-transparent' : 'rounded-lg bg-white p-6 shadow-md'}`}
+        >
+          {/* Información del peritaje */}
+          <div className={`${isMobile ? 'mb-4 rounded-lg bg-white p-4 shadow-md' : ''}`}>
+            <h2 className={`mb-4 text-lg font-semibold ${isMobile ? 'px-0 pt-0' : ''}`}>
+              Detalles del peritaje
+            </h2>
+            <div className="mb-4 min-h-[1.5em] text-xs text-gray-700">
+              {description || <span className="text-gray-400 italic">Sin descripción</span>}
+            </div>
+            <div className="mb-4 flex items-center gap-2 text-xs text-gray-500">
+              <ImageIcon className="h-4 w-4" />
+              {images.length} imagen{images.length === 1 ? '' : 'es'}
+            </div>
 
-                {/* Carousel de imágenes */}
-                {images.length > 0 &&
-                  (isMobile ? (
-                    <ImageCarousel
-                      images={images}
-                      showDeleteButton={false}
-                      onImageClick={(index) => {
-                        setImageModalOpen(true);
-                        setSelectedImageIndex(index);
-                      }}
+            {/* Carousel de imágenes */}
+            {images.length > 0 &&
+              (isMobile ? (
+                <ImageCarousel images={images} showDeleteButton={false} />
+              ) : (
+                <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  {images.map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={img}
+                      alt={`img-${idx}`}
+                      className="aspect-square w-full cursor-pointer rounded border border-gray-200 object-cover transition-opacity hover:opacity-80"
+                      onClick={() => console.log('Abrir imagen en modal: ', img)}
                     />
                   ) : (
                     <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -219,41 +189,28 @@ const DamageAssessmentDetail = () => {
                   ))}
               </div>
 
-              {/* Lista de daños */}
-              <div className={`${isMobile ? '' : 'mt-6'}`}>
-                <h3
-                  className={`text-base font-semibold ${isMobile ? 'bg-gray-50 px-4 py-3' : 'mb-2'}`}
-                >
-                  {state === 'DAMAGES_CONFIRMED' ? 'Daños Confirmados' : 'Daños detectados'}
-                </h3>
+          {/* Lista de daños */}
+          <div className={`${isMobile ? '' : 'mt-6'}`}>
+            <h3 className={`text-base font-semibold ${isMobile ? 'bg-gray-50 px-4 py-3' : 'mb-2'}`}>
+              {state === 'DAMAGES_CONFIRMED' ? 'Daños Confirmados' : 'Daños detectados'}
+            </h3>
 
-                {/* Indicador de actualización */}
-                {isUpdating && (
-                  <div className="mb-4 flex items-center gap-2 text-sm text-blue-600">
-                    <Spinner className="h-4 w-4" label="" />
-                    Actualizando...
-                  </div>
-                )}
-
-                {damagesToShow.length === 0 && (
-                  <div className={`text-xs text-gray-400 italic ${isMobile ? 'bg-white p-4' : ''}`}>
-                    {state === 'DAMAGES_CONFIRMED'
-                      ? 'No se confirmaron daños'
-                      : 'No se detectaron daños'}
-                  </div>
-                )}
-
-                {damagesToShow.map((damage, idx) => (
-                  <DamageCard
-                    key={damage._id || idx}
-                    damage={damage}
-                    onUpdateDamage={handleUpdateDamage}
-                    onDeleteDamage={handleDeleteDamage}
-                    isEditable={isEditable}
-                  />
-                ))}
+            {/* Indicador de actualización */}
+            {isUpdating && (
+              <div className="mb-4 flex items-center gap-2 text-sm text-blue-600">
+                <Spinner className="h-4 w-4" label="" />
+                Actualizando...
               </div>
             )}
+
+            {damagesToShow.length === 0 && (
+              <div className={`text-xs text-gray-400 italic ${isMobile ? 'bg-white p-4' : ''}`}>
+                {state === 'DAMAGES_CONFIRMED'
+                  ? 'No se confirmaron daños'
+                  : 'No se detectaron daños'}
+              </div>
+            )}
+
             {damagesToShow.map((damage, idx) => (
               <DamageCard
                 key={damage._id || idx}
@@ -265,7 +222,7 @@ const DamageAssessmentDetail = () => {
             ))}
           </div>
 
-          {/* Desglose de costes - Solo en desktop */}
+          {/* Información de fecha de creación */}
           {!isMobile && (
             <div className="flex-shrink-0">
               <CostBreakdown
@@ -303,14 +260,23 @@ const DamageAssessmentDetail = () => {
         )}
       </DetailsContainer>
 
-      {imageModalOpen && (
-        <ImageModal
-          isOpen={imageModalOpen}
-          onClose={() => setImageModalOpen(false)}
-          images={images}
-          initialIndex={selectedImageIndex}
+      {/* Bottom bar para confirmación de daños */}
+      {state !== 'DAMAGES_CONFIRMED' && (
+        <DamageAssessmentBottomBar
+          onConfirm={() => setIsConfirmModalOpen(true)}
+          isLoading={isConfirmingDamages}
+          isDisabled={damages.length === 0}
         />
       )}
+
+      {/* Modal de confirmación */}
+      <ConfirmDamagesModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => (isConfirmingDamages ? null : setIsConfirmModalOpen(false))}
+        onConfirm={handleConfirmDamages}
+        damages={damages}
+        isLoading={isConfirmingDamages}
+      />
     </div>
   );
 };

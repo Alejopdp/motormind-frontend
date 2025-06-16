@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Cog, Plus, X } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 import {
@@ -8,31 +10,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/atoms/Table';
+import { SparePart } from '@/types/DamageAssessment';
 import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
-import { SparePart, Damage } from '@/types/DamageAssessment';
-import { Cog, Plus, X } from 'lucide-react';
-import clsx from 'clsx';
 
 interface DamageSparePartsTableProps {
   damageId: string;
   isEditing?: boolean;
-  editFormData?: Damage;
-  onUpdateField?: <K extends keyof Damage>(field: K, value: Damage[K]) => void;
-  validationErrors?: Record<string, string>;
-  setValidationErrors?: (
-    errors: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>),
-  ) => void;
 }
 
 export const DamageSparePartsTable = ({
   damageId,
   isEditing = false,
-  editFormData,
-  onUpdateField,
-  validationErrors,
-  setValidationErrors,
 }: DamageSparePartsTableProps) => {
-  const { getDamageById } = useDamageAssessmentDetail();
+  const { getDamageById, updateDamage } = useDamageAssessmentDetail();
 
   const damage = getDamageById(damageId);
 
@@ -40,13 +30,8 @@ export const DamageSparePartsTable = ({
     return <div className="py-4 text-center text-sm text-gray-500">Daño no encontrado</div>;
   }
 
-  // Usar datos de edición si están disponibles, sino los datos originales
-  const spareParts =
-    isEditing && editFormData ? editFormData.spareParts || [] : damage.spareParts || [];
-  const totalSparePartsCost = spareParts.reduce(
-    (acc: number, part: SparePart) => acc + part.price * part.quantity,
-    0,
-  );
+  const spareParts = damage.spareParts || [];
+  const totalSparePartsCost = spareParts.reduce((acc, part) => acc + part.price * part.quantity, 0);
 
   const updateSparePart = <K extends keyof SparePart>(
     index: number,
@@ -55,18 +40,7 @@ export const DamageSparePartsTable = ({
   ) => {
     const updatedParts = [...spareParts];
     updatedParts[index] = { ...updatedParts[index], [field]: value };
-
-    if (onUpdateField) {
-      onUpdateField('spareParts', updatedParts);
-    }
-
-    // Limpiar errores de validación cuando el usuario edite
-    if (setValidationErrors && validationErrors) {
-      const errorKey = `sparePart_${index}_${field}`;
-      if (validationErrors[errorKey]) {
-        setValidationErrors((prev) => ({ ...prev, [errorKey]: '' }));
-      }
-    }
+    updateDamage(damageId, { spareParts: updatedParts });
   };
 
   const addSparePart = () => {
@@ -76,18 +50,12 @@ export const DamageSparePartsTable = ({
       quantity: 1,
       price: 0,
     };
-
-    if (onUpdateField) {
-      onUpdateField('spareParts', [...spareParts, newPart]);
-    }
+    updateDamage(damageId, { spareParts: [...spareParts, newPart] });
   };
 
   const removeSparePart = (index: number) => {
-    const updatedParts = spareParts.filter((_: SparePart, i: number) => i !== index);
-
-    if (onUpdateField) {
-      onUpdateField('spareParts', updatedParts);
-    }
+    const updatedParts = spareParts.filter((_, i) => i !== index);
+    updateDamage(damageId, { spareParts: updatedParts });
   };
 
   return (
@@ -117,7 +85,7 @@ export const DamageSparePartsTable = ({
           </p>
         </div>
       ) : spareParts.length === 0 && !isEditing ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-6">
           <p className="text-center text-sm text-gray-500 italic">
             No hay piezas de recambio definidas
           </p>
@@ -151,23 +119,12 @@ export const DamageSparePartsTable = ({
                   <TableRow key={index} className="border-t border-gray-100 hover:bg-transparent">
                     <TableCell className="max-w-0">
                       {isEditing ? (
-                        <div className="relative">
-                          <Input
-                            value={part.description}
-                            onChange={(e) => updateSparePart(index, 'description', e.target.value)}
-                            className={clsx(
-                              'w-full text-sm',
-                              validationErrors?.[`sparePart_${index}_description`] &&
-                                'border-red-500 focus:border-red-500',
-                            )}
-                            placeholder="Descripción de la pieza"
-                          />
-                          {validationErrors?.[`sparePart_${index}_description`] && (
-                            <div className="absolute top-full left-0 z-20 mt-1 max-w-xs rounded bg-red-100 px-2 py-1 text-xs text-red-600 shadow-md">
-                              {validationErrors[`sparePart_${index}_description`]}
-                            </div>
-                          )}
-                        </div>
+                        <Input
+                          value={part.description}
+                          onChange={(e) => updateSparePart(index, 'description', e.target.value)}
+                          className="w-full text-sm"
+                          placeholder="Descripción de la pieza"
+                        />
                       ) : (
                         <div className="truncate text-sm text-gray-900" title={part.description}>
                           {part.description}
@@ -193,54 +150,32 @@ export const DamageSparePartsTable = ({
                     </TableCell>
                     <TableCell className="text-center">
                       {isEditing ? (
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            value={part.quantity}
-                            onChange={(e) =>
-                              updateSparePart(index, 'quantity', parseInt(e.target.value) || 1)
-                            }
-                            className={clsx(
-                              'w-full text-center text-sm',
-                              validationErrors?.[`sparePart_${index}_quantity`] &&
-                                'border-red-500 focus:border-red-500',
-                            )}
-                            min="1"
-                          />
-                          {validationErrors?.[`sparePart_${index}_quantity`] && (
-                            <div className="absolute top-full left-0 z-20 mt-1 max-w-xs rounded bg-red-100 px-2 py-1 text-xs text-red-600 shadow-md">
-                              {validationErrors[`sparePart_${index}_quantity`]}
-                            </div>
-                          )}
-                        </div>
+                        <Input
+                          type="number"
+                          value={part.quantity}
+                          onChange={(e) =>
+                            updateSparePart(index, 'quantity', parseInt(e.target.value) || 1)
+                          }
+                          className="w-full text-center text-sm"
+                          min="1"
+                        />
                       ) : (
                         <span className="text-sm text-gray-900">{part.quantity}</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
                       {isEditing ? (
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            value={part.price}
-                            onChange={(e) =>
-                              updateSparePart(index, 'price', parseFloat(e.target.value) || 0)
-                            }
-                            className={clsx(
-                              'w-full text-right text-sm',
-                              validationErrors?.[`sparePart_${index}_price`] &&
-                                'border-red-500 focus:border-red-500',
-                            )}
-                            min="0"
-                            step="0.01"
-                            placeholder="0.00"
-                          />
-                          {validationErrors?.[`sparePart_${index}_price`] && (
-                            <div className="absolute top-full left-0 z-20 mt-1 max-w-xs rounded bg-red-100 px-2 py-1 text-xs text-red-600 shadow-md">
-                              {validationErrors[`sparePart_${index}_price`]}
-                            </div>
-                          )}
-                        </div>
+                        <Input
+                          type="number"
+                          value={part.price}
+                          onChange={(e) =>
+                            updateSparePart(index, 'price', parseFloat(e.target.value) || 0)
+                          }
+                          className="w-full text-right text-sm"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                        />
                       ) : (
                         <div
                           className="truncate text-right text-sm text-gray-900"
