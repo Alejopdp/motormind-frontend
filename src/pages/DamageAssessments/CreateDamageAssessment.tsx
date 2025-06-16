@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/Auth.context';
 import { UserRole } from '@/types/User';
 import { Navigate } from 'react-router-dom';
-import { useDamageAssessment } from '@/context/DamageAssessment.context';
+import { useDamageAssessmentCreation } from '@/context/DamageAssessment.context';
 import { Textarea } from '@/components/atoms/Textarea';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
@@ -34,7 +34,7 @@ const CreateDamageAssessment = () => {
   const step = Number(searchParams.get('step') || 1);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const { data, setImages, setDetails, reset } = useDamageAssessment();
+  const { data, setImages, setDetails, reset } = useDamageAssessmentCreation();
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
   const { execute: createDamageAssessment } = useApi<{ _id: string }>(
     'post',
