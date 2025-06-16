@@ -17,6 +17,7 @@ import { ConfirmDamagesModal } from './components/ConfirmDamagesModal';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import DamageCard from '@/components/molecules/DamageCard/DamageCard';
+import { ApiService } from '@/service/api.service';
 
 const DamageAssessmentDetail = () => {
   const { damageAssessmentId } = useParams();
@@ -24,6 +25,7 @@ const DamageAssessmentDetail = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  const apiService = ApiService.getInstance();
 
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
@@ -69,6 +71,36 @@ const DamageAssessmentDetail = () => {
     },
   });
 
+  const { mutate: updateDamageMutation } = useMutation({
+    mutationFn: ({ damageId, damageData }: { damageId: string; damageData: Partial<Damage> }) => {
+      return apiService.updateDamage(damageAssessmentId!, damageId, damageData);
+    },
+    onSuccess: () => {
+      enqueueSnackbar('Daño actualizado correctamente.', { variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['damageAssessment', damageAssessmentId] });
+    },
+    onError: () => {
+      enqueueSnackbar('Error al actualizar el daño. Por favor, intente de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
+
+  const { mutate: deleteDamageMutation } = useMutation({
+    mutationFn: (damageId: string) => {
+      return apiService.deleteDamage(damageAssessmentId!, damageId);
+    },
+    onSuccess: () => {
+      enqueueSnackbar('Daño eliminado correctamente.', { variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['damageAssessment', damageAssessmentId] });
+    },
+    onError: () => {
+      enqueueSnackbar('Error al eliminar el daño. Por favor, intente de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
+
   const carPlateOrVin = useCarPlateOrVin(damageAssessment?.car);
 
   if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
@@ -101,6 +133,21 @@ const DamageAssessmentDetail = () => {
     );
     confirmDamagesMutation(confirmedDamages);
   };
+
+  const handleUpdateDamage = (updatedDamage: Damage) => {
+    if (updatedDamage._id) {
+      updateDamageMutation({
+        damageId: updatedDamage._id,
+        damageData: updatedDamage,
+      });
+    }
+  };
+
+  const handleDeleteDamage = (damageId: string) => {
+    deleteDamageMutation(damageId);
+  };
+
+  const isEditable = state !== 'DAMAGES_CONFIRMED';
 
   return (
     <div className="bg-background min-h-screen w-full pb-24">
@@ -160,7 +207,13 @@ const DamageAssessmentDetail = () => {
               </div>
             )}
             {damagesToShow.map((damage, idx) => (
-              <DamageCard key={idx} damage={damage} />
+              <DamageCard
+                key={damage._id || idx}
+                damage={damage}
+                onUpdateDamage={handleUpdateDamage}
+                onDeleteDamage={handleDeleteDamage}
+                isEditable={isEditable}
+              />
             ))}
           </div>
 
