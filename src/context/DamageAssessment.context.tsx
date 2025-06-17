@@ -152,6 +152,8 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
           damageData,
         );
 
+        console.log('updatedAssessment', updatedAssessment);
+
         setState((prevState) => ({
           ...prevState,
           damageAssessment: updatedAssessment,
