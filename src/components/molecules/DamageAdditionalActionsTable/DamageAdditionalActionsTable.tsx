@@ -11,12 +11,17 @@ import {
 } from '@/components/atoms/Table';
 import { AdditionalAction, Damage } from '@/types/DamageAssessment';
 import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
+import clsx from 'clsx';
 
 interface DamageAdditionalActionsTableProps {
   damageId: string;
   isEditing?: boolean;
   editFormData?: Damage;
   onUpdateField?: <K extends keyof Damage>(field: K, value: Damage[K]) => void;
+  validationErrors?: Record<string, string>;
+  setValidationErrors?: (
+    errors: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>),
+  ) => void;
 }
 
 export const DamageAdditionalActionsTable = ({
@@ -24,6 +29,8 @@ export const DamageAdditionalActionsTable = ({
   isEditing = false,
   editFormData,
   onUpdateField,
+  validationErrors,
+  setValidationErrors,
 }: DamageAdditionalActionsTableProps) => {
   const { getDamageById } = useDamageAssessmentDetail();
 
@@ -49,6 +56,14 @@ export const DamageAdditionalActionsTable = ({
 
     if (onUpdateField) {
       onUpdateField('additionalActions', updatedActions);
+    }
+
+    // Limpiar errores de validación cuando el usuario edite
+    if (setValidationErrors && validationErrors) {
+      const errorKey = `additionalAction_${index}_${field}`;
+      if (validationErrors[errorKey]) {
+        setValidationErrors((prev) => ({ ...prev, [errorKey]: '' }));
+      }
     }
   };
 
@@ -104,9 +119,9 @@ export const DamageAdditionalActionsTable = ({
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="rounded-lg border border-gray-200 bg-white">
           <div className="overflow-x-auto">
-            <Table className="w-full min-w-[400px] table-fixed hover:bg-transparent">
+            <Table className="w-full min-w-[500px] table-fixed hover:bg-transparent">
               <TableHeader>
                 <TableRow className="bg-gray-50 hover:bg-transparent">
                   <TableHead className="w-[70%] text-xs font-medium text-gray-500">
@@ -121,40 +136,70 @@ export const DamageAdditionalActionsTable = ({
               <TableBody>
                 {additionalActions.map((act, index) => (
                   <TableRow key={index} className="border-t border-gray-100 hover:bg-transparent">
-                    <TableCell className="max-w-0">
-                      {isEditing ? (
-                        <Input
-                          value={act.description}
-                          onChange={(e) =>
-                            updateAdditionalAction(index, 'description', e.target.value)
-                          }
-                          className="w-full text-sm"
-                          placeholder="Descripción del suplemento"
-                        />
-                      ) : (
-                        <div className="truncate text-sm text-gray-900" title={act.description}>
-                          {act.description}
-                        </div>
-                      )}
+                    <TableCell className="max-w-0 align-top">
+                      <div className="space-y-1">
+                        {isEditing ? (
+                          <>
+                            <Input
+                              value={act.description}
+                              onChange={(e) =>
+                                updateAdditionalAction(index, 'description', e.target.value)
+                              }
+                              className={clsx(
+                                'w-full text-sm',
+                                validationErrors?.[`additionalAction_${index}_description`] &&
+                                  'border-red-500 focus:border-red-500',
+                              )}
+                              placeholder="Descripción del suplemento"
+                            />
+                            {validationErrors?.[`additionalAction_${index}_description`] && (
+                              <div className="w-fit rounded bg-red-100 px-2 py-1 text-xs text-red-600">
+                                {validationErrors[`additionalAction_${index}_description`]}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="truncate text-sm text-gray-900" title={act.description}>
+                            {act.description}
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
-                    <TableCell className="text-right">
-                      {isEditing ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <Input
-                            type="number"
-                            value={act.time}
-                            onChange={(e) =>
-                              updateAdditionalAction(index, 'time', parseInt(e.target.value) || 0)
-                            }
-                            className="w-20 text-center text-sm"
-                            placeholder="0"
-                            min="0"
-                          />
-                          <span className="text-xs text-gray-500">min</span>
-                        </div>
-                      ) : (
-                        <span className="text-sm font-medium text-gray-600">{act.time} min</span>
-                      )}
+                    <TableCell className="text-right align-top">
+                      <div className="space-y-1">
+                        {isEditing ? (
+                          <>
+                            <div className="flex items-center justify-end gap-2">
+                              <Input
+                                type="number"
+                                value={act.time}
+                                onChange={(e) =>
+                                  updateAdditionalAction(
+                                    index,
+                                    'time',
+                                    parseInt(e.target.value) || 0,
+                                  )
+                                }
+                                className={clsx(
+                                  'w-20 text-center text-sm',
+                                  validationErrors?.[`additionalAction_${index}_time`] &&
+                                    'border-red-500 focus:border-red-500',
+                                )}
+                                placeholder="0"
+                                min="0"
+                              />
+                              <span className="text-xs text-gray-500">min</span>
+                            </div>
+                            {validationErrors?.[`additionalAction_${index}_time`] && (
+                              <div className="ml-auto w-fit rounded bg-red-100 px-2 py-1 text-xs text-red-600">
+                                {validationErrors[`additionalAction_${index}_time`]}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-sm font-medium text-gray-600">{act.time} min</span>
+                        )}
+                      </div>
                     </TableCell>
                     {isEditing && (
                       <TableCell>
