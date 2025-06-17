@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { Cog, Plus, X } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 import {
@@ -10,8 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/atoms/Table';
-import { SparePart } from '@/types/DamageAssessment';
 import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
+import { SparePart } from '@/types/DamageAssessment';
+import { Cog, Plus, X } from 'lucide-react';
 
 interface DamageSparePartsTableProps {
   damageId: string;
@@ -85,7 +84,7 @@ export const DamageSparePartsTable = ({
           </p>
         </div>
       ) : spareParts.length === 0 && !isEditing ? (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-6">
+        <div className="rounded-lg border border-gray-200 bg-white p-6">
           <p className="text-center text-sm text-gray-500 italic">
             No hay piezas de recambio definidas
           </p>

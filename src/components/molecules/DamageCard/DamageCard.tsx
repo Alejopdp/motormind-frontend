@@ -6,6 +6,7 @@ import { DamageSeverity } from '@/types/DamageAssessment';
 import { Wrench, ChevronDown, Clock, Trash } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
+import clsx from 'clsx';
 
 const severityLabelMap: Record<DamageSeverity, string> = {
   [DamageSeverity.SEV1]: 'Muy Leve (Pulido)',
@@ -39,10 +40,9 @@ const DamageCard = ({
 }: DamageCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedDamage, setEditedDamage] = useState<Damage>(damage);
-  const [initialDamage] = useState<Damage>(damage);
+  const [editFormData, setEditFormData] = useState<Damage>(damage);
 
-  const { area, subarea, severity, action, notes } = editedDamage;
+  const { area, subarea, severity, action, notes } = damage;
 
   const getSeverityColor = (s: DamageSeverity) => {
     switch (s) {
@@ -62,19 +62,20 @@ const DamageCard = ({
   };
 
   const handleEdit = () => {
+    setEditFormData(damage);
     setIsEditing(true);
     setIsExpanded(true);
   };
 
   const handleSave = () => {
     if (onUpdateDamage) {
-      onUpdateDamage(editedDamage);
+      onUpdateDamage(editFormData);
     }
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditedDamage(initialDamage);
+    setEditFormData(damage);
     setIsEditing(false);
   };
 
@@ -85,7 +86,7 @@ const DamageCard = ({
   };
 
   const updateField = <K extends keyof Damage>(field: K, value: Damage[K]) => {
-    setEditedDamage((prev) => ({ ...prev, [field]: value }));
+    setEditFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -102,7 +103,7 @@ const DamageCard = ({
             <p className="text-base font-semibold text-gray-900">
               {area} - {subarea}
             </p>
-            <p className="mt-1 text-sm text-gray-600">{editedDamage.description}</p>
+            <p className="mt-1 text-sm text-gray-600">{damage.description}</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -153,7 +154,7 @@ const DamageCard = ({
             {isEditing && (
               <div className="space-y-4">
                 <div className="text-sm font-medium text-blue-700">
-                  Editando: {area} - {subarea}
+                  Editando: {damage.area} - {damage.subarea}
                 </div>
 
                 <div>
@@ -162,7 +163,7 @@ const DamageCard = ({
                   </label>
                   <div className="flex items-center gap-2">
                     <Input
-                      value={`${area} - ${subarea}`}
+                      value={`${editFormData.area} - ${editFormData.subarea}`}
                       onChange={(e) => {
                         const [newArea, newSubarea] = e.target.value.split(' - ');
                         updateField('area', newArea);
@@ -180,7 +181,11 @@ const DamageCard = ({
                   </label>
                   <div className="flex items-center gap-2">
                     <Input
-                      value={action ? `${actionLabelMap[action]} | Código: PDI-REP-M` : ''}
+                      value={
+                        editFormData.action
+                          ? `${actionLabelMap[editFormData.action]} | Código: PDI-REP-M`
+                          : ''
+                      }
                       readOnly
                       className="flex-1 bg-white"
                     />
@@ -195,15 +200,15 @@ const DamageCard = ({
             {/* Suplementos / Operaciones Adicionales */}
             <DamageAdditionalActionsTable damageId={damage._id!} isEditing={isEditing} />
 
-            {/* Notas específicas */}
             <div>
               <h4 className="mb-2 text-sm font-medium text-gray-900">Notas específicas</h4>
               <textarea
-                value={notes || ''}
+                value={isEditing ? editFormData.notes || '' : notes || ''}
                 onChange={isEditing ? (e) => updateField('notes', e.target.value) : undefined}
-                className={`w-full rounded-lg border border-gray-200 p-3 text-sm ${
-                  isEditing ? 'bg-white' : 'bg-gray-50'
-                }`}
+                className={clsx(
+                  'w-full rounded-lg border border-gray-200 bg-white p-3 text-sm',
+                  !isEditing && 'cursor-not-allowed',
+                )}
                 rows={3}
                 placeholder={isEditing ? 'Añadir notas específicas...' : 'Sin notas'}
                 readOnly={!isEditing}
