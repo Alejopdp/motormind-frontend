@@ -47,6 +47,9 @@ interface DamageAssessmentContextType {
   updateDamage: (damageId: string, damageData: Partial<Damage>) => Promise<void>;
   deleteDamage: (damageId: string) => Promise<void>;
 
+  // Método para actualizar notas del assessment
+  updateDamageAssessmentNotes: (notes: string) => Promise<void>;
+
   // Estados de edición
   startEditingDamage: (damageId: string) => void;
   stopEditingDamage: () => void;
@@ -254,6 +257,50 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
     [state.editingDamageId],
   );
 
+  // Método para actualizar notas del assessment
+  const updateDamageAssessmentNotes = useCallback(
+    async (notes: string) => {
+      if (!state.damageAssessment?._id) return;
+
+      setState((prevState) => ({
+        ...prevState,
+        isUpdating: true,
+      }));
+
+      try {
+        const updatedAssessment = await apiService.updateDamageAssessmentNotes(
+          state.damageAssessment._id,
+          notes,
+        );
+
+        console.log('updatedAssessment', updatedAssessment);
+
+        setState((prevState) => ({
+          ...prevState,
+          damageAssessment: updatedAssessment,
+          isUpdating: false,
+          editingDamageId: null,
+        }));
+
+        // Invalidar queries relacionadas
+        queryClient.invalidateQueries({
+          queryKey: ['damageAssessment', state.damageAssessment._id],
+        });
+        queryClient.invalidateQueries({ queryKey: ['damageAssessments'] });
+
+        enqueueSnackbar('Notas actualizadas correctamente', { variant: 'success' });
+      } catch {
+        setState((prevState) => ({
+          ...prevState,
+          isUpdating: false,
+        }));
+
+        enqueueSnackbar('Error al actualizar las notas', { variant: 'error' });
+      }
+    },
+    [apiService, state.damageAssessment?._id, queryClient],
+  );
+
   const contextValue: DamageAssessmentContextType = {
     state,
 
@@ -269,6 +316,9 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
     // Métodos de edición
     updateDamage,
     deleteDamage,
+
+    // Método para actualizar notas del assessment
+    updateDamageAssessmentNotes,
 
     // Estados de edición
     startEditingDamage,
@@ -318,6 +368,7 @@ export const useDamageAssessmentDetail = () => {
     refreshDamageAssessment: ctx.refreshDamageAssessment,
     updateDamage: ctx.updateDamage,
     deleteDamage: ctx.deleteDamage,
+    updateDamageAssessmentNotes: ctx.updateDamageAssessmentNotes,
     startEditingDamage: ctx.startEditingDamage,
     stopEditingDamage: ctx.stopEditingDamage,
     getDamageById: ctx.getDamageById,
