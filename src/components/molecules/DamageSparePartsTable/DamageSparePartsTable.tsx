@@ -9,19 +9,23 @@ import {
   TableRow,
 } from '@/components/atoms/Table';
 import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
-import { SparePart } from '@/types/DamageAssessment';
+import { SparePart, Damage } from '@/types/DamageAssessment';
 import { Cog, Plus, X } from 'lucide-react';
 
 interface DamageSparePartsTableProps {
   damageId: string;
   isEditing?: boolean;
+  editFormData?: Damage;
+  onUpdateField?: <K extends keyof Damage>(field: K, value: Damage[K]) => void;
 }
 
 export const DamageSparePartsTable = ({
   damageId,
   isEditing = false,
+  editFormData,
+  onUpdateField,
 }: DamageSparePartsTableProps) => {
-  const { getDamageById, updateDamage } = useDamageAssessmentDetail();
+  const { getDamageById } = useDamageAssessmentDetail();
 
   const damage = getDamageById(damageId);
 
@@ -29,8 +33,13 @@ export const DamageSparePartsTable = ({
     return <div className="py-4 text-center text-sm text-gray-500">Daño no encontrado</div>;
   }
 
-  const spareParts = damage.spareParts || [];
-  const totalSparePartsCost = spareParts.reduce((acc, part) => acc + part.price * part.quantity, 0);
+  // Usar datos de edición si están disponibles, sino los datos originales
+  const spareParts =
+    isEditing && editFormData ? editFormData.spareParts || [] : damage.spareParts || [];
+  const totalSparePartsCost = spareParts.reduce(
+    (acc: number, part: SparePart) => acc + part.price * part.quantity,
+    0,
+  );
 
   const updateSparePart = <K extends keyof SparePart>(
     index: number,
@@ -39,7 +48,10 @@ export const DamageSparePartsTable = ({
   ) => {
     const updatedParts = [...spareParts];
     updatedParts[index] = { ...updatedParts[index], [field]: value };
-    updateDamage(damageId, { spareParts: updatedParts });
+
+    if (onUpdateField) {
+      onUpdateField('spareParts', updatedParts);
+    }
   };
 
   const addSparePart = () => {
@@ -49,12 +61,18 @@ export const DamageSparePartsTable = ({
       quantity: 1,
       price: 0,
     };
-    updateDamage(damageId, { spareParts: [...spareParts, newPart] });
+
+    if (onUpdateField) {
+      onUpdateField('spareParts', [...spareParts, newPart]);
+    }
   };
 
   const removeSparePart = (index: number) => {
-    const updatedParts = spareParts.filter((_, i) => i !== index);
-    updateDamage(damageId, { spareParts: updatedParts });
+    const updatedParts = spareParts.filter((_: SparePart, i: number) => i !== index);
+
+    if (onUpdateField) {
+      onUpdateField('spareParts', updatedParts);
+    }
   };
 
   return (
