@@ -1,13 +1,20 @@
-import { DamageAction, Damage } from '@/types/DamageAssessment';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/atoms/Select';
+import { Input } from '@/components/atoms/Input';
+import { Button } from '@/components/atoms/Button';
 import { DamageSparePartsTable } from '@/components/molecules/DamageSparePartsTable';
 import { DamageAdditionalActionsTable } from '@/components/molecules/DamageAdditionalActionsTable';
+import { DamageAction, Damage } from '@/types/DamageAssessment';
+import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
 import { useState } from 'react';
+import { clsx } from 'clsx';
 import { DamageSeverity } from '@/types/DamageAssessment';
 import { Wrench, ChevronDown, Clock, Trash } from 'lucide-react';
-import { Button } from '@/components/atoms/Button';
-import { Input } from '@/components/atoms/Input';
-import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
-import clsx from 'clsx';
 
 const severityLabelMap: Record<DamageSeverity, string> = {
   [DamageSeverity.SEV1]: 'Muy Leve (Pulido)',
@@ -41,15 +48,60 @@ const DamageCard = ({
 }: DamageCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [editFormData, setEditFormData] = useState<Damage>(damage);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Usar el contexto para el estado de edición
-  const { isEditingDamage, startEditingDamage, stopEditingDamage, isUpdating } =
+  const { isEditingDamage, startEditingDamage, stopEditingDamage, isUpdating, isDeleting } =
     useDamageAssessmentDetail();
 
   const isEditing = isEditingDamage(damage._id || '');
   const isThisDamageUpdating = isUpdating && isEditing;
+  const isThisDamageDeleting = isDeleting && isEditing;
 
   const { area, subarea, severity, action, notes } = damage;
+
+  const validateFormData = () => {
+    const errors: Record<string, string> = {};
+
+    // Validar pieza afectada
+    if (!editFormData.area || !editFormData.area.trim()) {
+      errors.pieceAffected = 'La pieza afectada es obligatoria';
+    }
+
+    // Validar operación de baremo
+    if (!editFormData.action) {
+      errors.action = 'La operación de baremo es obligatoria';
+    }
+
+    // Validar piezas de recambio
+    if (editFormData.spareParts && editFormData.spareParts.length > 0) {
+      editFormData.spareParts.forEach((part, index) => {
+        if (!part.description.trim()) {
+          errors[`sparePart_${index}_description`] = 'La descripción es obligatoria';
+        }
+        if (!part.quantity || part.quantity <= 0) {
+          errors[`sparePart_${index}_quantity`] = 'La cantidad debe ser mayor a 0';
+        }
+        if (!part.price || part.price <= 0) {
+          errors[`sparePart_${index}_price`] = 'El precio debe ser mayor a 0';
+        }
+      });
+    }
+
+    // Validar operaciones adicionales
+    if (editFormData.additionalActions && editFormData.additionalActions.length > 0) {
+      editFormData.additionalActions.forEach((action, index) => {
+        if (!action.description.trim()) {
+          errors[`additionalAction_${index}_description`] = 'La descripción es obligatoria';
+        }
+        if (!action.time || action.time <= 0) {
+          errors[`additionalAction_${index}_time`] = 'El tiempo debe ser mayor a 0';
+        }
+      });
+    }
+
+    return errors;
+  };
 
   const getSeverityColor = (s: DamageSeverity) => {
     switch (s) {
@@ -75,9 +127,19 @@ const DamageCard = ({
   };
 
   const handleSave = () => {
+    // Validar los datos antes de enviar
+    const errors = validateFormData();
+    setValidationErrors(errors);
+
+    // Si hay errores, no enviar
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
     if (onUpdateDamage) {
       onUpdateDamage(editFormData);
     }
+    // No llamar stopEditingDamage aquí, lo hará el contexto en caso de éxito
   };
 
   const handleCancel = () => {
@@ -107,7 +169,7 @@ const DamageCard = ({
             onClick={() => !isEditing && setIsExpanded(!isExpanded)}
           >
             <p className="text-base font-semibold text-gray-900">
-              {area} - {subarea}
+              {subarea ? `${area} - ${subarea}` : area}
             </p>
             <p className="mt-1 text-sm text-gray-600">{damage.description}</p>
           </div>
@@ -160,24 +222,38 @@ const DamageCard = ({
             {isEditing && (
               <div className="space-y-4">
                 <div className="text-sm font-medium text-blue-700">
-                  Editando: {damage.area} - {damage.subarea}
+                  Editando: {damage.subarea ? `${damage.area} - ${damage.subarea}` : damage.area}
                 </div>
 
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700">
                     Pieza Afectada
                   </label>
-                  <div className="flex items-center gap-2">
+                  <div className="relative flex items-center gap-2">
                     <Input
-                      value={`${editFormData.area} - ${editFormData.subarea}`}
+                      value={editFormData.area || ''}
                       onChange={(e) => {
-                        const [newArea, newSubarea] = e.target.value.split(' - ');
-                        updateField('area', newArea);
-                        updateField('subarea', newSubarea || '');
+                        const value = e.target.value;
+                        // Siempre usar solo el área y resetear subarea
+                        updateField('area', value);
+                        updateField('subarea', '');
+
+                        // Limpiar error cuando el usuario empiece a escribir
+                        if (validationErrors.pieceAffected) {
+                          setValidationErrors((prev) => ({ ...prev, pieceAffected: '' }));
+                        }
                       }}
-                      className="flex-1 bg-white"
+                      className={clsx(
+                        'flex-1 bg-white',
+                        validationErrors.pieceAffected && 'border-red-500 focus:border-red-500',
+                      )}
                       placeholder="Ej: Puerta Delantera Izquierda"
                     />
+                    {validationErrors.pieceAffected && (
+                      <div className="absolute top-full left-0 z-10 mt-1 max-w-xs rounded bg-red-100 px-2 py-1 text-xs text-red-600 shadow-sm">
+                        {validationErrors.pieceAffected}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -185,16 +261,38 @@ const DamageCard = ({
                   <label className="mb-1 block text-sm font-medium text-gray-700">
                     Operación de Baremo
                   </label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={
-                        editFormData.action
-                          ? `${actionLabelMap[editFormData.action]} | Código: PDI-REP-M`
-                          : ''
-                      }
-                      readOnly
-                      className="flex-1 bg-white"
-                    />
+                  <div className="relative">
+                    <Select
+                      value={editFormData.action || ''}
+                      onValueChange={(value: string) => {
+                        updateField('action', value as DamageAction);
+                        // Limpiar error cuando el usuario empiece a escribir
+                        if (validationErrors.action) {
+                          setValidationErrors((prev) => ({ ...prev, action: '' }));
+                        }
+                      }}
+                    >
+                      <SelectTrigger
+                        className={clsx(
+                          'w-full bg-white',
+                          validationErrors.action && 'border-red-500 focus:border-red-500',
+                        )}
+                      >
+                        <SelectValue placeholder="Selecciona una operación" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(DamageAction).map((action) => (
+                          <SelectItem key={action} value={action}>
+                            {actionLabelMap[action]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {validationErrors.action && (
+                      <div className="absolute top-full left-0 z-10 mt-1 max-w-xs rounded bg-red-100 px-2 py-1 text-xs text-red-600 shadow-sm">
+                        {validationErrors.action}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -206,6 +304,8 @@ const DamageCard = ({
               isEditing={isEditing}
               editFormData={isEditing ? editFormData : undefined}
               onUpdateField={isEditing ? updateField : undefined}
+              validationErrors={validationErrors}
+              setValidationErrors={setValidationErrors}
             />
 
             {/* Suplementos / Operaciones Adicionales */}
@@ -214,6 +314,8 @@ const DamageCard = ({
               isEditing={isEditing}
               editFormData={isEditing ? editFormData : undefined}
               onUpdateField={isEditing ? updateField : undefined}
+              validationErrors={validationErrors}
+              setValidationErrors={setValidationErrors}
             />
 
             <div>
@@ -241,10 +343,19 @@ const DamageCard = ({
                   <Button
                     variant="outline"
                     onClick={handleDelete}
-                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    className="flex min-w-[120px] items-center justify-center border-red-200 text-red-600 hover:bg-red-50"
+                    disabled={isThisDamageDeleting}
                   >
-                    <Trash className="h-4 w-4" />
-                    Eliminar
+                    {isThisDamageDeleting ? (
+                      <div className="flex items-center justify-center">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-600 border-r-transparent" />
+                      </div>
+                    ) : (
+                      <>
+                        <Trash className="mr-1 h-4 w-4" />
+                        Eliminar
+                      </>
+                    )}
                   </Button>
                   <Button
                     onClick={handleSave}
