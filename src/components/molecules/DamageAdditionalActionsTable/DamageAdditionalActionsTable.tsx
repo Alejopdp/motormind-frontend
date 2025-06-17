@@ -9,19 +9,23 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/atoms/Table';
-import { AdditionalAction } from '@/types/DamageAssessment';
+import { AdditionalAction, Damage } from '@/types/DamageAssessment';
 import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
 
 interface DamageAdditionalActionsTableProps {
   damageId: string;
   isEditing?: boolean;
+  editFormData?: Damage;
+  onUpdateField?: <K extends keyof Damage>(field: K, value: Damage[K]) => void;
 }
 
 export const DamageAdditionalActionsTable = ({
   damageId,
   isEditing = false,
+  editFormData,
+  onUpdateField,
 }: DamageAdditionalActionsTableProps) => {
-  const { getDamageById, updateDamage } = useDamageAssessmentDetail();
+  const { getDamageById } = useDamageAssessmentDetail();
 
   const damage = getDamageById(damageId);
 
@@ -29,7 +33,11 @@ export const DamageAdditionalActionsTable = ({
     return <div className="py-4 text-center text-sm text-gray-500">Daño no encontrado</div>;
   }
 
-  const additionalActions = damage.additionalActions || [];
+  // Usar datos de edición si están disponibles, sino los datos originales
+  const additionalActions =
+    isEditing && editFormData
+      ? editFormData.additionalActions || []
+      : damage.additionalActions || [];
 
   const updateAdditionalAction = <K extends keyof AdditionalAction>(
     index: number,
@@ -38,7 +46,10 @@ export const DamageAdditionalActionsTable = ({
   ) => {
     const updatedActions = [...additionalActions];
     updatedActions[index] = { ...updatedActions[index], [field]: value };
-    updateDamage(damageId, { additionalActions: updatedActions });
+
+    if (onUpdateField) {
+      onUpdateField('additionalActions', updatedActions);
+    }
   };
 
   const addAdditionalAction = () => {
@@ -46,12 +57,18 @@ export const DamageAdditionalActionsTable = ({
       description: '',
       time: 0,
     };
-    updateDamage(damageId, { additionalActions: [...additionalActions, newAction] });
+
+    if (onUpdateField) {
+      onUpdateField('additionalActions', [...additionalActions, newAction]);
+    }
   };
 
   const removeAdditionalAction = (index: number) => {
     const updatedActions = additionalActions.filter((_, i) => i !== index);
-    updateDamage(damageId, { additionalActions: updatedActions });
+
+    if (onUpdateField) {
+      onUpdateField('additionalActions', updatedActions);
+    }
   };
 
   return (
