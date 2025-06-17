@@ -122,6 +122,15 @@ export class ApiService {
     );
     return response.data;
   }
+
+  // Método para actualizar notas del damage assessment
+  async updateDamageAssessmentNotes(assessmentId: string, notes: string): Promise<DamageAssessment> {
+    const response = await this.put<DamageAssessment>(
+      `/damage-assessments/${assessmentId}`,
+      { notes }
+    );
+    return response.data;
+  }
 }
 
 // Exporta la instancia singleton por defecto

@@ -23,6 +23,7 @@ export const useDamageAssessmentDetailPage = () => {
         isUpdating,
         updateDamage,
         deleteDamage,
+        updateDamageAssessmentNotes,
         startEditingDamage,
         stopEditingDamage,
         getDamageById,
@@ -69,6 +70,7 @@ export const useDamageAssessmentDetailPage = () => {
         // Métodos de acción
         updateDamage,
         deleteDamage,
+        updateDamageAssessmentNotes,
         refreshDamageAssessment,
 
         // Estados y métodos de edición
