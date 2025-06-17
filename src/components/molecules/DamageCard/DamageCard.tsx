@@ -6,6 +6,7 @@ import { DamageSeverity } from '@/types/DamageAssessment';
 import { Wrench, ChevronDown, Clock, Trash } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
+import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
 import clsx from 'clsx';
 
 const severityLabelMap: Record<DamageSeverity, string> = {
@@ -39,8 +40,14 @@ const DamageCard = ({
   isEditable = false,
 }: DamageCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState<Damage>(damage);
+
+  // Usar el contexto para el estado de edición
+  const { isEditingDamage, startEditingDamage, stopEditingDamage, isUpdating } =
+    useDamageAssessmentDetail();
+
+  const isEditing = isEditingDamage(damage._id || '');
+  const isThisDamageUpdating = isUpdating && isEditing;
 
   const { area, subarea, severity, action, notes } = damage;
 
@@ -63,7 +70,7 @@ const DamageCard = ({
 
   const handleEdit = () => {
     setEditFormData(damage);
-    setIsEditing(true);
+    startEditingDamage(damage._id || '');
     setIsExpanded(true);
   };
 
@@ -71,12 +78,11 @@ const DamageCard = ({
     if (onUpdateDamage) {
       onUpdateDamage(editFormData);
     }
-    setIsEditing(false);
   };
 
   const handleCancel = () => {
     setEditFormData(damage);
-    setIsEditing(false);
+    stopEditingDamage();
   };
 
   const handleDelete = () => {
@@ -195,10 +201,20 @@ const DamageCard = ({
             )}
 
             {/* Piezas de recambio */}
-            <DamageSparePartsTable damageId={damage._id!} isEditing={isEditing} />
+            <DamageSparePartsTable
+              damageId={damage._id!}
+              isEditing={isEditing}
+              editFormData={isEditing ? editFormData : undefined}
+              onUpdateField={isEditing ? updateField : undefined}
+            />
 
             {/* Suplementos / Operaciones Adicionales */}
-            <DamageAdditionalActionsTable damageId={damage._id!} isEditing={isEditing} />
+            <DamageAdditionalActionsTable
+              damageId={damage._id!}
+              isEditing={isEditing}
+              editFormData={isEditing ? editFormData : undefined}
+              onUpdateField={isEditing ? updateField : undefined}
+            />
 
             <div>
               <h4 className="mb-2 text-sm font-medium text-gray-900">Notas específicas</h4>
@@ -230,8 +246,18 @@ const DamageCard = ({
                     <Trash className="h-4 w-4" />
                     Eliminar
                   </Button>
-                  <Button onClick={handleSave} className="bg-blue-600 text-white hover:bg-blue-700">
-                    Guardar Cambios
+                  <Button
+                    onClick={handleSave}
+                    className="flex min-w-[140px] items-center justify-center bg-blue-600 text-white hover:bg-blue-700"
+                    disabled={isThisDamageUpdating}
+                  >
+                    {isThisDamageUpdating ? (
+                      <div className="flex items-center justify-center">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent" />
+                      </div>
+                    ) : (
+                      'Guardar Cambios'
+                    )}
                   </Button>
                 </div>
               </div>
