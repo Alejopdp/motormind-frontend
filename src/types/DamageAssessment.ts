@@ -38,7 +38,7 @@ export interface AdditionalAction {
 export interface Damage {
     _id?: string;
     area: string;
-    subarea: string;
+    subarea?: string;
     description: string;
     type: DamageType;
     severity: DamageSeverity;
