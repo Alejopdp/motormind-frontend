@@ -64,4 +64,5 @@ export interface DamageAssessment {
     createdAt: string;
     updatedAt: string;
     state: 'PENDING_REVIEW' | 'DAMAGES_CONFIRMED';
+    notes?: string;
 } 
