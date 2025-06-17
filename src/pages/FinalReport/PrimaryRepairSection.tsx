@@ -2,6 +2,21 @@ import { WrenchIcon } from 'lucide-react';
 import { Badge } from '@/components/atoms/Badge';
 import { ResourceLinkItems } from '@/components/atoms/ResourceLinkItems';
 import { DocumentLink } from '@/types/Diagnosis';
+import { SearchResourceButton } from '@/components/atoms/SearchResourceButton';
+import PartDiagramItem from '@/components/molecules/PartDiagramItem';
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
+import { ApiService } from '@/service/api.service';
+
+const manualLoadingMessages = [
+  'Buscando manuales de reparación... esto puede tardar un momento',
+  'Consultando base de datos de Autodoc Club...',
+  'Identificando manuales para marca, modelo y categoría...',
+  'Filtrando los mejores recursos para tu avería...',
+  'Compilando enlaces a los manuales encontrados...',
+];
+
 export const PrimaryRepairSection = ({
   confirmedFailures,
 }: {
@@ -10,8 +25,32 @@ export const PrimaryRepairSection = ({
     steps: string[];
     tools: string[];
     resources: DocumentLink[];
+    repairManuals: DocumentLink[];
   }[];
 }) => {
+  const { diagnosisId } = useParams();
+  const apiService = ApiService.getInstance();
+  const [repairManualsResults, setRepairManualsResults] = useState<DocumentLink[] | null>(() => {
+    const initialManuals = confirmedFailures.every((failure) => failure.repairManuals)
+      ? confirmedFailures?.map((failure) => failure.repairManuals || []).flat()
+      : null;
+
+    return initialManuals || null;
+  });
+  const fetchRepairManualsMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiService.get<DocumentLink[]>(`/diagnoses/${diagnosisId}/repair-manuals`);
+      if (res.status !== 200) throw new Error('No se pudo buscar manuales de reparación');
+      return res.data || [];
+    },
+    onSuccess: (data) => {
+      setRepairManualsResults(data);
+    },
+    onError: (error) => {
+      console.error('Error fetching repair manuals:', error);
+      setRepairManualsResults([]);
+    },
+  });
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center gap-2">
@@ -58,6 +97,22 @@ export const PrimaryRepairSection = ({
               </div>
 
               <ResourceLinkItems resources={fault.resources} />
+              <SearchResourceButton
+                buttonText="Buscar más manuales de reparación"
+                resourceName="manuales de reparación"
+                loadingMessages={manualLoadingMessages}
+                onClick={() => fetchRepairManualsMutation.mutate()}
+                isLoading={fetchRepairManualsMutation.isPending}
+                resultsData={repairManualsResults}
+                renderItem={(item: DocumentLink) => (
+                  <PartDiagramItem
+                    key={item.label + item.url}
+                    title={item.label}
+                    onClick={() => window.open(item.url, '_blank')}
+                    type={item.type}
+                  />
+                )}
+              />
             </div>
           </div>
         ))}

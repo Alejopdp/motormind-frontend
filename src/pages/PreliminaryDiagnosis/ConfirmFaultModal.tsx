@@ -49,7 +49,7 @@ export const ConfirmFaultModal = ({
             Por favor, selecciona la avería que deseas confirmar o ingresa una nueva.
           </DialogDescription>
         </DialogHeader>
-        <div className="mb-2 space-y-3">
+        <div className="mb-2 max-h-[70dvh] space-y-3 overflow-y-auto">
           {possibleReasons.map((fault, index) => (
             <label
               key={index}

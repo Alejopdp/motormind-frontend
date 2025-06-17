@@ -22,10 +22,9 @@ const DamageAssessments = () => {
       .catch(() => {});
   }, []);
 
-  // Redirigir si no es admin
-  if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
-    return <Navigate to="/" replace />;
-  }
+  const IS_ADMIN = [UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role);
+
+  if (!IS_ADMIN) return <Navigate to="/" replace />;
 
   return (
     <div className="flex min-h-screen w-full flex-row">

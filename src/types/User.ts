@@ -10,4 +10,5 @@ export type User = {
   name: string;
   workshopId: string;
   role: UserRole;
+  hasVendorResources: boolean;
 };

@@ -127,7 +127,7 @@ const CreateDamageAssessment = () => {
 
   if (isLoading || isUploading || isSubmitting) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center px-4 text-center">
         <Spinner label={loadingMessages[currentLoadingMessageIndex]} />
       </div>
     );

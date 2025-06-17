@@ -1,6 +1,6 @@
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { useApi } from '@/hooks/useApi';
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { DamageAssessment, Damage, DamageSeverity, DamageType } from '@/types/DamageAssessment';
 import Spinner from '@/components/atoms/Spinner';
 import { ImageIcon } from 'lucide-react';
@@ -13,6 +13,10 @@ import DetailsContainer from '@/components/atoms/DetailsContainer';
 import PartDiagramItem from '@/components/molecules/PartDiagramItem';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { ImageCarousel } from '@/components/molecules/ImageCarousel';
+import { DamageAssessmentBottomBar } from './components/DamageAssessmentBottomBar';
+import { ConfirmDamagesModal } from './components/ConfirmDamagesModal';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { enqueueSnackbar } from 'notistack';
 
 const severityLabelMap = {
   [DamageSeverity.HIGH]: 'Alto',
@@ -62,6 +66,7 @@ const DamageCard = ({ damage }: { damage: Damage }) => {
               <PartDiagramItem
                 key={index}
                 title={resource.label}
+                type="document"
                 onClick={() => window.open(resource.url, '_blank')}
               />
             ))}
@@ -75,32 +80,68 @@ const DamageCard = ({ damage }: { damage: Damage }) => {
 const DamageAssessmentDetail = () => {
   const { damageAssessmentId } = useParams();
   const { user } = useAuth();
-  const { execute, data, loading, error } = useApi<DamageAssessment>(
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+  const { execute: getDamageAssessmentById } = useApi<DamageAssessment>(
     'get',
     `/damage-assessments/${damageAssessmentId}`,
   );
-  const carPlateOrVin = useCarPlateOrVin(data?.car);
-  const isMobile = useIsMobile();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (damageAssessmentId) {
-      execute();
-    }
-  }, [damageAssessmentId]);
+  const {
+    data: damageAssessment,
+    isLoading,
+    isError,
+  } = useQuery<DamageAssessment>({
+    queryKey: ['damageAssessment', damageAssessmentId],
+    queryFn: async () => {
+      const response = await getDamageAssessmentById();
+      return response.data;
+    },
+    enabled: !!damageAssessmentId,
+  });
+
+  const { execute: confirmDamagesRequest } = useApi<DamageAssessment>(
+    'post',
+    `/damage-assessments/${damageAssessmentId}/confirm-damages`,
+  );
+
+  const { mutate: confirmDamagesMutation, isPending: isConfirmingDamages } = useMutation({
+    mutationFn: (confirmedDamages: Damage[]) => {
+      return confirmDamagesRequest({
+        confirmedDamageIds: confirmedDamages.map((damage) => damage._id!),
+      });
+    },
+    onSuccess: () => {
+      enqueueSnackbar('Daños confirmados correctamente.', { variant: 'success' });
+      setIsConfirmModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['damageAssessments'] });
+      queryClient.invalidateQueries({ queryKey: ['damageAssessment', damageAssessmentId] });
+    },
+    onError: () => {
+      enqueueSnackbar('Error al confirmar los daños. Por favor, intente de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
+
+  const carPlateOrVin = useCarPlateOrVin(damageAssessment?.car);
 
   if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
     return <Navigate to="/" replace />;
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner label="Cargando peritaje..." />
       </div>
     );
   }
-  if (error || !data) {
+  if (isError || !damageAssessment) {
     return (
       <div className="text-destructive flex min-h-screen items-center justify-center">
         Error al cargar el peritaje
@@ -108,10 +149,20 @@ const DamageAssessmentDetail = () => {
     );
   }
 
-  const { car, description, images, createdAt, damages = [] } = data;
+  const { car, description, images, createdAt, damages = [], state } = damageAssessment;
+
+  const damagesToShow =
+    state === 'DAMAGES_CONFIRMED' ? damages.filter((damage) => damage.isConfirmed) : damages;
+
+  const handleConfirmDamages = (confirmedDamageIds: string[]) => {
+    const confirmedDamages = damages.filter(
+      (damage) => damage._id && confirmedDamageIds.includes(damage._id),
+    );
+    confirmDamagesMutation(confirmedDamages);
+  };
 
   return (
-    <div className="bg-background min-h-screen w-full">
+    <div className="bg-background min-h-screen w-full pb-24">
       <HeaderPage
         data={{
           title: 'Detalles del Peritaje',
@@ -158,14 +209,16 @@ const DamageAssessmentDetail = () => {
 
           <div className={`${isMobile ? '' : 'mt-6'}`}>
             <h3 className={`text-base font-semibold ${isMobile ? 'bg-gray-50 px-4 py-3' : 'mb-2'}`}>
-              Daños detectados
+              {state === 'DAMAGES_CONFIRMED' ? 'Daños Confirmados' : 'Daños detectados'}
             </h3>
-            {damages.length === 0 && (
+            {damagesToShow.length === 0 && (
               <div className={`text-xs text-gray-400 italic ${isMobile ? 'bg-white p-4' : ''}`}>
-                No se detectaron daños
+                {state === 'DAMAGES_CONFIRMED'
+                  ? 'No se confirmaron daños'
+                  : 'No se detectaron daños'}
               </div>
             )}
-            {damages.map((damage, idx) => (
+            {damagesToShow.map((damage, idx) => (
               <DamageCard key={idx} damage={damage} />
             ))}
           </div>
@@ -184,6 +237,21 @@ const DamageAssessmentDetail = () => {
           </div>
         )}
       </DetailsContainer>
+
+      {state !== 'DAMAGES_CONFIRMED' && (
+        <DamageAssessmentBottomBar
+          onConfirm={() => setIsConfirmModalOpen(true)}
+          isLoading={isConfirmingDamages}
+          isDisabled={damages.length === 0}
+        />
+      )}
+      <ConfirmDamagesModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => (isConfirmingDamages ? null : setIsConfirmModalOpen(false))}
+        onConfirm={handleConfirmDamages}
+        damages={damages}
+        isLoading={isConfirmingDamages}
+      />
     </div>
   );
 };
