@@ -123,6 +123,15 @@ export class ApiService {
     return response.data;
   }
 
+  // Método para actualizar notas del damage assessment
+  async updateDamageAssessmentNotes(assessmentId: string, notes: string): Promise<DamageAssessment> {
+    const response = await this.put<DamageAssessment>(
+      `/damage-assessments/${assessmentId}`,
+      { notes }
+    );
+    return response.data;
+  }
+
   // Método para eliminar diagnóstico
   async deleteDiagnosis(diagnosisId: string): Promise<{ message: string }> {
     const response = await this.delete<{ message: string }>(`/diagnoses/${diagnosisId}`);
