@@ -25,6 +25,7 @@ interface DamageAssessmentContextState {
   // Estado de edición
   editingDamageId: string | null;
   isUpdating: boolean;
+  isDeleting: boolean;
 }
 
 interface DamageAssessmentContextType {
@@ -62,6 +63,7 @@ const initialState: DamageAssessmentContextState = {
   creationData: { images: [], details: '' },
   editingDamageId: null,
   isUpdating: false,
+  isDeleting: false,
 };
 
 const DamageAssessmentContext = createContext<DamageAssessmentContextType | undefined>(undefined);
@@ -187,7 +189,7 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
 
       setState((prevState) => ({
         ...prevState,
-        isUpdating: true,
+        isDeleting: true,
       }));
 
       try {
@@ -199,7 +201,7 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
         setState((prevState) => ({
           ...prevState,
           damageAssessment: updatedAssessment,
-          isUpdating: false,
+          isDeleting: false,
           editingDamageId: null,
         }));
 
@@ -213,7 +215,7 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
       } catch {
         setState((prevState) => ({
           ...prevState,
-          isUpdating: false,
+          isDeleting: false,
         }));
 
         enqueueSnackbar('Error al eliminar el daño', { variant: 'error' });
@@ -311,6 +313,7 @@ export const useDamageAssessmentDetail = () => {
     isLoading: ctx.state.isLoading,
     error: ctx.state.error,
     isUpdating: ctx.state.isUpdating,
+    isDeleting: ctx.state.isDeleting,
     loadDamageAssessment: ctx.loadDamageAssessment,
     refreshDamageAssessment: ctx.refreshDamageAssessment,
     updateDamage: ctx.updateDamage,
