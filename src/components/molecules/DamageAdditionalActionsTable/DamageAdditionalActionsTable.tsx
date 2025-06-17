@@ -81,7 +81,7 @@ export const DamageAdditionalActionsTable = ({
           </p>
         </div>
       ) : additionalActions.length === 0 && !isEditing ? (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-6">
+        <div className="rounded-lg border border-gray-200 bg-white p-6">
           <p className="text-center text-sm text-gray-500 italic">
             No hay suplementos u operaciones adicionales definidas
           </p>
