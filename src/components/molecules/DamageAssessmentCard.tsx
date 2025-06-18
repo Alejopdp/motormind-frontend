@@ -60,7 +60,7 @@ export const DamageAssessmentCard: React.FC<DamageAssessmentCardProps> = ({ asse
         <div className="mt-4 space-y-3 pl-1">
           <div className="text-sm">
             <span className="text-gray-500">Aseguradora:</span>{' '}
-            <span className="text-gray-800">-</span>
+            <span className="text-gray-800">{assessment.insuranceCompany}</span>
           </div>
 
           <div>

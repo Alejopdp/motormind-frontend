@@ -56,6 +56,8 @@ const DamageAssessmentDetail = () => {
       enqueueSnackbar('Daños confirmados correctamente.', { variant: 'success' });
       queryClient.invalidateQueries({ queryKey: ['damageAssessments'] });
       queryClient.invalidateQueries({ queryKey: ['damageAssessment', damageAssessmentId] });
+      // Redirigir al informe después de confirmar
+      navigate(`/damage-assessments/${damageAssessmentId}/report`);
     },
     onError: () => {
       enqueueSnackbar('Error al confirmar los daños. Por favor, intente de nuevo.', {
@@ -114,6 +116,10 @@ const DamageAssessmentDetail = () => {
 
   const handleConfirmDamages = () => {
     confirmDamagesMutation();
+  };
+
+  const handleViewReport = () => {
+    navigate(`/damage-assessments/${damageAssessmentId}/report`);
   };
 
   return (
@@ -224,6 +230,7 @@ const DamageAssessmentDetail = () => {
                 }}
                 onConfirmDamages={handleConfirmDamages}
                 isConfirming={isConfirmingDamages}
+                onViewReport={handleViewReport}
               />
             </div>
           )}
@@ -244,6 +251,7 @@ const DamageAssessmentDetail = () => {
                 }}
                 onConfirmDamages={handleConfirmDamages}
                 isConfirming={isConfirmingDamages}
+                onViewReport={handleViewReport}
               />
             </div>
           </>
