@@ -9,6 +9,7 @@ interface CostBreakdownProps {
   onUpdateNotes: (notes: string) => void;
   onConfirmDamages?: () => void;
   isConfirming?: boolean;
+  onViewReport?: () => void;
 }
 
 export const CostBreakdown = ({
@@ -16,6 +17,7 @@ export const CostBreakdown = ({
   onUpdateNotes,
   onConfirmDamages,
   isConfirming = false,
+  onViewReport,
 }: CostBreakdownProps) => {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState(damageAssessment.notes || '');
@@ -137,7 +139,7 @@ export const CostBreakdown = ({
         <div className="space-y-1 text-sm text-gray-600">
           <div className="flex justify-between">
             <span>Aseguradora</span>
-            <span className="font-medium">Mapfre</span>
+            <span className="font-medium">{damageAssessment.insuranceCompany}</span>
           </div>
           <div className="flex justify-between">
             <span>Tarifa Hora</span>
@@ -212,9 +214,17 @@ export const CostBreakdown = ({
           </Button>
         )}
         {damageAssessment.state === 'DAMAGES_CONFIRMED' && (
-          <Button className="w-full bg-green-600 text-white hover:bg-green-700">
-            Generar Informe PDF
-          </Button>
+          <>
+            <Button
+              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+              onClick={onViewReport}
+            >
+              Ver Informe Completo
+            </Button>
+            <Button className="w-full bg-green-600 text-white hover:bg-green-700">
+              Generar Informe PDF
+            </Button>
+          </>
         )}
       </div>
     </div>

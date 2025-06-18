@@ -35,6 +35,9 @@ const CreateDamageAssessment = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { data, setImages, setDetails, reset } = useDamageAssessmentCreation();
+  // Obtener datos del siniestro desde el contexto
+  const { insuranceCompany, claimNumber } = data;
+
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
   const { execute: createDamageAssessment } = useApi<{ _id: string }>(
     'post',
@@ -109,13 +112,23 @@ const CreateDamageAssessment = () => {
       // 1. Subir imágenes
       const uploadResult = await upload(data.images, { carId: carId! });
       // 2. Crear el peritaje
+      // Validar que insuranceCompany esté presente (es obligatorio)
+      if (!insuranceCompany) {
+        enqueueSnackbar('Error: La aseguradora es obligatoria para crear un peritaje', {
+          variant: 'error',
+        });
+        return;
+      }
+
       const response = await createDamageAssessment({
         carId,
-        details: data.details,
+        description: data.details,
         images: uploadResult.keys,
+        insuranceCompany, // Obligatorio
+        ...(claimNumber && { claimNumber }), // Opcional
       });
       enqueueSnackbar('Peritaje creado exitosamente', { variant: 'success' });
-      reset();
+      reset(); // Resetear contexto solo después de éxito
       navigate(`/damage-assessments/${response.data._id}`);
     } catch (error) {
       console.error(error);
@@ -179,6 +192,28 @@ const CreateDamageAssessment = () => {
         {step === 2 && (
           <>
             <VehicleInformation car={car} editMode={false} />
+
+            {/* Información del siniestro */}
+            {insuranceCompany && (
+              <div
+                className={`mb-6 ${isMobile ? 'rounded-lg bg-white p-4 shadow-md' : 'rounded-lg bg-white p-6 shadow-md'}`}
+              >
+                <h3 className="mb-4 text-lg font-semibold text-gray-900">Datos del Siniestro</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Aseguradora:</span>
+                    <span className="text-sm font-medium text-gray-900">{insuranceCompany}</span>
+                  </div>
+                  {claimNumber && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Número de siniestro:</span>
+                      <span className="text-sm font-medium text-gray-900">{claimNumber}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="mb-6">
               <label className="mb-2 block text-sm font-medium text-gray-900">
                 Detalles de los daños (opcional)

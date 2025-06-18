@@ -25,13 +25,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/atoms/Select';
-import { parseSpanishDate } from '@/utils';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { useApi } from '@/hooks/useApi';
 import { CreateCar, Car } from '@/types/Car';
+import { useDamageAssessmentCreation } from '@/context/DamageAssessment.context';
 
 const MIN_YEAR = 1980;
+
+// Lista de aseguradoras disponibles
+const INSURANCE_COMPANIES = [
+  'Mapfre',
+  'Allianz',
+  'AXA',
+  'Mutua Madrileña',
+  'Generali',
+  'Línea Directa',
+  'Reale',
+  'Zurich',
+  'Otra',
+];
 
 interface CreateDiagnosticModalProps {
   open: boolean;
@@ -54,16 +66,21 @@ export const CreateDiagnosticModal = ({
 }: CreateDiagnosticModalProps) => {
   const [licensePlate, setLicensePlate] = useState('');
   const [vin, setVin] = useState('');
-  const [activeTab, setActiveTab] = useState('licensePlate');
+  const [activeTab, setActiveTab] = useState<'licensePlate' | 'vin'>('licensePlate');
   const [isLicensePlateValid, setIsLicensePlateValid] = useState<boolean | null>(null);
   const [isVinValid, setIsVinValid] = useState<boolean | null>(null);
+  const [isManualMode, setIsManualMode] = useState(false);
+
+  // Estados para datos del siniestro - ahora usando el contexto
+  const { data, setInsuranceCompany, setClaimNumber } = useDamageAssessmentCreation();
+  const { insuranceCompany, claimNumber } = data;
+
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const { execute: addVehicleRequest } = useApi<Car>('post', '/cars');
   const { execute: getOrCreateVehicleRequest } = useApi<Car>('get', '/cars/vin-or-plate');
 
   // Manual creation form state
-  const [isManualMode, setIsManualMode] = useState(false);
   const [manualData, setManualData] = useState({
     brand: '',
     model: '',
@@ -81,6 +98,7 @@ export const CreateDiagnosticModal = ({
       enqueueSnackbar('Vehículo creado exitosamente', { variant: 'success' });
       onOpenChange(false);
       if (redirectTo === 'damage-assessment') {
+        // Navegar directamente sin query params
         navigate(`/damage-assessments/create?carId=${response.data._id}`);
       } else {
         navigate(`/cars/${response.data._id}`);
@@ -100,6 +118,7 @@ export const CreateDiagnosticModal = ({
       getOrCreateVehicleRequest(undefined, params),
     onSuccess: (response) => {
       if (redirectTo === 'damage-assessment') {
+        // Navegar directamente sin query params
         navigate(`/damage-assessments/create?carId=${response.data._id}`);
       } else {
         navigate(`/cars/${response.data._id}`);
@@ -177,6 +196,7 @@ export const CreateDiagnosticModal = ({
     setIsLicensePlateValid(null);
     setIsVinValid(null);
     setIsManualMode(false);
+    // NO resetear los datos del siniestro aquí - los necesitamos en la página de creación
     setManualData({
       brand: '',
       model: '',
@@ -200,21 +220,26 @@ export const CreateDiagnosticModal = ({
     }));
   };
 
-  const isSubmitDisabled = Boolean(
-    isManualMode
-      ? !manualData.brand || // Brand is required
-          manualData.brand.length < 2 || // Brand must be at least 3 characters
-          !manualData.model || // Model is required
-          !manualData.year || // Year is required
-          Number(manualData.year) < MIN_YEAR || // Year must be greater than 1980
-          Number(manualData.year) > new Date().getFullYear() || // Year must be less than current year
-          (manualData.kilometers && Number(manualData.kilometers) <= 0) || // Kilometers must be greater than 0
-          (manualData.licensePlate && !isLicensePlateValid) // License plate must be valid
-      : (activeTab === 'licensePlate' && !licensePlate.trim()) ||
-          (activeTab === 'vin' && !vin.trim()),
-  );
-
+  // Determinar si el botón de envío debe estar deshabilitado
   const isLoading = addVehicleMutation.isPending || getOrCreateVehicleMutation.isPending;
+
+  // Para peritajes, la aseguradora es obligatoria
+  const isDamageAssessment = redirectTo === 'damage-assessment';
+  const isInsuranceValid = !isDamageAssessment || insuranceCompany !== '';
+
+  const isSubmitDisabled =
+    isLoading ||
+    !isInsuranceValid ||
+    (isManualMode
+      ? !manualData.brand ||
+        !manualData.model ||
+        !manualData.year ||
+        Number(manualData.year) < MIN_YEAR ||
+        Number(manualData.year) > new Date().getFullYear() ||
+        (manualData.licensePlate && isLicensePlateValid === false) ||
+        (manualData.vinCode && isVinValid === false)
+      : (activeTab === 'licensePlate' && (!licensePlate || isLicensePlateValid === false)) ||
+        (activeTab === 'vin' && (!vin || isVinValid === false)));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -224,7 +249,9 @@ export const CreateDiagnosticModal = ({
           <DialogDescription className="text-muted">
             {isManualMode
               ? 'Introduce los datos del vehículo manualmente'
-              : 'Introduce los datos del vehículo para iniciar un nuevo diagnóstico.'}
+              : isDamageAssessment
+                ? 'Introduce los datos del vehículo y la aseguradora para iniciar un nuevo peritaje.'
+                : 'Introduce los datos del vehículo para iniciar un nuevo diagnóstico.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -325,40 +352,38 @@ export const CreateDiagnosticModal = ({
 
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
                 <div>
-                  <p className="mb-0.5 text-xs font-medium sm:text-sm">VIN</p>
-                  <div>
-                    <div className="relative">
-                      <Input
-                        id="vinCode"
-                        value={manualData.vinCode}
-                        onChange={(e) => validateVin(e.target.value)}
-                        className={`${
-                          isVinValid === true
-                            ? 'border-green-500 pr-10'
-                            : isVinValid === false
-                              ? 'border-red-500 pr-10'
-                              : ''
-                        }`}
-                        pattern={VIN_REGEX.source}
-                        placeholder="Ej: 12345678901234567"
-                      />
+                  <p className="mb-0.5 text-xs font-medium sm:text-sm">Nº Bastidor (VIN)</p>
+                  <div className="relative">
+                    <Input
+                      id="vin"
+                      value={manualData.vinCode}
+                      onChange={(e) => validateVin(e.target.value)}
+                      className={`${
+                        isVinValid === true
+                          ? 'border-green-500 pr-10'
+                          : isVinValid === false
+                            ? 'border-red-500 pr-10'
+                            : ''
+                      }`}
+                      pattern={VIN_REGEX.source}
+                      placeholder="VIN del vehículo"
+                    />
 
-                      {isVinValid !== null && (
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                          {isVinValid ? (
-                            <CheckIcon className="h-5 w-5 text-green-500" />
-                          ) : (
-                            <XIcon className="h-5 w-5 text-red-500" />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {isVinValid === false && (
-                      <p className="mt-1 text-xs text-red-500">
-                        VIN inválido. Por favor, introduce un VIN válido.
-                      </p>
+                    {isVinValid !== null && (
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        {isVinValid ? (
+                          <CheckIcon className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <XIcon className="h-5 w-5 text-red-500" />
+                        )}
+                      </div>
                     )}
                   </div>
+                  {isVinValid === false && (
+                    <p className="mt-1 text-xs text-red-500">
+                      VIN inválido. Por favor, introduce un VIN válido.
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -398,36 +423,66 @@ export const CreateDiagnosticModal = ({
                 </div>
 
                 <div>
-                  <p className="mb-0.5 text-xs font-medium sm:text-sm">Última revisión</p>
-
+                  <p className="mb-0.5 text-xs font-medium sm:text-sm">Última Revisión</p>
                   <Calendar
-                    value={
-                      manualData.lastRevision
-                        ? parseSpanishDate(manualData.lastRevision) || null
-                        : null
-                    }
-                    onChange={(date) => {
+                    value={manualData.lastRevision ? new Date(manualData.lastRevision) : null}
+                    onChange={(date: Date | null) => {
                       if (date) {
-                        const formattedDate = format(date, 'dd/MM/yyyy', { locale: es });
+                        const formattedDate = format(date, 'yyyy-MM-dd');
                         handleManualInputChange('lastRevision', formattedDate);
                       } else {
                         handleManualInputChange('lastRevision', '');
                       }
                     }}
                     maxDate={new Date()}
+                    placeholder="Selecciona fecha de revisión"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-center">
+              {/* Campos para peritaje en modo manual */}
+              {isDamageAssessment && (
+                <div className="grid grid-cols-1 gap-2 border-t border-gray-200 pt-4 sm:gap-4">
+                  <div>
+                    <p className="mb-0.5 text-xs font-medium sm:text-sm">
+                      Aseguradora <span className="text-red-500">*</span>
+                    </p>
+                    <Select value={insuranceCompany} onValueChange={setInsuranceCompany} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una aseguradora" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {INSURANCE_COMPANIES.map((company) => (
+                          <SelectItem key={company} value={company}>
+                            {company}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <p className="mb-0.5 text-xs font-medium sm:text-sm">
+                      Número de siniestro (opcional)
+                    </p>
+                    <Input
+                      value={claimNumber}
+                      onChange={(e) => setClaimNumber(e.target.value)}
+                      placeholder="Ej: SIN-2023-45678"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex w-full pt-2">
                 <Button
                   type="button"
-                  variant="ghost"
-                  className="text-primary flex items-center text-sm"
+                  variant="outline"
                   onClick={handleBackToSearch}
+                  className="mr-auto flex items-center gap-2"
                 >
                   <ArrowLeftIcon className="h-4 w-4" />
-                  Volver <span className="hidden sm:inline">a búsqueda por matrícula o VIN</span>
+                  Volver a búsqueda
                 </Button>
               </div>
             </div>
@@ -436,7 +491,7 @@ export const CreateDiagnosticModal = ({
               <Tabs
                 defaultValue="licensePlate"
                 value={activeTab}
-                onValueChange={setActiveTab}
+                onValueChange={(value) => setActiveTab(value as 'licensePlate' | 'vin')}
                 className="w-full"
               >
                 <TabsList className="grid w-full grid-cols-2">
@@ -485,12 +540,10 @@ export const CreateDiagnosticModal = ({
                 </TabsContent>
                 <TabsContent value="vin" className="mt-4">
                   <div>
-                    <p className="mb-0.5 text-xs font-medium sm:text-sm">
-                      Número de Bastidor (VIN)
-                    </p>
+                    <p className="mb-0.5 text-sm font-medium">Número de Bastidor (VIN)</p>
                     <div className="relative">
                       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <HashIcon className="mb-0.5 h-5 w-5 text-gray-400" />
+                        <HashIcon className="h-5 w-5 text-gray-400" />
                       </div>
                       <Input
                         id="vin"
@@ -503,9 +556,9 @@ export const CreateDiagnosticModal = ({
                               ? 'border-red-500 pr-10'
                               : ''
                         }`}
-                        placeholder="Ej: WVWZZZ1JZXW000001"
-                        autoComplete="off"
                         pattern={VIN_REGEX.source}
+                        placeholder="VIN del vehículo"
+                        autoComplete="off"
                       />
 
                       {isVinValid !== null && (
@@ -526,6 +579,38 @@ export const CreateDiagnosticModal = ({
                   </div>
                 </TabsContent>
               </Tabs>
+
+              {/* Campos para peritaje fuera del modo manual */}
+              {isDamageAssessment && (
+                <div className="grid grid-cols-1 gap-2 border-t border-gray-200 pt-4 sm:gap-4">
+                  <div>
+                    <p className="mb-0.5 text-sm font-medium">
+                      Aseguradora <span className="text-red-500">*</span>
+                    </p>
+                    <Select value={insuranceCompany} onValueChange={setInsuranceCompany} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una aseguradora" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {INSURANCE_COMPANIES.map((company) => (
+                          <SelectItem key={company} value={company}>
+                            {company}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <p className="mb-0.5 text-sm font-medium">Número de siniestro (opcional)</p>
+                    <Input
+                      value={claimNumber}
+                      onChange={(e) => setClaimNumber(e.target.value)}
+                      placeholder="Ej: SIN-2023-45678"
+                    />
+                  </div>
+                </div>
+              )}
 
               {allowManualCar && !isManualMode && (
                 <div className="my-4 flex justify-center">
