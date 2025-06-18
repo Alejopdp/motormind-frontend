@@ -118,6 +118,10 @@ const DamageAssessmentDetail = () => {
     confirmDamagesMutation();
   };
 
+  const handleViewReport = () => {
+    navigate(`/damage-assessments/${damageAssessmentId}/report`);
+  };
+
   return (
     <div className="bg-background min-h-screen w-full">
       <HeaderPage
@@ -226,6 +230,7 @@ const DamageAssessmentDetail = () => {
                 }}
                 onConfirmDamages={handleConfirmDamages}
                 isConfirming={isConfirmingDamages}
+                onViewReport={handleViewReport}
               />
             </div>
           )}
@@ -246,6 +251,7 @@ const DamageAssessmentDetail = () => {
                 }}
                 onConfirmDamages={handleConfirmDamages}
                 isConfirming={isConfirmingDamages}
+                onViewReport={handleViewReport}
               />
             </div>
           </>

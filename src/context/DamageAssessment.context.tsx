@@ -63,7 +63,7 @@ const initialState: DamageAssessmentContextState = {
   isLoading: false,
   damageAssessment: null,
   error: null,
-  creationData: { images: [], details: '' },
+  creationData: { images: [], details: '', insuranceCompany: '', claimNumber: '' },
   editingDamageId: null,
   isUpdating: false,
   isDeleting: false,
@@ -88,6 +88,20 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
     setState((prevState) => ({
       ...prevState,
       creationData: { ...prevState.creationData, details },
+    }));
+  }, []);
+
+  const setInsuranceCompany = useCallback((insuranceCompany: string) => {
+    setState((prevState) => ({
+      ...prevState,
+      creationData: { ...prevState.creationData, insuranceCompany },
+    }));
+  }, []);
+
+  const setClaimNumber = useCallback((claimNumber: string) => {
+    setState((prevState) => ({
+      ...prevState,
+      creationData: { ...prevState.creationData, claimNumber },
     }));
   }, []);
 
@@ -307,6 +321,8 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
     // Métodos de creación (compatibilidad)
     setImages,
     setDetails,
+    setInsuranceCompany,
+    setClaimNumber,
     reset,
 
     // Métodos del damage assessment completo
@@ -347,9 +363,16 @@ export const useDamageAssessmentCreation = () => {
   const ctx = useDamageAssessment();
 
   return {
-    data: ctx.state.creationData || { images: [], details: '' },
+    data: ctx.state.creationData || {
+      images: [],
+      details: '',
+      insuranceCompany: '',
+      claimNumber: '',
+    },
     setImages: ctx.setImages,
     setDetails: ctx.setDetails,
+    setInsuranceCompany: ctx.setInsuranceCompany,
+    setClaimNumber: ctx.setClaimNumber,
     reset: ctx.reset,
   };
 };
