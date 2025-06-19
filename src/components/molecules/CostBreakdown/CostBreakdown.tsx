@@ -151,14 +151,14 @@ export const CostBreakdown = ({
         <div className="mb-6">
           <h4 className="mb-3 text-sm font-medium text-gray-700">Desglose de Costes</h4>
 
-        <div className="space-y-2 text-sm">
-          {/* Mano de Obra - Solo mostrar si hay additionalActions */}
-          {costBreakdown.hasLaborWork && (
-            <div className="flex justify-between">
-              <span className="text-gray-600">Mano de Obra</span>
-              <span className="font-medium">{formatCurrency(costBreakdown.laborCost)}</span>
-            </div>
-          )}
+          <div className="space-y-2 text-sm">
+            {/* Mano de Obra - Solo mostrar si hay additionalActions */}
+            {costBreakdown.hasLaborWork && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Mano de Obra</span>
+                <span className="font-medium">{formatCurrency(costBreakdown.laborCost)}</span>
+              </div>
+            )}
 
             {/* Recambios - Solo mostrar si hay recambios */}
             {costBreakdown.hasSpareParts && (
@@ -168,21 +168,14 @@ export const CostBreakdown = ({
               </div>
             )}
 
-            {/* Materiales de Pintura/Suplementos */}
-            <div className="flex justify-between">
-              <span className="text-gray-600">Materiales de Pintura</span>
-              <span className="font-medium">{formatCurrency(costBreakdown.supplementsCost)}</span>
-            </div>
-          )}
-
-          {/* Materiales de Pintura - Solo mostrar si hay paintWorks */}
-          {costBreakdown.hasPaintWorks && (
-            <div className="flex justify-between">
-              <span className="text-gray-600">Materiales de Pintura</span>
-              <span className="font-medium">{formatCurrency(costBreakdown.paintWorksCost)}</span>
-            </div>
-          )}
-        </div>
+            {/* Materiales de Pintura - Solo mostrar si hay paintWorks */}
+            {costBreakdown.hasPaintWorks && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Materiales de Pintura</span>
+                <span className="font-medium">{formatCurrency(costBreakdown.paintWorksCost)}</span>
+              </div>
+            )}
+          </div>
 
           {/* Subtotal */}
           <div className="mt-4 border-t border-gray-200 pt-3">
@@ -291,7 +284,7 @@ export const CostBreakdown = ({
           )}
           {damageAssessment.state === 'DAMAGES_CONFIRMED' && (
             <>
-              <Button className="w-full" onClick={onViewReport}>
+              <Button variant="outline" className="w-full" onClick={onViewReport}>
                 Ver Informe Completo
               </Button>
               <Button className="w-full">Generar Informe PDF</Button>
