@@ -243,7 +243,7 @@ export const CostBreakdown = ({
           )}
           {damageAssessment.state === 'DAMAGES_CONFIRMED' && (
             <>
-              <Button className="w-full" onClick={onViewReport}>
+              <Button variant="outline" className="w-full" onClick={onViewReport}>
                 Ver Informe Completo
               </Button>
               <Button className="w-full">Generar Informe PDF</Button>
