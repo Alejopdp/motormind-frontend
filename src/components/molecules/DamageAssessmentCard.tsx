@@ -21,7 +21,7 @@ export const DamageAssessmentCard: React.FC<DamageAssessmentCardProps> = ({ asse
 
   return (
     <Link to={`/damage-assessments/${_id}`} className="block">
-      <div className="w-full cursor-pointer rounded-lg border border-gray-200 bg-white p-4 shadow-2xs transition-colors duration-200 hover:bg-blue-50">
+      <div className="mb-4 rounded-lg border border-gray-300 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">

@@ -11,17 +11,21 @@ import { useCarPlateOrVin } from '@/hooks/useCarPlateOrVin';
 import DetailsContainer from '@/components/atoms/DetailsContainer';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { ImageCarousel } from '@/components/molecules/ImageCarousel';
+import { ImageModal } from '@/components/molecules/ImageModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import DamageCard from '@/components/molecules/DamageCard/DamageCard';
 import { useDamageAssessmentDetailPage } from '@/hooks/useDamageAssessmentDetail.hook';
 import { CostBreakdown } from '@/components/molecules/CostBreakdown/CostBreakdown';
+import { useState } from 'react';
 
 const DamageAssessmentDetail = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // Hook personalizado que maneja toda la lógica del DamageAssessment
   const {
@@ -158,7 +162,14 @@ const DamageAssessmentDetail = () => {
                 {/* Carousel de imágenes */}
                 {images.length > 0 &&
                   (isMobile ? (
-                    <ImageCarousel images={images} showDeleteButton={false} />
+                    <ImageCarousel
+                      images={images}
+                      showDeleteButton={false}
+                      onImageClick={(index) => {
+                        setImageModalOpen(true);
+                        setSelectedImageIndex(index);
+                      }}
+                    />
                   ) : (
                     <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                       {images.map((img, idx) => (
@@ -167,7 +178,10 @@ const DamageAssessmentDetail = () => {
                           src={img}
                           alt={`img-${idx}`}
                           className="aspect-square w-full cursor-pointer rounded border border-gray-200 object-cover transition-opacity hover:opacity-80"
-                          onClick={() => console.log('Abrir imagen en modal: ', img)}
+                          onClick={() => {
+                            setImageModalOpen(true);
+                            setSelectedImageIndex(idx);
+                          }}
                         />
                       ))}
                     </div>
@@ -257,6 +271,15 @@ const DamageAssessmentDetail = () => {
           </>
         )}
       </DetailsContainer>
+
+      {imageModalOpen && (
+        <ImageModal
+          isOpen={imageModalOpen}
+          onClose={() => setImageModalOpen(false)}
+          images={images}
+          initialIndex={selectedImageIndex}
+        />
+      )}
     </div>
   );
 };
