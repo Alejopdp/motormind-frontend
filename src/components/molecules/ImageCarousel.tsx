@@ -9,6 +9,7 @@ interface ImageCarouselProps {
   onRemove?: (index: number) => void; // onRemove es ahora opcional
   initialIndex?: number;
   showDeleteButton?: boolean; // Nueva prop para controlar el botón de eliminar
+  onImageClick?: (index: number) => void; // Nueva prop para manejar clicks en imágenes
 }
 
 export const ImageCarousel: React.FC<ImageCarouselProps> = ({
@@ -16,6 +17,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
   onRemove, // Recibimos onRemove
   initialIndex = 0, // Usaremos initialIndex para el estado inicial de activeIndex
   showDeleteButton = true,
+  onImageClick, // Nueva prop para manejar clicks en imágenes
 }) => {
   const [activeIndex, setActiveIndex] = useState(
     initialIndex < images.length && initialIndex >= 0 ? initialIndex : 0,
@@ -120,7 +122,8 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
             <img
               src={getImageUrl(image)}
               alt={`preview-${index}`}
-              className="h-full w-full rounded-lg object-cover"
+              className="h-full w-full cursor-pointer rounded-lg object-cover"
+              onClick={() => onImageClick?.(index)}
               onLoad={(e) => {
                 const target = e.target as HTMLImageElement;
                 if (target.src.startsWith('blob:')) {

@@ -18,7 +18,7 @@ interface FloatingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
 }
 
 export const FloatingButton: React.FC<FloatingButtonProps> = ({
-  size = 'md',
+  size = 'sm',
   className = '',
   children,
   onClick,
