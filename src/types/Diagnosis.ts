@@ -46,10 +46,8 @@ export type Diagnosis = {
         title: string;
         steps: string[];
         tools: string[];
-        resources: {
-          label: string;
-          url: string;
-        }[];
+        resources: DocumentLink[];
+        repairManuals: DocumentLink[];
       },
     ];
     alternativeFailures: [
@@ -57,10 +55,7 @@ export type Diagnosis = {
         title: string;
         probability: string;
         tests: string[];
-        resources: {
-          label: string;
-          url: string;
-        }[];
+        resources: DocumentLink[];
       },
     ];
   };
@@ -93,4 +88,5 @@ export type Diagnosis = {
 export type DocumentLink = {
   label: string;
   url: string;
+  type: 'video' | 'document';
 };

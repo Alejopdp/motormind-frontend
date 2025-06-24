@@ -1,19 +1,18 @@
 import { BarChartIcon } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Button } from '@/components/atoms/Button';
-import Spinner from '@/components/atoms/Spinner';
-import { useApi } from '@/hooks/useApi';
 import { DocumentLink } from '@/types/Diagnosis';
 import PartDiagramItem from '@/components/molecules/PartDiagramItem';
 import { useAuth } from '@/context/Auth.context';
+import { SearchResourceButton } from '@/components/atoms/SearchResourceButton';
+import { ApiService } from '@/service/api.service';
 
-const messages = [
+const diagramLoadingMessages = [
   'Buscando diagramas... esta operación puede tardar varios segundos',
   'Accediendo a documentación técnica del fabricante...',
-  'Analizando la avería y localizando manuales relevantes...',
-  'Explorando secciones técnicas en busca de instrucciones de diagnóstico...',
-  'Preparando recursos visuales para reparar más rápido y mejor...',
+  'Analizando la avería y localizando diagramas relevantes...',
+  'Explorando secciones técnicas en busca de esquemas de piezas...',
+  'Preparando recursos visuales para facilitar la reparación...',
 ];
 
 type EstimatedResourcesProps = {
@@ -26,7 +25,7 @@ type EstimatedResourcesProps = {
       },
     ];
     laborHours: number;
-    partsDiagrams: DocumentLink[];
+    partsDiagrams?: DocumentLink[];
   };
   diagnosisId: string;
 };
@@ -35,53 +34,29 @@ export const EstimatedResources = ({
   estimatedResources,
   diagnosisId,
 }: EstimatedResourcesProps) => {
-  const [diagramResults, setDiagramResults] = useState<DocumentLink[] | null>(null);
   const { user } = useAuth();
-  const { execute: getDiagrams } = useApi<DocumentLink[]>(
-    'get',
-    `/diagnoses/${diagnosisId}/failure-diagrams`,
-  );
-  const { mutate: fetchDiagrams, isPending } = useMutation({
-    mutationFn: async () => {
-      setDiagramResults([]);
-      const res = await getDiagrams();
+  const apiService = ApiService.getInstance();
 
-      if (res.status !== 200) throw new Error('No se pudo buscar diagramas');
-      const data = res.data;
-      return (
-        data.map((doc: DocumentLink) => ({
-          label: doc.label,
-          url: doc.url,
-        })) || []
+  const [diagramResults, setDiagramResults] = useState<DocumentLink[] | null>(
+    estimatedResources.partsDiagrams || null,
+  );
+
+  const fetchDiagramsMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiService.get<DocumentLink[]>(
+        `/diagnoses/${diagnosisId}/failure-diagrams`,
       );
+      if (res.status !== 200) throw new Error('No se pudo buscar diagramas');
+      return res.data || [];
     },
-    onSuccess: (results) => {
-      setDiagramResults(results);
+    onSuccess: (data) => {
+      setDiagramResults(data);
     },
     onError: (error) => {
       console.error('Error fetching diagrams:', error);
       setDiagramResults([]);
     },
-    onSettled: () => {},
   });
-
-  const hasSearchedDiagrams =
-    diagramResults !== null || estimatedResources.partsDiagrams !== undefined;
-  const partsDiagrams = estimatedResources.partsDiagrams ?? diagramResults ?? [];
-
-  const [currentMessage, setCurrentMessage] = useState(0);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isPending) {
-      interval = setInterval(() => {
-        setCurrentMessage((prev) => (prev + 1) % messages.length);
-      }, 10000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isPending]);
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
@@ -121,48 +96,23 @@ export const EstimatedResources = ({
       </div>
 
       <div className="mt-8">
-        {user.hasVendorResources && (
-          <div style={{ minHeight: 40 }} className="relative">
-            <Button
-              variant="outline"
-              onClick={() => fetchDiagrams()}
-              disabled={isPending}
-              className="mb-2 min-h-12 w-full"
-              style={{ display: hasSearchedDiagrams || isPending ? 'none' : 'block' }}
-            >
-              Buscar diagramas
-            </Button>
-            <div className="absolute inset-x-0 top-0">
-              {isPending && (
-                <div className="flex h-12 flex-col items-center justify-center gap-2">
-                  <Spinner className="h-5 w-5" label={messages[currentMessage]} />
-                </div>
-              )}
-              {!isPending && hasSearchedDiagrams && partsDiagrams?.length === 0 && (
-                <div className="text-xs text-gray-500 italic" style={{ fontSize: 14 }}>
-                  No encontramos manuales para este vehículo.
-                </div>
-              )}
-            </div>
-
-            {!isPending && hasSearchedDiagrams && partsDiagrams?.length > 0 && (
-              <>
-                <h3 className="mb-3 text-sm font-medium sm:text-base">Diagramas de las piezas</h3>
-                <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {partsDiagrams.map((result) => (
-                    <PartDiagramItem
-                      key={result.label}
-                      title={result.label}
-                      onClick={() => {
-                        window.open(result.url, '_blank');
-                      }}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
+        <SearchResourceButton
+          buttonText="Buscar diagramas de piezas"
+          resourceName="diagramas"
+          loadingMessages={diagramLoadingMessages}
+          onClick={() => fetchDiagramsMutation.mutate()}
+          isLoading={fetchDiagramsMutation.isPending}
+          resultsData={diagramResults}
+          userHasVendorResources={user.hasVendorResources}
+          renderItem={(item: DocumentLink) => (
+            <PartDiagramItem
+              key={item.label + item.url}
+              title={item.label}
+              type="document"
+              onClick={() => window.open(item.url, '_blank')}
+            />
+          )}
+        />
       </div>
     </div>
   );
