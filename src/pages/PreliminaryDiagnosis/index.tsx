@@ -38,7 +38,7 @@ const PreliminaryDiagnosis = () => {
     '/cars/:carId/diagnosis/:diagnosisId/final',
   );
   const { execute: getMorePossibleReasons } = useApi<Diagnosis>(
-    'get',
+    'post',
     '/diagnoses/:diagnosisId/more-possible-reasons',
   );
 
@@ -148,9 +148,15 @@ const PreliminaryDiagnosis = () => {
   const onGenerateMorePossibleReasons = async () => {
     setIsLoadingMorePossibleReasons(true);
     try {
-      const response = await getMorePossibleReasons(undefined, undefined, {
-        diagnosisId: params.diagnosisId as string,
-      });
+      const response = await getMorePossibleReasons(
+        {
+          obdCodes,
+        },
+        undefined,
+        {
+          diagnosisId: params.diagnosisId as string,
+        },
+      );
 
       if (response.status === 200 && response.data) {
         queryClient.setQueryData(
