@@ -33,6 +33,13 @@ export interface SparePart {
 export interface AdditionalAction {
     description: string;
     time: number; // in minutes
+    hourlyRate: number; // hourly rate in euros
+}
+
+export interface PaintWork {
+    description: string;
+    quantity: number;
+    price: number;
 }
 
 export interface Damage {
@@ -47,6 +54,7 @@ export interface Damage {
     action?: DamageAction;
     spareParts?: SparePart[];
     additionalActions?: AdditionalAction[];
+    paintWorks?: PaintWork[];
     notes?: string;
 }
 

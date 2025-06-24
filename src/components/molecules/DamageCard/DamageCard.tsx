@@ -9,6 +9,7 @@ import { Input } from '@/components/atoms/Input';
 import { Button } from '@/components/atoms/Button';
 import { DamageSparePartsTable } from '@/components/molecules/DamageSparePartsTable';
 import { DamageAdditionalActionsTable } from '@/components/molecules/DamageAdditionalActionsTable';
+import { DamagePaintWorksTable } from '@/components/molecules/DamagePaintWorksTable';
 import { DamageAction, Damage } from '@/types/DamageAssessment';
 import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
 import { useState } from 'react';
@@ -310,6 +311,16 @@ const DamageCard = ({
 
             {/* Suplementos / Operaciones Adicionales */}
             <DamageAdditionalActionsTable
+              damageId={damage._id!}
+              isEditing={isEditing}
+              editFormData={isEditing ? editFormData : undefined}
+              onUpdateField={isEditing ? updateField : undefined}
+              validationErrors={validationErrors}
+              setValidationErrors={setValidationErrors}
+            />
+
+            {/* Materiales de Pintura */}
+            <DamagePaintWorksTable
               damageId={damage._id!}
               isEditing={isEditing}
               editFormData={isEditing ? editFormData : undefined}
