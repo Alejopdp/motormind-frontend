@@ -1,32 +1,121 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { MoreVertical, Trash2, Share2 } from 'lucide-react';
+import { enqueueSnackbar } from 'notistack';
 import { Diagnosis } from '@/types/Diagnosis';
 import { useSymptom } from '@/hooks/useSymptom';
 import { diagnosisLink, formatToddmmyyyy } from '@/utils';
+import { Button } from '@/components/atoms/Button';
+import { Dropdown } from '@/components/atoms/Dropdown';
+import { DeleteDiagnosisModal } from '../DeleteDiagnosisModal';
 
 interface FaultsHistoryItemProps {
   diagnosis: Diagnosis;
   index: number;
+  onDelete?: (diagnosisId: string) => void;
 }
 
-export const FaultsHistoryItem = ({ diagnosis, index }: FaultsHistoryItemProps) => {
+export const FaultsHistoryItem = ({ diagnosis, index, onDelete }: FaultsHistoryItemProps) => {
   const { symptom } = useSymptom(diagnosis);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const copyDiagnosis = () => {
+    const link = `${window.location.origin}${diagnosisLink(diagnosis)}`;
+    navigator.clipboard.writeText(link);
+    enqueueSnackbar('🔗 Link del diagnóstico copiado', { variant: 'success' });
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropdownOpen(false); // Cerramos el dropdown
+    setShowDeleteModal(true);
+  };
+
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropdownOpen(false); // Cerramos el dropdown
+    copyDiagnosis();
+  };
+
+  const handleConfirmDelete = async () => {
+    if (onDelete && diagnosis._id) {
+      await onDelete(diagnosis._id);
+      // Cerramos el modal después de que el componente padre haya hecho el refresco
+      setShowDeleteModal(false);
+    }
+  };
 
   return (
-    <Link to={diagnosisLink(diagnosis)}>
-      <div
-        key={diagnosis._id}
-        className={`border-b last:border-b-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} transition-colors duration-200 hover:bg-[#EAF2FD]`}
-      >
-        <div className="p-3 sm:p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-muted text-xs sm:text-sm">
-              Fecha:{' '}
-              {diagnosis.createdAt ? formatToddmmyyyy(new Date(diagnosis.createdAt)) || '-' : '-'}
-            </p>
+    <>
+      <Link to={diagnosisLink(diagnosis)}>
+        <div
+          key={diagnosis._id}
+          className={`border-b last:border-b-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} transition-colors duration-200 hover:bg-[#EAF2FD]`}
+        >
+          <div className="p-3 sm:p-4">
+            <div className="flex items-center justify-between">
+              <p className="text-muted text-xs sm:text-sm">
+                Fecha:{' '}
+                {diagnosis.createdAt ? formatToddmmyyyy(new Date(diagnosis.createdAt)) || '-' : '-'}
+              </p>
+
+              {/* Dropdown de opciones */}
+              {onDelete && (
+                <div onClick={(e) => e.preventDefault()}>
+                  <Dropdown.Root open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                    <Dropdown.Trigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </Dropdown.Trigger>
+                    <Dropdown.Content>
+                      <Dropdown.Item
+                        onClick={handleShareClick}
+                        className="focus:bg-blue-50 focus:text-blue-600"
+                      >
+                        <Share2 className="mr-2 h-4 w-4" />
+                        Compartir diagnóstico
+                      </Dropdown.Item>
+                      <Dropdown.Item
+                        onClick={handleDeleteClick}
+                        className="text-red-600 focus:bg-red-50 focus:text-red-600"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar diagnóstico
+                      </Dropdown.Item>
+                    </Dropdown.Content>
+                  </Dropdown.Root>
+                </div>
+              )}
+            </div>
+            <p className="text-sm font-medium sm:text-base">{symptom}</p>
           </div>
-          <p className="text-sm font-medium sm:text-base">{symptom}</p>
         </div>
-      </div>
-    </Link>
+      </Link>
+
+      {/* Modal de confirmación */}
+      <DeleteDiagnosisModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        diagnosisInfo={{
+          carBrand: diagnosis.car?.brand,
+          carModel: diagnosis.car?.model,
+          carPlate: diagnosis.car?.plate,
+          fault: diagnosis.fault,
+        }}
+      />
+    </>
   );
 };

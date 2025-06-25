@@ -1,5 +1,6 @@
-import { CarIcon, Share2Icon } from 'lucide-react';
+import { CarIcon, Share2, MoreVertical, Trash2 } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
+import { useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/atoms/Avatar';
 import { cn } from '@/utils/cn';
@@ -9,6 +10,8 @@ import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
 import { DIAGNOSIS_STATUS } from '@/constants';
 import TitledStringList from '../../atoms/TitledStringList';
+import { Dropdown } from '@/components/atoms/Dropdown';
+import { DeleteDiagnosisModal } from '../DeleteDiagnosisModal';
 
 interface DiagnosticListItemProps {
   vehicle?: {
@@ -28,6 +31,9 @@ interface DiagnosticListItemProps {
   timestamp: string;
   className?: string;
   diagnosisLink: string;
+  diagnosisId: string;
+  fault?: string;
+  onDelete?: (diagnosisId: string) => void;
 }
 
 export const DiagnosticListItem = ({
@@ -39,10 +45,37 @@ export const DiagnosticListItem = ({
   className,
   diagnosisLink,
   status,
+  diagnosisId,
+  fault,
+  onDelete,
 }: DiagnosticListItemProps) => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   const copyDiagnosis = (link: string) => {
     navigator.clipboard.writeText(link);
     enqueueSnackbar('🔗 Link del diagnóstico copiado', { variant: 'success' });
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropdownOpen(false);
+    setShowDeleteModal(true);
+  };
+
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropdownOpen(false);
+    copyDiagnosis(diagnosisLink);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (onDelete) {
+      await onDelete(diagnosisId);
+      setShowDeleteModal(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -76,73 +109,111 @@ export const DiagnosticListItem = ({
   };
 
   return (
-    <Link to={`/cars${diagnosisLink.split('/cars')[1]}`}>
-      <div
-        className={cn(
-          'mb-4 rounded-lg border border-gray-300 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]',
-          className,
-        )}
-      >
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-100 sm:h-10 sm:w-10">
-              <CarIcon className="text-primary h-5 w-5" />
+    <>
+      <Link to={`/cars${diagnosisLink.split('/cars')[1]}`}>
+        <div
+          className={cn(
+            'mb-4 rounded-lg border border-gray-300 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]',
+            className,
+          )}
+        >
+          <div className="mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-100 sm:h-10 sm:w-10">
+                <CarIcon className="text-primary h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-medium sm:text-base">
+                  {vehicle?.brand} {vehicle?.model}
+                </p>
+                <p className="text-xs text-gray-500 sm:text-sm">
+                  {vehicle?.plate || vehicle?.vinCode}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium sm:text-base">
-                {vehicle?.brand} {vehicle?.model}
-              </p>
-              <p className="text-xs text-gray-500 sm:text-sm">
-                {vehicle?.plate || vehicle?.vinCode}
-              </p>
+
+            <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+              {status && (
+                <Badge
+                  variant="outline"
+                  className={`${getStatusColor(status)} truncate px-2 py-0.5 text-xs font-medium`}
+                >
+                  {getStatusText(status)}
+                </Badge>
+              )}
+
+              {/* Dropdown de opciones */}
+              <Dropdown.Root open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                <Dropdown.Trigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </Dropdown.Trigger>
+                <Dropdown.Content>
+                  <Dropdown.Item
+                    onClick={handleShareClick}
+                    className="focus:bg-blue-50 focus:text-blue-600"
+                  >
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Compartir diagnóstico
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    onClick={handleDeleteClick}
+                    className="text-red-600 focus:bg-red-50 focus:text-red-600"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Eliminar diagnóstico
+                  </Dropdown.Item>
+                </Dropdown.Content>
+              </Dropdown.Root>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {status && (
-              <Badge
-                variant="outline"
-                className={`${getStatusColor(status)} truncate px-2 py-0.5 text-xs font-medium`}
-              >
-                {getStatusText(status)}
-              </Badge>
-            )}
-            <Button
-              variant="ghost"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                copyDiagnosis(diagnosisLink);
-              }}
-            >
-              <Share2Icon className="text-primary h-4 w-4" />
-            </Button>
+          {status === DIAGNOSIS_STATUS.GUIDED_QUESTIONS ? (
+            <TitledStringList title="Preguntas guiadas:" items={questions} />
+          ) : status === DIAGNOSIS_STATUS.PRELIMINARY ? (
+            <TitledStringList title="Potenciales averías:" items={problems} />
+          ) : (
+            <TitledStringList title="Problemas detectados:" items={problems} />
+          )}
+
+          <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-6 w-6 sm:h-9 sm:w-9">
+                <AvatarImage alt={technician?.name || 'Unknown'} />
+                <AvatarFallback className="text-xs sm:text-base">
+                  {technician?.name ? getInitials(technician.name) : 'NN'}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-xs font-medium sm:text-sm">
+                {technician?.name || 'Sin asignar'}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">{timestamp}</span>
           </div>
         </div>
+      </Link>
 
-        {status === DIAGNOSIS_STATUS.GUIDED_QUESTIONS ? (
-          <TitledStringList title="Preguntas guiadas:" items={questions} />
-        ) : status === DIAGNOSIS_STATUS.PRELIMINARY ? (
-          <TitledStringList title="Potenciales averías:" items={problems} />
-        ) : (
-          <TitledStringList title="Problemas detectados:" items={problems} />
-        )}
-
-        <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6 sm:h-9 sm:w-9">
-              <AvatarImage alt={technician?.name || 'Unknown'} />
-              <AvatarFallback className="text-xs sm:text-base">
-                {technician?.name ? getInitials(technician.name) : 'NN'}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs font-medium sm:text-sm">
-              {technician?.name || 'Sin asignar'}
-            </span>
-          </div>
-          <span className="text-xs text-gray-500">{timestamp}</span>
-        </div>
-      </div>
-    </Link>
+      {/* Modal de confirmación de eliminación - fuera del Link */}
+      <DeleteDiagnosisModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        diagnosisInfo={{
+          carBrand: vehicle?.brand,
+          carModel: vehicle?.model,
+          carPlate: vehicle?.plate,
+          fault: fault,
+        }}
+      />
+    </>
   );
 };

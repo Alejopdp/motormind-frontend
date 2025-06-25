@@ -1,10 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { debounce } from 'lodash';
 import { FileSearch, PlusIcon, SearchIcon } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
 import { diagnosisLink, formatDate } from '@/utils';
 import { useApi } from '@/hooks/useApi';
 import { Diagnosis } from '@/types/Diagnosis';
+import apiService from '@/service/api.service';
 import Spinner from '@/components/atoms/Spinner';
 import { DiagnosticListItem } from '@/components/molecules/DiagnosticListItem';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
@@ -29,6 +30,7 @@ const Diagnoses = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const queryClient = useQueryClient();
   const { execute: getDiagnosesRequest } = useApi<{ data: Diagnosis[]; total: number }>(
     'get',
     '/diagnoses',
@@ -102,6 +104,22 @@ const Diagnoses = () => {
         return 'Reparado';
       default:
         return status;
+    }
+  };
+
+  const handleDeleteDiagnosis = async (diagnosisId: string) => {
+    try {
+      await apiService.deleteDiagnosis(diagnosisId);
+      enqueueSnackbar('Diagnóstico eliminado correctamente', { variant: 'success' });
+
+      // Invalidar múltiples queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['diagnoses'] });
+      queryClient.invalidateQueries({ queryKey: ['getDiagnosesByCarId'] });
+      queryClient.removeQueries({ queryKey: ['getDiagnosisById', diagnosisId] });
+      queryClient.removeQueries({ queryKey: ['diagnosis', diagnosisId] });
+    } catch (error) {
+      console.error('Error deleting diagnosis:', error);
+      enqueueSnackbar('Error al eliminar el diagnóstico', { variant: 'error' });
     }
   };
 
@@ -179,6 +197,9 @@ const Diagnoses = () => {
                   }
                   timestamp={formatDate(diagnosis.createdAt)}
                   diagnosisLink={diagnosisLink(diagnosis, true)}
+                  diagnosisId={diagnosis._id!}
+                  fault={diagnosis.fault}
+                  onDelete={handleDeleteDiagnosis}
                 />
               ))}
             </>
