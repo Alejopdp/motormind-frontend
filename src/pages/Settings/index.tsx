@@ -1,48 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
-import { useApi } from '@/hooks/useApi';
-import { useAuth } from '@/context/Auth.context';
+import { useWorkshop } from '@/context/Workshop.context';
 import HeaderPage from '@/components/molecules/HeaderPage';
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { workshop, isLoading, updateWorkshop } = useWorkshop();
   const { enqueueSnackbar } = useSnackbar();
   const [newPricePerHour, setNewPricePerHour] = useState<string>('');
   const [newBodyworkHourlyRate, setNewBodyworkHourlyRate] = useState<string>('');
-  const { execute: updatePricePerHourRequest } = useApi<{
-    pricePerHour: number;
-    bodyworkHourlyRate: number;
-  }>('put', `/workshops/:workshopId`);
-  const { execute: getMechanicRequest } = useApi<{
-    pricePerHour: number;
-    bodyworkHourlyRate: number;
-  }>('get', `/workshops/${user.workshopId}`);
 
-  const { data: mechanicData, isLoading: isLoadingMechanic } = useQuery({
-    queryKey: ['workshop', user.workshopId],
-    queryFn: async () => {
-      const response = await getMechanicRequest();
-      const price = response.data?.pricePerHour || 0;
-      const bodyworkRate = response.data?.bodyworkHourlyRate || 0;
-      setNewPricePerHour(price.toString());
-      setNewBodyworkHourlyRate(bodyworkRate.toString());
-      return response.data;
-    },
-    enabled: !!user.workshopId,
-  });
+  // Inicializar valores cuando el workshop se carga
+  useEffect(() => {
+    if (workshop) {
+      setNewPricePerHour((workshop.pricePerHour || 0).toString());
+      setNewBodyworkHourlyRate((workshop.bodyworkHourlyRate || 0).toString());
+    }
+  }, [workshop]);
 
   const { mutate: updatePricePerHourMutation, isPending: isSubmitting } = useMutation({
     mutationFn: async (data: { pricePerHour: number; bodyworkHourlyRate: number }) => {
-      const response = await updatePricePerHourRequest(data, undefined, {
-        workshopId: user.workshopId,
-      });
-      return response;
+      await updateWorkshop(data);
     },
     onSuccess: () => {
       enqueueSnackbar('Cambios guardados correctamente', {
@@ -101,14 +84,14 @@ const Settings = () => {
   };
 
   const isSubmitDisabled = () => {
-    const currentMechanicPrice = mechanicData?.pricePerHour || 0;
-    const currentBodyworkPrice = mechanicData?.bodyworkHourlyRate || 0;
+    const currentMechanicPrice = workshop?.pricePerHour || 0;
+    const currentBodyworkPrice = workshop?.bodyworkHourlyRate || 0;
     const mechanicPrice = parseInt(newPricePerHour, 10);
     const bodyworkPrice = parseInt(newBodyworkHourlyRate, 10);
 
     return (
       isSubmitting ||
-      isLoadingMechanic ||
+      isLoading ||
       isNaN(mechanicPrice) ||
       isNaN(bodyworkPrice) ||
       mechanicPrice <= 0 ||
@@ -154,9 +137,9 @@ const Settings = () => {
                     onChange={handleInputChange}
                     type="number"
                     className="pl-8"
-                    placeholder={isLoadingMechanic ? 'Cargando...' : 'Precio mecánica'}
+                    placeholder={isLoading ? 'Cargando...' : 'Precio mecánica'}
                     required
-                    disabled={isLoadingMechanic}
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -178,9 +161,9 @@ const Settings = () => {
                     onChange={handleBodyworkInputChange}
                     type="number"
                     className="pl-8"
-                    placeholder={isLoadingMechanic ? 'Cargando...' : 'Precio carrocería'}
+                    placeholder={isLoading ? 'Cargando...' : 'Precio carrocería'}
                     required
-                    disabled={isLoadingMechanic}
+                    disabled={isLoading}
                   />
                 </div>
               </div>

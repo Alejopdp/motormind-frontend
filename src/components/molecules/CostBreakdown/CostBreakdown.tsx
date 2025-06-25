@@ -3,6 +3,11 @@ import { DamageAssessment } from '@/types/DamageAssessment';
 import { useMemo, useState, useEffect } from 'react';
 import { Button } from '@/components/atoms/Button';
 import { Textarea } from '@/components/atoms/Textarea';
+import { useWorkshop } from '@/context/Workshop.context';
+import {
+  groupPaintMaterials,
+  calculatePaintMaterialsSubtotal,
+} from '@/utils/paintMaterialGrouping';
 
 interface CostBreakdownProps {
   damageAssessment: DamageAssessment;
@@ -19,6 +24,7 @@ export const CostBreakdown = ({
   isConfirming = false,
   onViewReport,
 }: CostBreakdownProps) => {
+  const { workshop } = useWorkshop();
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState(damageAssessment.notes || '');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -37,6 +43,25 @@ export const CostBreakdown = ({
     const laborCost = 15; // MOCK
     const supplementsCost = 30; // MOCK
 
+      const damageAdditionalActionsTotal = damage.additionalActions.reduce(
+        (damageTotal, action) => {
+          // Convertir minutos a horas y multiplicar por tarifa por hora
+          const hours = action.time / 60;
+          // Usar la tarifa del taller como fuente única de verdad
+          const actionCost = hours * (workshop?.bodyworkHourlyRate || 40);
+          return damageTotal + actionCost;
+        },
+        0,
+      );
+
+      return total + damageAdditionalActionsTotal;
+    }, 0);
+
+    // Calcular total de materiales de pintura usando la nueva lógica de agrupación
+    // Ya no se usa confirmación - usar todos los daños disponibles
+    const groupedPaintMaterials = groupPaintMaterials(damageAssessment.damages);
+    const paintWorksCost = calculatePaintMaterialsSubtotal(groupedPaintMaterials);
+
     // Calcular total de recambios de todos los daños
     const sparePartsCost = damageAssessment.damages.reduce((total, damage) => {
       if (!damage.spareParts || damage.spareParts.length === 0) return total;
@@ -53,7 +78,15 @@ export const CostBreakdown = ({
       (damage) => damage.spareParts && damage.spareParts.length > 0,
     );
 
-    const subtotal = laborCost + sparePartsCost + supplementsCost;
+    // Verificar si hay mano de obra
+    const hasLaborWork = damageAssessment.damages.some(
+      (damage) => damage.additionalActions && damage.additionalActions.length > 0,
+    );
+
+    // Verificar si hay materiales de pintura
+    const hasPaintWorks = groupedPaintMaterials.length > 0;
+
+    const subtotal = laborCost + sparePartsCost + paintWorksCost;
     const iva = subtotal * 0.21;
     const total = subtotal + iva;
 
@@ -171,7 +204,7 @@ export const CostBreakdown = ({
             </div>
             <div className="flex justify-between">
               <span>Tarifa Hora</span>
-              <span className="font-medium">€45.00/h</span>
+              <span className="font-medium">€{workshop?.bodyworkHourlyRate || 40}.00/h</span>
             </div>
           </div>
         </div>

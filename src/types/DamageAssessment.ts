@@ -1,5 +1,6 @@
 import { Car } from './Car';
 import { DocumentLink } from './Diagnosis';
+import { PaintMaterialType } from './PaintMaterial';
 
 export enum DamageSeverity {
     SEV1 = 'SEV1',
@@ -33,6 +34,13 @@ export interface SparePart {
 export interface AdditionalAction {
     description: string;
     time: number; // in minutes
+}
+
+export interface PaintWork {
+    type: PaintMaterialType;
+    description: string;
+    quantity: number;
+    price: number;
 }
 
 export interface Damage {
