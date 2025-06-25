@@ -5,15 +5,19 @@ import { UserRole } from '@/types/User';
 import { Navigate } from 'react-router-dom';
 import Spinner from '@/components/atoms/Spinner';
 import { Button } from '@/components/atoms/Button';
-import { Printer, Share, Mail, Download } from 'lucide-react';
-import { useEffect } from 'react';
+import { Share, Download } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useSnackbar } from 'notistack';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const DamageAssessmentReport = () => {
+  const contentRef = useRef<HTMLDivElement>(null);
   const { damageAssessmentId } = useParams<{ damageAssessmentId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const { damageAssessment, isLoading, error, isCurrentAssessmentLoaded, damages } =
     useDamageAssessmentDetailPage();
@@ -23,6 +27,36 @@ const DamageAssessmentReport = () => {
     // Este efecto se ejecuta para asegurar que se carga el assessment correcto
     // El hook interno ya maneja la carga automática
   }, [damageAssessmentId]);
+
+  const handleDownloadPdf = async () => {
+    const element = contentRef.current;
+
+    try {
+      setIsGeneratingPDF(true);
+      enqueueSnackbar('Generando PDF...', { variant: 'info' });
+
+      // Esperar a que el estado se actualice y las imágenes se oculten
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const canvas = await html2canvas(element || document.body);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF();
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('pantalla.pdf');
+
+      enqueueSnackbar('PDF descargado correctamente', { variant: 'success' });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      enqueueSnackbar('Error al generar el PDF', { variant: 'error' });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   // Verificar permisos
   if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role)) {
@@ -83,19 +117,19 @@ const DamageAssessmentReport = () => {
   const { car } = damageAssessment;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-5">
       {/* Header con botones de acción */}
-      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <Button variant="outline" onClick={() => navigate('/damage-assessments')}>
+      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white px-4 py-2 sm:px-6 sm:py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/damage-assessments')}
+            className="self-start !pl-0"
+          >
             ← Volver a Peritajes
           </Button>
 
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Printer className="mr-2 h-4 w-4" />
-              Imprimir
-            </Button>
+          <div className="flex gap-2 self-end">
             <Button
               variant="outline"
               size="sm"
@@ -104,100 +138,97 @@ const DamageAssessmentReport = () => {
                 enqueueSnackbar('Link copiado al portapapeles', { variant: 'success' });
               }}
             >
-              <Share className="mr-2 h-4 w-4" />
-              Compartir
+              <Share className="h-4 w-4" />
+              <span className="hidden sm:inline">Compartir</span>
             </Button>
-            <Button variant="outline" size="sm">
-              <Mail className="mr-2 h-4 w-4" />
-              Enviar por Email
-            </Button>
-            <Button size="sm">
-              <Download className="mr-2 h-4 w-4" />
-              Descargar PDF
+
+            <Button size="sm" onClick={handleDownloadPdf}>
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Descargar PDF</span>
             </Button>
           </div>
         </div>
       </div>
 
       {/* Contenido del informe */}
-      <div className="mx-auto my-8 max-w-5xl bg-white shadow-lg">
-        <div className="p-8">
+      <div
+        ref={contentRef}
+        className={`mx-auto my-5 max-w-6xl rounded-lg bg-white px-1 py-3 sm:px-7 sm:py-5 ${!isGeneratingPDF && 'shadow-lg'}`}
+      >
+        <div className="p-4 sm:p-8">
           {/* Header del informe */}
-          <div className="mb-8 flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="rounded bg-blue-600 p-2 text-white">
-                <span className="text-sm font-bold">Motormind</span>
+          <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+              <div className="w-32 sm:w-40">
+                <img src="/logo_motormind.png" alt="Motormind" className="w-full" />
               </div>
-              <div>
-                <h2 className="font-semibold text-gray-900">Talleres Motormind</h2>
-                <p className="text-sm text-gray-600">Calle Principal 123, 28001 Madrid</p>
-                <p className="text-sm text-gray-600">CIF: B12345678 | Tel: 91 234 56 78</p>
+              <div className="text-center sm:text-left">
+                <h2 className="font-semibold text-[#111827]">Talleres Motormind</h2>
+                <p className="text-sm text-[#6b7280]">Calle Principal 123, 28001 Madrid</p>
+                <p className="text-sm text-[#6b7280]">CIF: B12345678 | Tel: 91 234 56 78</p>
               </div>
             </div>
-            <div className="text-right">
-              <h1 className="mb-2 text-xl font-bold text-gray-900">
+            <div className="text-center lg:text-right">
+              <h1 className="mb-2 text-lg font-bold text-[#111827] sm:text-xl">
                 INFORME DE PERITACIÓN DE DAÑOS
               </h1>
-              <p className="text-sm text-gray-600">Fecha de emisión: {currentDate}</p>
+              <p className="text-sm text-[#6b7280]">Fecha de emisión: {currentDate}</p>
             </div>
           </div>
 
-          {/* Divider */}
-          <hr className="mb-8 border-gray-200" />
-
           {/* Datos del Vehículo y Siniestro */}
-          <div className="mb-8 grid grid-cols-2 gap-8">
-            <div className="rounded-lg border border-gray-200 p-6">
-              <h3 className="mb-4 font-semibold text-gray-900">Datos del Vehículo</h3>
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="rounded-lg border border-[#e5e7eb] p-4 sm:p-6">
+              <h3 className="mb-4 font-semibold text-[#111827]">Datos del Vehículo</h3>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Marca y Modelo:</span>
+                <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
+                  <span className="text-[#6b7280]">Marca y Modelo:</span>
                   <span className="font-medium">
                     {car.brand} {car.model}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Matrícula:</span>
+                <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
+                  <span className="text-[#6b7280]">Matrícula:</span>
                   <span className="font-medium">{car.plate || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Nº de Bastidor (VIN):</span>
-                  <span className="font-medium">{car.vinCode || 'N/A'}</span>
+                <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
+                  <span className="text-[#6b7280]">Nº de Bastidor (VIN):</span>
+                  <span className="font-medium break-all">{car.vinCode || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Kilometraje:</span>
+                <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
+                  <span className="text-[#6b7280]">Kilometraje:</span>
                   <span className="font-medium">16,272 km</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Fecha de 1ª Matriculación:</span>
+                <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
+                  <span className="text-[#6b7280]">Fecha de 1ª Matriculación:</span>
                   <span className="font-medium">{car.year || 'N/A'}</span>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-lg border border-gray-200 p-6">
-              <h3 className="mb-4 font-semibold text-gray-900">Datos del Siniestro</h3>
+            <div className="rounded-lg border border-[#e5e7eb] p-4 sm:p-6">
+              <h3 className="mb-4 font-semibold text-[#111827]">Datos del Siniestro</h3>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Aseguradora:</span>
+                <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
+                  <span className="text-[#6b7280]">Aseguradora:</span>
                   <span className="font-medium">{damageAssessment.insuranceCompany}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Nº de Póliza:</span>
+                <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
+                  <span className="text-[#6b7280]">Nº de Póliza:</span>
                   <span className="font-medium">-</span>
                 </div>
                 {damageAssessment.claimNumber && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Nº de Siniestro:</span>
-                    <span className="font-medium">{damageAssessment.claimNumber}</span>
+                  <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
+                    <span className="text-[#6b7280]">Nº de Siniestro:</span>
+                    <span className="font-medium break-all">{damageAssessment.claimNumber}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Fecha del Siniestro:</span>
+                <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
+                  <span className="text-[#6b7280]">Fecha del Siniestro:</span>
                   <span className="font-medium">-</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Cliente/Asegurado:</span>
+                <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
+                  <span className="text-[#6b7280]">Cliente/Asegurado:</span>
                   <span className="font-medium">-</span>
                 </div>
               </div>
@@ -206,12 +237,12 @@ const DamageAssessmentReport = () => {
 
           {/* Resumen de Daños Principales */}
           <div className="mb-8">
-            <h3 className="mb-4 font-semibold text-gray-900">Resumen de Daños Principales</h3>
-            <div className="rounded-lg bg-gray-50 p-4">
+            <h3 className="mb-4 font-semibold text-[#111827]">Resumen de Daños Principales</h3>
+            <div className="rounded-lg bg-[#f9fafb] p-4">
               <ul className="space-y-2 text-sm">
                 {mockDamagesSummary.map((summary, index) => (
                   <li key={index} className="flex items-start">
-                    <span className="mr-2 text-gray-400">•</span>
+                    <span className="mt-0.5 mr-2 text-[#9ca3af]">•</span>
                     <span>{summary}</span>
                   </li>
                 ))}
@@ -219,48 +250,62 @@ const DamageAssessmentReport = () => {
             </div>
           </div>
 
-          {/* Fotografías Clave */}
-          <div className="mb-8">
-            <h3 className="mb-4 font-semibold text-gray-900">Fotografías Clave</h3>
-            <div className="grid grid-cols-4 gap-4">
-              {damageAssessment.images.slice(0, 8).map((image, index) => (
-                <div key={index} className="aspect-square">
-                  <img
-                    src={image}
-                    alt={`Fotografía ${index + 1}`}
-                    className="h-full w-full rounded border border-gray-200 object-cover"
-                  />
-                </div>
-              ))}
+          {/* Fotografías Clave - Solo visibles cuando NO se está generando PDF */}
+          {!isGeneratingPDF && (
+            <div className="mb-8">
+              <h3 className="mb-4 font-semibold text-[#111827]">Fotografías Clave</h3>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {damageAssessment.images.slice(0, 8).map((image, index) => (
+                  <div key={index} className="aspect-square">
+                    <img
+                      src={image}
+                      alt={`Fotografía ${index + 1}`}
+                      className="h-full w-full rounded border border-[#e5e7eb] object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Desglose Detallado de la Valoración */}
           <div className="mb-8">
-            <h3 className="mb-6 text-lg font-bold text-gray-900">
+            <h3 className="mb-6 text-lg font-bold text-[#111827]">
               DESGLOSE DETALLADO DE LA VALORACIÓN
             </h3>
 
             {/* Mano de Obra */}
             <div className="mb-6">
-              <h4 className="mb-3 font-semibold text-gray-900">MANO DE OBRA</h4>
+              <h4 className="mb-3 font-semibold text-[#111827]">MANO DE OBRA</h4>
               <div className="overflow-x-auto">
-                <table className="w-full border border-gray-200 text-sm">
-                  <thead className="bg-gray-50">
+                <table className="w-full text-xs sm:text-sm">
+                  <thead className="bg-[#f9fafb]">
                     <tr>
-                      <th className="border border-gray-200 px-4 py-2 text-left">OPERACIÓN</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">CÓDIGO BAREMO</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">TIEMPO (HORAS)</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">PRECIO/HORA</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">IMPORTE</th>
+                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                        OPERACIÓN
+                      </th>
+                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                        CÓDIGO
+                      </th>
+                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                        TIEMPO
+                      </th>
+                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                        PRECIO/H
+                      </th>
+                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                        IMPORTE
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {confirmedDamages.map((damage, damageIndex) =>
-                      (damage.additionalActions || []).map((action, actionIndex) => (
-                        <tr key={`${damageIndex}-${actionIndex}`}>
-                          <td className="border border-gray-200 px-4 py-2">{action.description}</td>
-                          <td className="border border-gray-200 px-4 py-2">
+                      (damage.additionalActions || []).map((action) => (
+                        <tr key={`${damageIndex}-${action.description}`}>
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                            <span className="line-clamp-2">{action.description}</span>
+                          </td>
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
                             {damage.action === 'REPLACE'
                               ? 'SUST-'
                               : damage.action === 'REPAIR_AND_PAINT'
@@ -268,19 +313,26 @@ const DamageAssessmentReport = () => {
                                 : 'PINT-'}
                             {String(damageIndex + 1).padStart(2, '0')}
                           </td>
-                          <td className="border border-gray-200 px-4 py-2">{action.time}h</td>
-                          <td className="border border-gray-200 px-4 py-2">€70.00</td>
-                          <td className="border border-gray-200 px-4 py-2 font-medium">
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                            {action.time}h
+                          </td>
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                            €70
+                          </td>
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs font-medium sm:px-4 sm:text-sm">
                             €{(action.time * 70).toFixed(2)}
                           </td>
                         </tr>
                       )),
                     )}
-                    <tr className="bg-gray-50 font-medium">
-                      <td colSpan={4} className="border border-gray-200 px-4 py-2 text-right">
+                    <tr className="bg-[#f9fafb] font-medium">
+                      <td
+                        colSpan={4}
+                        className="border border-[#e5e7eb] px-2 py-2 text-right text-xs sm:px-4 sm:text-sm"
+                      >
                         Subtotal Mano de Obra:
                       </td>
-                      <td className="border border-gray-200 px-4 py-2">
+                      <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
                         €{laborSubtotal.toFixed(2)}
                       </td>
                     </tr>
@@ -291,42 +343,55 @@ const DamageAssessmentReport = () => {
 
             {/* Recambios */}
             <div className="mb-6">
-              <h4 className="mb-3 font-semibold text-gray-900">RECAMBIOS</h4>
+              <h4 className="mb-3 font-semibold text-[#111827]">RECAMBIOS</h4>
               <div className="overflow-x-auto">
-                <table className="w-full border border-gray-200 text-sm">
-                  <thead className="bg-gray-50">
+                <table className="w-full border border-[#e5e7eb] text-xs sm:text-sm">
+                  <thead className="bg-[#f9fafb]">
                     <tr>
-                      <th className="border border-gray-200 px-4 py-2 text-left">DESCRIPCIÓN</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">REFERENCIA</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">CANT.</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">PRECIO UNIT.</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">IMPORTE</th>
+                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                        DESCRIPCIÓN
+                      </th>
+                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">REF.</th>
+                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">CANT.</th>
+                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                        PRECIO
+                      </th>
+                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                        IMPORTE
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {confirmedDamages.map((damage, damageIndex) =>
                       (damage.spareParts || []).map((part, partIndex) => (
                         <tr key={`${damageIndex}-${partIndex}`}>
-                          <td className="border border-gray-200 px-4 py-2">{part.description}</td>
-                          <td className="border border-gray-200 px-4 py-2">
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                            <span className="line-clamp-2">{part.description}</span>
+                          </td>
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
                             {damage.area.slice(0, 3).toUpperCase()}
                             {String(damageIndex + 1).padStart(3, '0')}-{String(partIndex + 1)}
                           </td>
-                          <td className="border border-gray-200 px-4 py-2">{part.quantity}</td>
-                          <td className="border border-gray-200 px-4 py-2">
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                            {part.quantity}
+                          </td>
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
                             €{part.price.toFixed(2)}
                           </td>
-                          <td className="border border-gray-200 px-4 py-2 font-medium">
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs font-medium sm:px-4 sm:text-sm">
                             €{(part.quantity * part.price).toFixed(2)}
                           </td>
                         </tr>
                       )),
                     )}
-                    <tr className="bg-gray-50 font-medium">
-                      <td colSpan={4} className="border border-gray-200 px-4 py-2 text-right">
+                    <tr className="bg-[#f9fafb] font-medium">
+                      <td
+                        colSpan={4}
+                        className="border border-[#e5e7eb] px-2 py-2 text-right text-xs sm:px-4 sm:text-sm"
+                      >
                         Subtotal Recambios:
                       </td>
-                      <td className="border border-gray-200 px-4 py-2">
+                      <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
                         €{partsSubtotal.toFixed(2)}
                       </td>
                     </tr>
@@ -337,14 +402,16 @@ const DamageAssessmentReport = () => {
 
             {/* Materiales de Pintura */}
             <div className="mb-6">
-              <h4 className="mb-3 font-semibold text-gray-900">MATERIALES DE PINTURA</h4>
+              <h4 className="mb-3 font-semibold text-[#111827]">MATERIALES DE PINTURA</h4>
               <div className="overflow-x-auto">
-                <table className="w-full border border-gray-200 text-sm">
+                <table className="w-full border border-[#e5e7eb] text-xs sm:text-sm">
                   <tbody>
-                    {paintMaterials.map((material, index) => (
-                      <tr key={index}>
-                        <td className="border border-gray-200 px-4 py-2">{material.description}</td>
-                        <td className="border border-gray-200 px-4 py-2 text-right font-medium">
+                    {paintMaterials.map((material) => (
+                      <tr key={material.description}>
+                        <td className="border border-[#e5e7eb] px-2 py-2 sm:px-4">
+                          <span className="line-clamp-2">{material.description}</span>
+                        </td>
+                        <td className="border border-[#e5e7eb] px-2 py-2 text-right font-medium sm:px-4">
                           €{material.amount.toFixed(2)}
                         </td>
                       </tr>
@@ -354,11 +421,11 @@ const DamageAssessmentReport = () => {
               </div>
             </div>
 
-            {/* Resumen de Costes Totales */}
+            {/* Resumen de Costes */}
             <div>
-              <h4 className="mb-3 font-semibold text-gray-900">RESUMEN DE COSTES TOTALES</h4>
-              <div className="rounded-lg bg-gray-50 p-6">
-                <div className="ml-auto max-w-md space-y-2 text-sm">
+              <h4 className="mb-3 font-semibold text-[#111827]">RESUMEN DE COSTES TOTALES</h4>
+              <div className="rounded-lg bg-[#f9fafb] p-4 sm:p-6">
+                <div className="ml-auto max-w-md space-y-2 text-xs sm:text-sm">
                   <div className="flex justify-between">
                     <span>Subtotal Mano de Obra:</span>
                     <span className="font-medium">€{laborSubtotal.toFixed(2)}</span>
@@ -371,7 +438,7 @@ const DamageAssessmentReport = () => {
                     <span>Subtotal Materiales Pintura:</span>
                     <span className="font-medium">€{paintSubtotal.toFixed(2)}</span>
                   </div>
-                  <hr className="my-2" />
+                  <hr className="my-2 border-[#e5e7eb]" />
                   <div className="flex justify-between font-medium">
                     <span>BASE IMPONIBLE:</span>
                     <span>€{subtotal.toFixed(2)}</span>
@@ -380,9 +447,9 @@ const DamageAssessmentReport = () => {
                     <span>IVA (21%):</span>
                     <span className="font-medium">€{iva.toFixed(2)}</span>
                   </div>
-                  <hr className="my-2" />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>TOTAL VALORACIÓN (IVA Incluido):</span>
+                  <hr className="my-2 border-[#e5e7eb]" />
+                  <div className="flex justify-between text-base font-bold sm:text-lg">
+                    <span>TOTAL VALORACIÓN:</span>
                     <span>€{total.toFixed(2)}</span>
                   </div>
                 </div>
