@@ -38,7 +38,7 @@ const PreliminaryDiagnosis = () => {
     '/cars/:carId/diagnosis/:diagnosisId/final',
   );
   const { execute: getMorePossibleReasons } = useApi<Diagnosis>(
-    'get',
+    'post',
     '/diagnoses/:diagnosisId/more-possible-reasons',
   );
 
@@ -109,9 +109,12 @@ const PreliminaryDiagnosis = () => {
   if (isError || !diagnosis) {
     return (
       <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4">
-        <div className="text-destructive flex items-center gap-2 rounded-lg bg-red-50 p-4">
-          <AlertCircle className="h-5 w-5" />
-          <span>Error al cargar los datos del diagnóstico preliminar</span>
+        <div className="text-destructive flex max-w-md items-center gap-2 rounded-lg bg-red-50 p-4 text-center">
+          <AlertCircle className="h-5 w-5 flex-shrink-0" />
+          <div>
+            <p className="font-medium">No se puede cargar el diagnóstico</p>
+            <p className="mt-1 text-sm">Este diagnóstico no existe o puede haber sido eliminado</p>
+          </div>
         </div>
         <Button variant="outline" onClick={() => navigate(`/cars/${params.carId}`)}>
           Volver atrás
@@ -148,9 +151,15 @@ const PreliminaryDiagnosis = () => {
   const onGenerateMorePossibleReasons = async () => {
     setIsLoadingMorePossibleReasons(true);
     try {
-      const response = await getMorePossibleReasons(undefined, undefined, {
-        diagnosisId: params.diagnosisId as string,
-      });
+      const response = await getMorePossibleReasons(
+        {
+          obdCodes,
+        },
+        undefined,
+        {
+          diagnosisId: params.diagnosisId as string,
+        },
+      );
 
       if (response.status === 200 && response.data) {
         queryClient.setQueryData(

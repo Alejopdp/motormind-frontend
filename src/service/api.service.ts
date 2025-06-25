@@ -131,6 +131,12 @@ export class ApiService {
     );
     return response.data;
   }
+
+  // Método para eliminar diagnóstico
+  async deleteDiagnosis(diagnosisId: string): Promise<{ message: string }> {
+    const response = await this.delete<{ message: string }>(`/diagnoses/${diagnosisId}`);
+    return response.data;
+  }
 }
 
 // Exporta la instancia singleton por defecto
