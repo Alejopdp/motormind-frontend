@@ -8,20 +8,9 @@ interface DeleteDiagnosisModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void>;
-  diagnosisInfo?: {
-    carBrand?: string;
-    carModel?: string;
-    carPlate?: string;
-    fault?: string;
-  };
 }
 
-export const DeleteDiagnosisModal = ({
-  open,
-  onClose,
-  onConfirm,
-  diagnosisInfo,
-}: DeleteDiagnosisModalProps) => {
+export const DeleteDiagnosisModal = ({ open, onClose, onConfirm }: DeleteDiagnosisModalProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
@@ -46,7 +35,7 @@ export const DeleteDiagnosisModal = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-red-600">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
             <AlertTriangle className="h-5 w-5" />
             Eliminar diagnóstico
           </DialogTitle>
@@ -56,22 +45,6 @@ export const DeleteDiagnosisModal = ({
           <p className="mb-4 text-gray-700">
             ¿Estás seguro que deseas eliminar este diagnóstico? No podrás recuperar los datos.
           </p>
-
-          {diagnosisInfo && (
-            <div className="mb-4 rounded-lg bg-gray-50 p-3">
-              <p className="text-sm font-medium text-gray-900">
-                {diagnosisInfo.carBrand} {diagnosisInfo.carModel}
-              </p>
-              {diagnosisInfo.carPlate && (
-                <p className="text-sm text-gray-600">{diagnosisInfo.carPlate}</p>
-              )}
-              {diagnosisInfo.fault && (
-                <p className="mt-1 text-sm text-gray-600">
-                  <span className="font-medium">Problema:</span> {diagnosisInfo.fault}
-                </p>
-              )}
-            </div>
-          )}
         </div>
 
         <div className="flex justify-end gap-2">
