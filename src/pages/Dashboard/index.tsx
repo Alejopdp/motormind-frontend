@@ -78,6 +78,7 @@ const Dashboard = () => {
                 {diagnoses.map((diagnosis, index) => (
                   <DiagnosticListItem
                     key={index}
+                    diagnosisId={diagnosis._id || ''}
                     diagnosisLink={diagnosisLink(diagnosis, true)}
                     vehicle={diagnosis.car}
                     problems={

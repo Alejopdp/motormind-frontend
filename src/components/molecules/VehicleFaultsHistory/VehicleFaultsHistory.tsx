@@ -6,6 +6,7 @@ import { enqueueSnackbar } from 'notistack';
 import { useEffect } from 'react';
 import { AlertCircleIcon } from 'lucide-react';
 import { FaultsHistoryItem } from './FaultsHistoryItem';
+import apiService from '@/service/api.service';
 
 const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
   const queryClient = useQueryClient();
@@ -41,6 +42,22 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
     };
   }, [carId, queryClient]);
 
+  const handleDeleteDiagnosis = async (diagnosisId: string) => {
+    try {
+      await apiService.deleteDiagnosis(diagnosisId);
+      enqueueSnackbar('Diagnóstico eliminado correctamente', { variant: 'success' });
+
+      // Invalidar múltiples queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['getDiagnosesByCarId'] });
+      queryClient.invalidateQueries({ queryKey: ['diagnoses'] });
+      queryClient.removeQueries({ queryKey: ['getDiagnosisById', diagnosisId] });
+      queryClient.removeQueries({ queryKey: ['diagnosis', diagnosisId] });
+    } catch (error) {
+      console.error('Error deleting diagnosis:', error);
+      enqueueSnackbar('Error al eliminar el diagnóstico', { variant: 'error' });
+    }
+  };
+
   return (
     <div className="mt-4 rounded-lg bg-white p-4 shadow-sm sm:p-6">
       <h3 className="text-md mb-3 font-medium sm:text-lg">Historial de Averías Reciente</h3>
@@ -66,8 +83,15 @@ const VehicleFaultsHistory = ({ carId }: { carId: string }) => {
               return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
             })
             .map((diagnosis: Diagnosis, index: number) => (
-              <div className="overflow-hidden border border-gray-200 first:rounded-t-lg last:rounded-b-lg">
-                <FaultsHistoryItem diagnosis={diagnosis} index={index} />
+              <div
+                key={diagnosis._id}
+                className="overflow-hidden border border-gray-200 first:rounded-t-lg last:rounded-b-lg"
+              >
+                <FaultsHistoryItem
+                  diagnosis={diagnosis}
+                  index={index}
+                  onDelete={handleDeleteDiagnosis}
+                />
               </div>
             ))}
         </div>
