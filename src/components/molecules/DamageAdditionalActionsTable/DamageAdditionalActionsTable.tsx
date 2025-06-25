@@ -71,6 +71,7 @@ export const DamageAdditionalActionsTable = ({
     const newAction: AdditionalAction = {
       description: '',
       time: 0,
+      hourlyRate: 0, // Will be set from damage assessment context or user input
     };
 
     if (onUpdateField) {

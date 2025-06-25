@@ -14,29 +14,32 @@ const Settings = () => {
   const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const [newPricePerHour, setNewPricePerHour] = useState<string>('');
-  const { execute: updatePricePerHourRequest } = useApi<{ pricePerHour: number }>(
-    'put',
-    `/workshops/:workshopId`,
-  );
-  const { execute: getMechanicRequest } = useApi<{ pricePerHour: number }>(
-    'get',
-    `/workshops/${user.workshopId}`,
-  );
+  const [newBodyworkHourlyRate, setNewBodyworkHourlyRate] = useState<string>('');
+  const { execute: updatePricePerHourRequest } = useApi<{
+    pricePerHour: number;
+    bodyworkHourlyRate: number;
+  }>('put', `/workshops/:workshopId`);
+  const { execute: getMechanicRequest } = useApi<{
+    pricePerHour: number;
+    bodyworkHourlyRate: number;
+  }>('get', `/workshops/${user.workshopId}`);
 
   const { data: mechanicData, isLoading: isLoadingMechanic } = useQuery({
     queryKey: ['workshop', user.workshopId],
     queryFn: async () => {
       const response = await getMechanicRequest();
       const price = response.data?.pricePerHour || 0;
+      const bodyworkRate = response.data?.bodyworkHourlyRate || 0;
       setNewPricePerHour(price.toString());
+      setNewBodyworkHourlyRate(bodyworkRate.toString());
       return response.data;
     },
     enabled: !!user.workshopId,
   });
 
   const { mutate: updatePricePerHourMutation, isPending: isSubmitting } = useMutation({
-    mutationFn: async (price: number) => {
-      const response = await updatePricePerHourRequest({ pricePerHour: price }, undefined, {
+    mutationFn: async (data: { pricePerHour: number; bodyworkHourlyRate: number }) => {
+      const response = await updatePricePerHourRequest(data, undefined, {
         workshopId: user.workshopId,
       });
       return response;
@@ -69,24 +72,48 @@ const Settings = () => {
     }
   };
 
+  const handleBodyworkInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // Si está vacío, permitir borrar
+    if (value === '') {
+      setNewBodyworkHourlyRate('');
+      return;
+    }
+
+    // Convertir a número y validar
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue >= 0) {
+      setNewBodyworkHourlyRate(numValue.toString());
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const numValue = parseInt(newPricePerHour, 10);
-    if (numValue > 0) {
-      updatePricePerHourMutation(numValue);
+    const mechanicPrice = parseInt(newPricePerHour, 10);
+    const bodyworkPrice = parseInt(newBodyworkHourlyRate, 10);
+    if (mechanicPrice > 0 && bodyworkPrice > 0) {
+      updatePricePerHourMutation({
+        pricePerHour: mechanicPrice,
+        bodyworkHourlyRate: bodyworkPrice,
+      });
     }
   };
 
   const isSubmitDisabled = () => {
-    const currentValue = mechanicData?.pricePerHour || 0;
-    const numValue = parseInt(newPricePerHour, 10);
+    const currentMechanicPrice = mechanicData?.pricePerHour || 0;
+    const currentBodyworkPrice = mechanicData?.bodyworkHourlyRate || 0;
+    const mechanicPrice = parseInt(newPricePerHour, 10);
+    const bodyworkPrice = parseInt(newBodyworkHourlyRate, 10);
 
     return (
       isSubmitting ||
       isLoadingMechanic ||
-      isNaN(numValue) ||
-      numValue <= 0 ||
-      numValue === currentValue
+      isNaN(mechanicPrice) ||
+      isNaN(bodyworkPrice) ||
+      mechanicPrice <= 0 ||
+      bodyworkPrice <= 0 ||
+      (mechanicPrice === currentMechanicPrice && bodyworkPrice === currentBodyworkPrice)
     );
   };
 
@@ -105,25 +132,57 @@ const Settings = () => {
             <div className="mb-4">
               <h2 className="text-md font-semibold sm:text-lg">Tarifa por Hora</h2>
               <p className="text-muted mt-1 text-sm sm:mt-0 sm:text-base">
-                Establece tu tarifa por hora predeterminada para las reparaciones
+                Establece tus tarifas por hora para mecánica y carrocería
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <span className="text-gray-500">€</span>
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="pricePerHour"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Precio por hora - Mecánica
+                </label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span className="text-gray-500">€</span>
+                  </div>
+                  <Input
+                    id="pricePerHour"
+                    value={newPricePerHour}
+                    onChange={handleInputChange}
+                    type="number"
+                    className="pl-8"
+                    placeholder={isLoadingMechanic ? 'Cargando...' : 'Precio mecánica'}
+                    required
+                    disabled={isLoadingMechanic}
+                  />
                 </div>
-                <Input
-                  id="pricePerHour"
-                  value={newPricePerHour}
-                  onChange={handleInputChange}
-                  type="number"
-                  className="pl-8"
-                  placeholder={isLoadingMechanic ? 'Cargando...' : 'Price'}
-                  required
-                  disabled={isLoadingMechanic}
-                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="bodyworkHourlyRate"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Precio por hora - Carrocería
+                </label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span className="text-gray-500">€</span>
+                  </div>
+                  <Input
+                    id="bodyworkHourlyRate"
+                    value={newBodyworkHourlyRate}
+                    onChange={handleBodyworkInputChange}
+                    type="number"
+                    className="pl-8"
+                    placeholder={isLoadingMechanic ? 'Cargando...' : 'Precio carrocería'}
+                    required
+                    disabled={isLoadingMechanic}
+                  />
+                </div>
               </div>
             </div>
           </div>
