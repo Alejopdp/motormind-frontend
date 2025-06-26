@@ -10,6 +10,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { useWorkshop } from '@/context/Workshop.context';
+import {
+  groupPaintMaterials,
+  calculatePaintMaterialsSubtotal,
+} from '@/utils/paintMaterialGrouping';
 
 const DamageAssessmentReport = () => {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -18,7 +23,7 @@ const DamageAssessmentReport = () => {
   const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-
+  const { workshop } = useWorkshop();
   const { damageAssessment, isLoading, error, isCurrentAssessmentLoaded, damages } =
     useDamageAssessmentDetailPage();
 
@@ -80,35 +85,30 @@ const DamageAssessmentReport = () => {
     );
   }
 
-  // Solo mostrar daños confirmados
-  const confirmedDamages = damages.filter((damage) => damage.isConfirmed);
+  // Usar todos los daños disponibles (ya no se usa confirmación)
+  const damagesToShow = damages;
 
-  // Mock data para el resumen de daños principales
-  const mockDamagesSummary = [
-    'Daños principales localizados en parte frontal izquierda, afectando paragolpes, faro y aleta.',
-    'Se requiere sustitución de paragolpes y faro, y reparación de aleta.',
-  ];
-
-  // Mock data para materiales de pintura
-  const paintMaterials = [
-    {
-      description: 'Aplicación según baremo',
-      amount: 120.0,
-    },
-  ];
+  // Agrupar materiales de pintura por tipo
+  const groupedPaintMaterials = groupPaintMaterials(damagesToShow);
 
   // Calcular totales
-  const laborSubtotal = confirmedDamages.reduce((total, damage) => {
+  const laborSubtotal = damagesToShow.reduce((total, damage) => {
     const additionalActions = damage.additionalActions || [];
-    return total + additionalActions.reduce((sum, action) => sum + action.time * 70, 0);
+    return (
+      total +
+      additionalActions.reduce(
+        (sum, action) => sum + (action.time / 60) * (workshop?.bodyworkHourlyRate || 40),
+        0,
+      )
+    );
   }, 0);
 
-  const partsSubtotal = confirmedDamages.reduce((total, damage) => {
+  const partsSubtotal = damagesToShow.reduce((total, damage) => {
     const spareParts = damage.spareParts || [];
     return total + spareParts.reduce((sum, part) => sum + part.quantity * part.price, 0);
   }, 0);
 
-  const paintSubtotal = paintMaterials.reduce((total, material) => total + material.amount, 0);
+  const paintSubtotal = calculatePaintMaterialsSubtotal(groupedPaintMaterials);
   const subtotal = laborSubtotal + partsSubtotal + paintSubtotal;
   const iva = subtotal * 0.21;
   const total = subtotal + iva;
@@ -240,10 +240,10 @@ const DamageAssessmentReport = () => {
             <h3 className="mb-4 font-semibold text-[#111827]">Resumen de Daños Principales</h3>
             <div className="rounded-lg bg-[#f9fafb] p-4">
               <ul className="space-y-2 text-sm">
-                {mockDamagesSummary.map((summary, index) => (
+                {damagesToShow.map((damage, index) => (
                   <li key={index} className="flex items-start">
                     <span className="mt-0.5 mr-2 text-[#9ca3af]">•</span>
-                    <span>{summary}</span>
+                    <span>{damage.description}</span>
                   </li>
                 ))}
               </ul>
@@ -299,7 +299,7 @@ const DamageAssessmentReport = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {confirmedDamages.map((damage, damageIndex) =>
+                    {damagesToShow.map((damage, damageIndex) =>
                       (damage.additionalActions || []).map((action) => (
                         <tr key={`${damageIndex}-${action.description}`}>
                           <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
@@ -314,13 +314,14 @@ const DamageAssessmentReport = () => {
                             {String(damageIndex + 1).padStart(2, '0')}
                           </td>
                           <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
-                            {action.time}h
+                            {action.time}min
                           </td>
                           <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
-                            €70
+                            €{workshop?.bodyworkHourlyRate || 40}
                           </td>
                           <td className="border border-[#e5e7eb] px-2 py-2 text-xs font-medium sm:px-4 sm:text-sm">
-                            €{(action.time * 70).toFixed(2)}
+                            €
+                            {((action.time / 60) * (workshop?.bodyworkHourlyRate || 40)).toFixed(2)}
                           </td>
                         </tr>
                       )),
@@ -362,7 +363,7 @@ const DamageAssessmentReport = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {confirmedDamages.map((damage, damageIndex) =>
+                    {damagesToShow.map((damage, damageIndex) =>
                       (damage.spareParts || []).map((part, partIndex) => (
                         <tr key={`${damageIndex}-${partIndex}`}>
                           <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
@@ -401,25 +402,65 @@ const DamageAssessmentReport = () => {
             </div>
 
             {/* Materiales de Pintura */}
-            <div className="mb-6">
-              <h4 className="mb-3 font-semibold text-[#111827]">MATERIALES DE PINTURA</h4>
-              <div className="overflow-x-auto">
-                <table className="w-full border border-[#e5e7eb] text-xs sm:text-sm">
-                  <tbody>
-                    {paintMaterials.map((material) => (
-                      <tr key={material.description}>
-                        <td className="border border-[#e5e7eb] px-2 py-2 sm:px-4">
-                          <span className="line-clamp-2">{material.description}</span>
+            {groupedPaintMaterials.length > 0 && (
+              <div className="mb-6">
+                <h4 className="mb-3 font-semibold text-[#111827]">MATERIALES DE PINTURA</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full border border-[#e5e7eb] text-xs sm:text-sm">
+                    <thead className="bg-[#f9fafb]">
+                      <tr>
+                        <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                          DESCRIPCIÓN
+                        </th>
+                        <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                          CANT.
+                        </th>
+                        <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                          PRECIO UNIT.
+                        </th>
+                        <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                          IMPORTE
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {groupedPaintMaterials.map((material) => (
+                        <tr key={material.type}>
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                            <div className="flex items-center gap-2">
+                              <span className="rounded bg-gray-100 px-2 py-1 font-mono text-xs">
+                                {material.code}
+                              </span>
+                              <span className="line-clamp-2">{material.description}</span>
+                            </div>
+                          </td>
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                            {material.totalQuantity}ml
+                          </td>
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                            €{material.averagePrice.toFixed(2)}/L
+                          </td>
+                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs font-medium sm:px-4 sm:text-sm">
+                            €{material.totalAmount.toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr className="bg-[#f9fafb] font-medium">
+                        <td
+                          colSpan={3}
+                          className="border border-[#e5e7eb] px-2 py-2 text-right text-xs sm:px-4 sm:text-sm"
+                        >
+                          Subtotal Materiales Pintura:
                         </td>
-                        <td className="border border-[#e5e7eb] px-2 py-2 text-right font-medium sm:px-4">
-                          €{material.amount.toFixed(2)}
+                        <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                          €{paintSubtotal.toFixed(2)}
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Resumen de Costes */}
             <div>
