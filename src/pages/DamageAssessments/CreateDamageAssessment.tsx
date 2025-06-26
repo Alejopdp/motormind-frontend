@@ -13,10 +13,10 @@ import { Navigate } from 'react-router-dom';
 import { useDamageAssessmentCreation } from '@/context/DamageAssessment.context';
 import { Textarea } from '@/components/atoms/Textarea';
 import { useFileUpload } from '@/hooks/useFileUpload';
-import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
 import HeaderPage from '@/components/molecules/HeaderPage';
 import DetailsContainer from '@/components/atoms/DetailsContainer';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { CircleCheckBig } from 'lucide-react';
 
 const loadingMessages = [
   'Este proceso puede tardar unos minutos, por favor espere...',
@@ -29,9 +29,8 @@ const loadingMessages = [
 ];
 
 const CreateDamageAssessment = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const carId = searchParams.get('carId');
-  const step = Number(searchParams.get('step') || 1);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { data, setImages, setDetails, reset } = useDamageAssessmentCreation();
@@ -95,17 +94,6 @@ const CreateDamageAssessment = () => {
   const isAdmin = [UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role);
   if (!isAdmin) return <Navigate to="/" replace />;
 
-  const goToStep = (n: number) => {
-    setSearchParams((prev) => {
-      const params = new URLSearchParams(prev);
-      params.set('step', String(n));
-      return params;
-    });
-  };
-
-  const handleNext = () => goToStep(step + 1);
-  const handleBack = () => goToStep(step - 1);
-
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
@@ -150,13 +138,7 @@ const CreateDamageAssessment = () => {
     return null;
   }
 
-  const mainContainerMobilePaddingBottom = isMobile
-    ? step === 1
-      ? 'pb-20'
-      : step === 2
-        ? 'pb-36'
-        : ''
-    : '';
+  const mainContainerMobilePaddingBottom = isMobile ? 'pb-20' : '';
 
   return (
     <div className={`bg-background min-h-screen ${mainContainerMobilePaddingBottom}`}>
@@ -165,91 +147,107 @@ const CreateDamageAssessment = () => {
         onBack={() => navigate('/damage-assessments')}
       />
       <DetailsContainer>
-        {step === 1 && (
-          <div
-            className={`w-full ${isMobile ? 'flex flex-grow flex-col' : 'rounded-lg bg-white p-8 shadow-md'}`}
-          >
-            <ImageUploadStep images={data.images} onImagesChange={setImages} />
-            <div
-              className={`flex w-full gap-2 ${
-                isMobile
-                  ? 'shadow-t-md fixed bottom-0 left-0 z-10 mt-auto w-full bg-white p-4'
-                  : 'mt-6'
-              }`}
-            >
-              <Button
-                className={`w-full md:mx-auto md:w-1/2 ${isMobile ? '' : ''}`}
-                onClick={handleNext}
-                disabled={data.images.length === 0}
-                size={isMobile ? 'lg' : 'default'}
-              >
-                Siguiente
-              </Button>
+        <div className={`w-full ${isMobile ? 'flex flex-grow flex-col' : ''}`}>
+          {isMobile ? (
+            // Vista móvil - mantener el layout original
+            <div className="flex flex-grow flex-col">
+              <div className="rounded-lg bg-white p-4 shadow-md">
+                <ImageUploadStep images={data.images} onImagesChange={setImages} />
+              </div>
+
+              {/* Observaciones móvil */}
+              <div className="mt-4 rounded-lg bg-white p-4 shadow-md">
+                <label className="mb-2 block text-sm font-medium text-gray-900">
+                  Observaciones adicionales (opcional)
+                </label>
+                <Textarea
+                  value={data.details}
+                  onChange={(e) => setDetails(e.target.value)}
+                  placeholder="Agrega cualquier observación o detalle adicional sobre los daños..."
+                  className="min-h-[100px]"
+                />
+              </div>
+
+              {/* Botón móvil */}
+              <div className="shadow-t-md fixed bottom-0 left-0 z-10 mt-auto w-full bg-white p-4">
+                <Button
+                  className="w-full"
+                  onClick={handleSubmit}
+                  disabled={data.images.length === 0}
+                  size="lg"
+                >
+                  Enviar a Análisis IA
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
+          ) : (
+            // Vista desktop - replicar exactamente el layout de DamageAssessmentDetail
+            <div className="flex gap-6">
+              {/* Columna principal - Igual que DamageAssessmentDetail */}
+              <div className="min-w-0 flex-1">
+                {/* Sección Fotos del Vehículo */}
+                <div className="rounded-lg bg-white p-6 shadow-md">
+                  <h2 className="mb-4 text-lg font-semibold text-gray-900">Fotos del Vehículo</h2>
+                  <ImageUploadStep images={data.images} onImagesChange={setImages} />
+                </div>
 
-        {step === 2 && (
-          <>
-            <VehicleInformation car={car} editMode={false} />
-
-            {/* Información del siniestro */}
-            {insuranceCompany && (
-              <div
-                className={`mb-6 ${isMobile ? 'rounded-lg bg-white p-4 shadow-md' : 'rounded-lg bg-white p-6 shadow-md'}`}
-              >
-                <h3 className="mb-4 text-lg font-semibold text-gray-900">Datos del Siniestro</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Aseguradora:</span>
-                    <span className="text-sm font-medium text-gray-900">{insuranceCompany}</span>
-                  </div>
-                  {claimNumber && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Número de siniestro:</span>
-                      <span className="text-sm font-medium text-gray-900">{claimNumber}</span>
-                    </div>
-                  )}
+                {/* Sección Observaciones */}
+                <div className="mt-6 rounded-lg bg-white p-6 shadow-md">
+                  <label className="mb-3 block text-lg font-semibold text-gray-900">
+                    Observaciones
+                  </label>
+                  <Textarea
+                    value={data.details}
+                    onChange={(e) => setDetails(e.target.value)}
+                    placeholder="Agrega cualquier observación o detalle adicional sobre los daños..."
+                    className="min-h-[120px]"
+                  />
                 </div>
               </div>
-            )}
 
-            <div className="mb-6">
-              <label className="mb-2 block text-sm font-medium text-gray-900">
-                Detalles de los daños (opcional)
-              </label>
-              <Textarea
-                value={data.details}
-                onChange={(e) => setDetails(e.target.value)}
-                placeholder="Describe los detalles de los daños..."
-                className="min-h-[120px]"
-              />
+              {/* Card Fotos recomendadas - Fixed como CostBreakdown */}
+              <div className="fixed right-4 bottom-4 z-20 h-fit w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:top-26 md:right-16">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900">Fotos recomendadas</h3>
+
+                <div className="space-y-3">
+                  {[
+                    'Vista Frontal Completa',
+                    'Vista Trasera Completa',
+                    'Lateral Izquierdo',
+                    'Lateral Derecho',
+                    'Matrícula Clara',
+                    'Número de Bastidor (VIN)',
+                    'Kilometraje del Odómetro',
+                    'Daño Principal Detalle 1',
+                    'Daño Principal Detalle 2',
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <CircleCheckBig className="h-4 w-4 text-gray-300" />
+                      <span className="text-sm text-gray-700">{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="mt-4 text-xs text-gray-500 italic">
+                  Esta lista es una guía para ayudarte a capturar todas las fotos necesarias para el
+                  peritaje.
+                </p>
+
+                {/* Botón de acción */}
+                <div className="mt-6">
+                  <Button
+                    className="w-full"
+                    onClick={handleSubmit}
+                    disabled={data.images.length === 0}
+                    size="default"
+                  >
+                    Enviar a Análisis IA
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div
-              className={`flex gap-2 ${
-                isMobile
-                  ? 'shadow-t-md fixed bottom-0 left-0 z-10 w-full flex-col bg-white p-4'
-                  : 'mt-6 ml-auto max-w-md flex-row-reverse'
-              }`}
-            >
-              <Button
-                className={`${isMobile ? 'w-full' : 'w-1/2'}`}
-                onClick={handleSubmit}
-                size={isMobile ? 'lg' : 'default'}
-              >
-                Crear Peritaje
-              </Button>
-              <Button
-                className={`${isMobile ? 'w-full' : 'w-1/2'}`}
-                variant="outline"
-                onClick={handleBack}
-                size={isMobile ? 'lg' : 'default'}
-              >
-                Atrás
-              </Button>
-            </div>
-          </>
-        )}
+          )}
+        </div>
       </DetailsContainer>
     </div>
   );
