@@ -46,6 +46,7 @@ interface DamageAssessmentContextType {
   // Métodos para edición de damages
   updateDamage: (damageId: string, damageData: Partial<Damage>) => Promise<void>;
   deleteDamage: (damageId: string) => Promise<void>;
+  addDamage: (damageData: Partial<Damage>) => Promise<void>;
 
   // Método para actualizar notas del assessment
   updateDamageAssessmentNotes: (notes: string) => Promise<void>;
@@ -315,6 +316,50 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
     [apiService, state.damageAssessment?._id, queryClient],
   );
 
+  // Método para agregar un nuevo damage
+  const addDamage = useCallback(
+    async (damageData: Partial<Damage>) => {
+      if (!state.damageAssessment?._id) return;
+
+      setState((prevState) => ({
+        ...prevState,
+        isUpdating: true,
+      }));
+
+      try {
+        const updatedAssessment = await apiService.addDamage(
+          state.damageAssessment._id,
+          damageData,
+        );
+
+        console.log('updatedAssessment', updatedAssessment);
+
+        setState((prevState) => ({
+          ...prevState,
+          damageAssessment: updatedAssessment,
+          isUpdating: false,
+          editingDamageId: null,
+        }));
+
+        // Invalidar queries relacionadas
+        queryClient.invalidateQueries({
+          queryKey: ['damageAssessment', state.damageAssessment._id],
+        });
+        queryClient.invalidateQueries({ queryKey: ['damageAssessments'] });
+
+        enqueueSnackbar('Daño agregado correctamente', { variant: 'success' });
+      } catch {
+        setState((prevState) => ({
+          ...prevState,
+          isUpdating: false,
+        }));
+
+        enqueueSnackbar('Error al agregar el daño', { variant: 'error' });
+      }
+    },
+    [apiService, state.damageAssessment?._id, queryClient],
+  );
+
   const contextValue: DamageAssessmentContextType = {
     state,
 
@@ -332,6 +377,7 @@ export const DamageAssessmentProvider = ({ children }: { children: ReactNode }) 
     // Métodos de edición
     updateDamage,
     deleteDamage,
+    addDamage,
 
     // Método para actualizar notas del assessment
     updateDamageAssessmentNotes,
@@ -391,6 +437,7 @@ export const useDamageAssessmentDetail = () => {
     refreshDamageAssessment: ctx.refreshDamageAssessment,
     updateDamage: ctx.updateDamage,
     deleteDamage: ctx.deleteDamage,
+    addDamage: ctx.addDamage,
     updateDamageAssessmentNotes: ctx.updateDamageAssessmentNotes,
     startEditingDamage: ctx.startEditingDamage,
     stopEditingDamage: ctx.stopEditingDamage,
