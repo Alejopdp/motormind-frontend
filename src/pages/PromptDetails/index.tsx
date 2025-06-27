@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Prompt, PromptVersion } from '@/types/prompt';
+import { Prompt, PromptVersion, PromptType } from '@/types/prompt';
 import { promptService } from '@/service/prompt.service';
 import Spinner from '@/components/atoms/Spinner';
 import { formatDate } from '@/utils';
@@ -11,6 +11,7 @@ import { PromptWarningModal } from '@/components/molecules/PromptWarningModal';
 import { PromptVersionHistory } from '@/components/molecules/PromptVersionHistory';
 import { usePromptVariables } from '@/hooks/usePromptVariables';
 import { Textarea } from '@/components/atoms/Textarea';
+import { Badge } from '@/components/atoms/Badge';
 
 const PromptDetail: React.FC = () => {
   const { phase } = useParams<{ phase: string }>();
@@ -145,6 +146,18 @@ const PromptDetail: React.FC = () => {
     setActiveContent(originalContent);
   };
 
+  const getTypeVariant = (type?: PromptType): 'tertiary' | 'secondary' | null => {
+    if (type === PromptType.SYSTEM) return 'tertiary'; // Purple para system
+    if (type === PromptType.USER) return 'secondary'; // Gray para user
+    return null;
+  };
+
+  const getTypeLabel = (type?: PromptType) => {
+    if (type === PromptType.SYSTEM) return 'System';
+    if (type === PromptType.USER) return 'User';
+    return null;
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -177,10 +190,15 @@ const PromptDetail: React.FC = () => {
         onBack={handleBack}
       />
       <div className="container mx-auto px-4 py-2 sm:px-8 sm:py-4">
-        <div className="mb-4">
+        <div className="mb-4 flex items-center gap-3">
           <p className="text-muted text-xs sm:text-sm">
             Actualizado: {formatDate(prompt.updatedAt)}
           </p>
+          {prompt.type && getTypeVariant(prompt.type) && (
+            <Badge variant={getTypeVariant(prompt.type)!} className="px-2 py-0.5 text-xs">
+              {getTypeLabel(prompt.type)}
+            </Badge>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
