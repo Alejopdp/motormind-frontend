@@ -12,6 +12,7 @@ import {
 import { AdditionalAction, Damage } from '@/types/DamageAssessment';
 import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
 import clsx from 'clsx';
+import { onChangePrice } from '@/utils';
 
 interface DamageAdditionalActionsTableProps {
   damageId: string;
@@ -183,6 +184,11 @@ export const DamageAdditionalActionsTable = ({
                                 <Input
                                   type="number"
                                   value={act.time}
+                                  onKeyDown={(e) => {
+                                    if (act.time === 0 && /[0-9]/.test(e.key)) {
+                                      e.currentTarget.value = '';
+                                    }
+                                  }}
                                   onChange={(e) =>
                                     updateAdditionalAction(
                                       index,
@@ -223,10 +229,8 @@ export const DamageAdditionalActionsTable = ({
                                   step="0.01"
                                   value={act.hourlyRate || 0}
                                   onChange={(e) =>
-                                    updateAdditionalAction(
-                                      index,
-                                      'hourlyRate',
-                                      parseFloat(e.target.value) || 0,
+                                    onChangePrice(e, (value) =>
+                                      updateAdditionalAction(index, 'hourlyRate', value),
                                     )
                                   }
                                   className={clsx(
@@ -252,13 +256,16 @@ export const DamageAdditionalActionsTable = ({
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right align-top">
+                      <TableCell className="text-right align-middle">
                         <span className="text-sm font-semibold text-gray-900">
-                          {totalCost.toFixed(2)}€
+                          {totalCost.toLocaleString('es-ES', {
+                            style: 'currency',
+                            currency: 'EUR',
+                          })}
                         </span>
                       </TableCell>
                       {isEditing && (
-                        <TableCell>
+                        <TableCell className="p-0">
                           <Button
                             variant="ghost"
                             size="sm"

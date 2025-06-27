@@ -12,6 +12,7 @@ import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
 import { PaintWork, Damage } from '@/types/DamageAssessment';
 import { Palette, Plus, X } from 'lucide-react';
 import clsx from 'clsx';
+import { onChangePrice } from '@/utils';
 
 interface DamagePaintWorksTableProps {
   damageId: string;
@@ -131,12 +132,12 @@ export const DamagePaintWorksTable = ({
                     Descripción
                   </TableHead>
                   <TableHead className="w-[15%] text-center text-xs font-medium text-gray-500">
-                    Cantidad
+                    Cant.
                   </TableHead>
-                  <TableHead className="w-[15%] text-right text-xs font-medium text-gray-500">
-                    Precio por litro
+                  <TableHead className="w-[20%] text-right text-xs font-medium text-gray-500">
+                    Precio por Litro
                   </TableHead>
-                  <TableHead className="w-[15%] text-right text-xs font-medium text-gray-500">
+                  <TableHead className="w-[10%] text-right text-xs font-medium text-gray-500">
                     Total
                   </TableHead>
                   {isEditing && <TableHead className="w-[5%]"></TableHead>}
@@ -179,17 +180,28 @@ export const DamagePaintWorksTable = ({
                           <div className="flex items-center justify-center gap-2">
                             <Input
                               type="number"
-                              step="0.01"
                               value={paintWork.quantity}
-                              onChange={(e) =>
-                                updatePaintWork(index, 'quantity', parseFloat(e.target.value) || 1)
-                              }
+                              onKeyDown={(e) => {
+                                if (paintWork.quantity === 0 && /[0-9]/.test(e.key)) {
+                                  e.currentTarget.value = '';
+                                }
+                              }}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (value === '') {
+                                  updatePaintWork(index, 'quantity', 0);
+                                } else {
+                                  const numValue = parseInt(value, 10);
+                                  if (!isNaN(numValue) && numValue >= 0) {
+                                    updatePaintWork(index, 'quantity', numValue);
+                                  }
+                                }
+                              }}
                               className={clsx(
                                 'w-20 text-center text-sm',
                                 validationErrors?.[`paintWork_${index}_quantity`] &&
                                   'border-red-500 focus:border-red-500',
                               )}
-                              min="0.01"
                               placeholder="0.00"
                             />
                             <span className="text-xs text-gray-500">ml</span>
@@ -211,7 +223,7 @@ export const DamagePaintWorksTable = ({
                             type="number"
                             value={paintWork.price}
                             onChange={(e) =>
-                              updatePaintWork(index, 'price', parseFloat(e.target.value) || 0)
+                              onChangePrice(e, (value) => updatePaintWork(index, 'price', value))
                             }
                             className={clsx(
                               'w-full text-right text-sm',
@@ -261,7 +273,7 @@ export const DamagePaintWorksTable = ({
                       </div>
                     </TableCell>
                     {isEditing && (
-                      <TableCell>
+                      <TableCell className="p-0">
                         <Button
                           variant="ghost"
                           size="sm"
