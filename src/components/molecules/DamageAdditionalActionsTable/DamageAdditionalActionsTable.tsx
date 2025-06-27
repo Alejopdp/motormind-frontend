@@ -12,6 +12,7 @@ import {
 import { AdditionalAction, Damage } from '@/types/DamageAssessment';
 import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
 import clsx from 'clsx';
+import { onChangePrice } from '@/utils';
 
 interface DamageAdditionalActionsTableProps {
   damageId: string;
@@ -191,9 +192,38 @@ export const DamageAdditionalActionsTable = ({
                               />
                               <span className="text-xs text-gray-500">min</span>
                             </div>
-                            {validationErrors?.[`additionalAction_${index}_time`] && (
-                              <div className="ml-auto w-fit rounded bg-red-100 px-2 py-1 text-xs text-red-600">
-                                {validationErrors[`additionalAction_${index}_time`]}
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right align-top">
+                        <div className="space-y-1">
+                          {isEditing ? (
+                            <>
+                              <div className="flex items-center justify-end gap-2">
+                                <Input
+                                  type="number"
+                                  value={act.time}
+                                  onKeyDown={(e) => {
+                                    if (act.time === 0 && /[0-9]/.test(e.key)) {
+                                      e.currentTarget.value = '';
+                                    }
+                                  }}
+                                  onChange={(e) =>
+                                    updateAdditionalAction(
+                                      index,
+                                      'time',
+                                      parseInt(e.target.value) || 0,
+                                    )
+                                  }
+                                  className={clsx(
+                                    'w-20 text-center text-sm',
+                                    validationErrors?.[`additionalAction_${index}_time`] &&
+                                      'border-red-500 focus:border-red-500',
+                                  )}
+                                  placeholder="0"
+                                  min="0"
+                                />
+                                <span className="text-xs text-gray-500">min</span>
                               </div>
                             )}
                           </>
@@ -213,9 +243,66 @@ export const DamageAdditionalActionsTable = ({
                           <X className="h-4 w-4" />
                         </Button>
                       </TableCell>
-                    )}
-                  </TableRow>
-                ))}
+                      <TableCell className="text-right align-top">
+                        <div className="space-y-1">
+                          {isEditing ? (
+                            <>
+                              <div className="flex items-center justify-end gap-2">
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={act.hourlyRate || 0}
+                                  onChange={(e) =>
+                                    onChangePrice(e, (value) =>
+                                      updateAdditionalAction(index, 'hourlyRate', value),
+                                    )
+                                  }
+                                  className={clsx(
+                                    'w-20 text-center text-sm',
+                                    validationErrors?.[`additionalAction_${index}_hourlyRate`] &&
+                                      'border-red-500 focus:border-red-500',
+                                  )}
+                                  placeholder="0.00"
+                                  min="0"
+                                />
+                                <span className="text-xs text-gray-500">€/h</span>
+                              </div>
+                              {validationErrors?.[`additionalAction_${index}_hourlyRate`] && (
+                                <div className="ml-auto w-fit rounded bg-red-100 px-2 py-1 text-xs text-red-600">
+                                  {validationErrors[`additionalAction_${index}_hourlyRate`]}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-sm font-medium text-gray-600">
+                              {(act.hourlyRate || 0).toFixed(2)}€/h
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right align-middle">
+                        <span className="text-sm font-semibold text-gray-900">
+                          {totalCost.toLocaleString('es-ES', {
+                            style: 'currency',
+                            currency: 'EUR',
+                          })}
+                        </span>
+                      </TableCell>
+                      {isEditing && (
+                        <TableCell className="p-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeAdditionalAction(index)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
