@@ -2,7 +2,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useApi } from '@/hooks/useApi';
 import { DamageAssessment, Damage } from '@/types/DamageAssessment';
 import Spinner from '@/components/atoms/Spinner';
-import { ImageIcon } from 'lucide-react';
+import { ImageIcon, Plus } from 'lucide-react';
 import { UserRole } from '@/types/User';
 import { useAuth } from '@/context/Auth.context';
 import VehicleInformation from '@/components/molecules/VehicleInformation/VehicleInformation';
@@ -17,7 +17,9 @@ import { enqueueSnackbar } from 'notistack';
 import DamageCard from '@/components/molecules/DamageCard/DamageCard';
 import { useDamageAssessmentDetailPage } from '@/hooks/useDamageAssessmentDetail.hook';
 import { CostBreakdown } from '@/components/molecules/CostBreakdown/CostBreakdown';
+import { AddDamageModal } from '@/components/molecules/AddDamageModal';
 import { useState } from 'react';
+import { Button } from '@/components/atoms/Button';
 
 const DamageAssessmentDetail = () => {
   const { user } = useAuth();
@@ -26,6 +28,7 @@ const DamageAssessmentDetail = () => {
   const isMobile = useIsMobile();
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [addDamageModalOpen, setAddDamageModalOpen] = useState(false);
 
   // Hook personalizado que maneja toda la lógica del DamageAssessment
   const {
@@ -38,6 +41,7 @@ const DamageAssessmentDetail = () => {
     isEditable,
     updateDamage,
     deleteDamage,
+    addDamage,
     updateDamageAssessmentNotes,
     damageAssessmentId,
   } = useDamageAssessmentDetailPage();
@@ -190,11 +194,21 @@ const DamageAssessmentDetail = () => {
 
               {/* Lista de daños */}
               <div className={`${isMobile ? '' : 'mt-6'}`}>
-                <h3
-                  className={`text-base font-semibold ${isMobile ? 'bg-gray-50 px-4 py-3' : 'mb-2'}`}
+                <div
+                  className={`flex items-center justify-between ${isMobile ? 'bg-gray-50 px-4 py-3' : 'mb-2'}`}
                 >
-                  {state === 'DAMAGES_CONFIRMED' ? 'Daños Confirmados' : 'Daños detectados'}
-                </h3>
+                  <h3 className="text-base font-semibold">
+                    {state === 'DAMAGES_CONFIRMED' ? 'Daños Confirmados' : 'Daños detectados'}
+                  </h3>
+
+                  {/* Botón para añadir daño - solo si es editable */}
+                  {isEditable && (
+                    <Button onClick={() => setAddDamageModalOpen(true)} size="sm">
+                      <Plus className="h-4 w-4" />
+                      Añadir Daño
+                    </Button>
+                  )}
+                </div>
 
                 {/* Indicador de actualización */}
                 {isUpdating && (
@@ -280,6 +294,14 @@ const DamageAssessmentDetail = () => {
           initialIndex={selectedImageIndex}
         />
       )}
+
+      {/* Modal para añadir nuevo daño */}
+      <AddDamageModal
+        isOpen={addDamageModalOpen}
+        onClose={() => setAddDamageModalOpen(false)}
+        onAddDamage={addDamage}
+        isAdding={isUpdating}
+      />
     </div>
   );
 };

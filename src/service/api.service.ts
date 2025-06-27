@@ -108,27 +108,41 @@ export class ApiService {
   }
 
   // Métodos para gestión de daños en assessments
-  async updateDamage(assessmentId: string, damageId: string, damageData: Partial<Damage>): Promise<DamageAssessment> {
+  async updateDamage(
+    assessmentId: string,
+    damageId: string,
+    damageData: Partial<Damage>,
+  ): Promise<DamageAssessment> {
     const response = await this.put<DamageAssessment>(
       `/damage-assessments/${assessmentId}/damages/${damageId}`,
-      damageData
+      damageData,
     );
     return response.data;
   }
 
   async deleteDamage(assessmentId: string, damageId: string): Promise<DamageAssessment> {
     const response = await this.delete<DamageAssessment>(
-      `/damage-assessments/${assessmentId}/damages/${damageId}`
+      `/damage-assessments/${assessmentId}/damages/${damageId}`,
+    );
+    return response.data;
+  }
+
+  async addDamage(assessmentId: string, damageData: Partial<Damage>): Promise<DamageAssessment> {
+    const response = await this.post<DamageAssessment>(
+      `/damage-assessments/${assessmentId}/damages`,
+      damageData,
     );
     return response.data;
   }
 
   // Método para actualizar notas del damage assessment
-  async updateDamageAssessmentNotes(assessmentId: string, notes: string): Promise<DamageAssessment> {
-    const response = await this.put<DamageAssessment>(
-      `/damage-assessments/${assessmentId}`,
-      { notes }
-    );
+  async updateDamageAssessmentNotes(
+    assessmentId: string,
+    notes: string,
+  ): Promise<DamageAssessment> {
+    const response = await this.put<DamageAssessment>(`/damage-assessments/${assessmentId}`, {
+      notes,
+    });
     return response.data;
   }
 
