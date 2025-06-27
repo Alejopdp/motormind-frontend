@@ -12,6 +12,7 @@ import { useDamageAssessmentDetail } from '@/context/DamageAssessment.context';
 import { SparePart, Damage } from '@/types/DamageAssessment';
 import { Cog, Plus, X } from 'lucide-react';
 import clsx from 'clsx';
+import { onChangePrice } from '@/utils';
 
 interface DamageSparePartsTableProps {
   damageId: string;
@@ -197,15 +198,27 @@ export const DamageSparePartsTable = ({
                           <Input
                             type="number"
                             value={part.quantity}
-                            onChange={(e) =>
-                              updateSparePart(index, 'quantity', parseInt(e.target.value) || 1)
-                            }
+                            onKeyDown={(e) => {
+                              if (part.quantity === 0 && /[0-9]/.test(e.key)) {
+                                e.currentTarget.value = '';
+                              }
+                            }}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (value === '') {
+                                updateSparePart(index, 'quantity', 0);
+                              } else {
+                                const numValue = parseInt(value, 10);
+                                if (!isNaN(numValue) && numValue >= 0) {
+                                  updateSparePart(index, 'quantity', numValue);
+                                }
+                              }
+                            }}
                             className={clsx(
                               'w-full text-center text-sm',
                               validationErrors?.[`sparePart_${index}_quantity`] &&
                                 'border-red-500 focus:border-red-500',
                             )}
-                            min="1"
                           />
                           {validationErrors?.[`sparePart_${index}_quantity`] && (
                             <div className="absolute top-full left-0 z-20 mt-1 max-w-xs rounded bg-red-100 px-2 py-1 text-xs text-red-600 shadow-md">
@@ -224,16 +237,15 @@ export const DamageSparePartsTable = ({
                             type="number"
                             value={part.price}
                             onChange={(e) =>
-                              updateSparePart(index, 'price', parseFloat(e.target.value) || 0)
+                              onChangePrice(e, (value) => updateSparePart(index, 'price', value))
                             }
                             className={clsx(
                               'w-full text-right text-sm',
                               validationErrors?.[`sparePart_${index}_price`] &&
                                 'border-red-500 focus:border-red-500',
                             )}
-                            min="0"
                             step="0.01"
-                            placeholder="0.00"
+                            placeholder="0,00"
                           />
                           {validationErrors?.[`sparePart_${index}_price`] && (
                             <div className="absolute top-full left-0 z-20 mt-1 max-w-xs rounded bg-red-100 px-2 py-1 text-xs text-red-600 shadow-md">
@@ -256,7 +268,7 @@ export const DamageSparePartsTable = ({
                         </div>
                       )}
                     </TableCell>
-                    <TableCell className="max-w-0 text-right">
+                    <TableCell className="max-w-0 text-right align-middle">
                       <div
                         className="truncate text-right text-sm font-medium text-gray-900"
                         title={(part.price * part.quantity).toLocaleString('es-ES', {
