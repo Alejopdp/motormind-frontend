@@ -40,8 +40,9 @@ export const CostBreakdown = ({
 
   // Cálculos de costes
   const costBreakdown = useMemo(() => {
-    const laborCost = 15; // MOCK
-    const supplementsCost = 30; // MOCK
+    // Calcular total de mano de obra basándose en additionalActions
+    const laborCost = damageAssessment.damages.reduce((total, damage) => {
+      if (!damage.additionalActions || damage.additionalActions.length === 0) return total;
 
       const damageAdditionalActionsTotal = damage.additionalActions.reduce(
         (damageTotal, action) => {
@@ -93,8 +94,10 @@ export const CostBreakdown = ({
     return {
       laborCost,
       sparePartsCost,
-      supplementsCost,
+      paintWorksCost,
       hasSpareParts,
+      hasLaborWork,
+      hasPaintWorks,
       subtotal,
       iva,
       total,
@@ -148,11 +151,13 @@ export const CostBreakdown = ({
           <h4 className="mb-3 text-sm font-medium text-gray-700">Desglose de Costes</h4>
 
           <div className="space-y-2 text-sm">
-            {/* Mano de Obra */}
-            <div className="flex justify-between">
-              <span className="text-gray-600">Mano de Obra</span>
-              <span className="font-medium">{formatCurrency(costBreakdown.laborCost)}</span>
-            </div>
+            {/* Mano de Obra - Solo mostrar si hay additionalActions */}
+            {costBreakdown.hasLaborWork && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Mano de Obra</span>
+                <span className="font-medium">{formatCurrency(costBreakdown.laborCost)}</span>
+              </div>
+            )}
 
             {/* Recambios - Solo mostrar si hay recambios */}
             {costBreakdown.hasSpareParts && (
@@ -162,11 +167,13 @@ export const CostBreakdown = ({
               </div>
             )}
 
-            {/* Materiales de Pintura/Suplementos */}
-            <div className="flex justify-between">
-              <span className="text-gray-600">Materiales de Pintura</span>
-              <span className="font-medium">{formatCurrency(costBreakdown.supplementsCost)}</span>
-            </div>
+            {/* Materiales de Pintura - Solo mostrar si hay paintWorks */}
+            {costBreakdown.hasPaintWorks && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Materiales de Pintura</span>
+                <span className="font-medium">{formatCurrency(costBreakdown.paintWorksCost)}</span>
+              </div>
+            )}
           </div>
 
           {/* Subtotal */}

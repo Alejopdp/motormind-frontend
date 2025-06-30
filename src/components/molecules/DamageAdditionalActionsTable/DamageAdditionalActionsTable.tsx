@@ -123,74 +123,55 @@ export const DamageAdditionalActionsTable = ({
       ) : (
         <div className="rounded-lg border border-gray-200 bg-white">
           <div className="overflow-x-auto">
-            <Table className="w-full min-w-[500px] table-fixed hover:bg-transparent">
+            <Table className="w-full min-w-[700px] table-fixed hover:bg-transparent">
               <TableHeader>
                 <TableRow className="bg-gray-50 hover:bg-transparent">
-                  <TableHead className="w-[70%] text-xs font-medium text-gray-500">
+                  <TableHead className="w-[50%] text-xs font-medium text-gray-500">
                     Descripción
                   </TableHead>
-                  <TableHead className="w-[20%] text-right text-xs font-medium text-gray-500">
+                  <TableHead className="w-[15%] text-right text-xs font-medium text-gray-500">
                     Tiempo
                   </TableHead>
-                  {isEditing && <TableHead className="w-[10%]"></TableHead>}
+                  <TableHead className="w-[15%] text-right text-xs font-medium text-gray-500">
+                    Precio/Hora
+                  </TableHead>
+                  <TableHead className="w-[15%] text-right text-xs font-medium text-gray-500">
+                    Total
+                  </TableHead>
+                  {isEditing && <TableHead className="w-[5%]"></TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {additionalActions.map((act, index) => (
-                  <TableRow key={index} className="border-t border-gray-100 hover:bg-transparent">
-                    <TableCell className="max-w-0 align-top">
-                      <div className="space-y-1">
-                        {isEditing ? (
-                          <>
-                            <Input
-                              value={act.description}
-                              onChange={(e) =>
-                                updateAdditionalAction(index, 'description', e.target.value)
-                              }
-                              className={clsx(
-                                'w-full text-sm',
-                                validationErrors?.[`additionalAction_${index}_description`] &&
-                                  'border-red-500 focus:border-red-500',
-                              )}
-                              placeholder="Descripción del suplemento"
-                            />
-                            {validationErrors?.[`additionalAction_${index}_description`] && (
-                              <div className="w-fit rounded bg-red-100 px-2 py-1 text-xs text-red-600">
-                                {validationErrors[`additionalAction_${index}_description`]}
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <div className="truncate text-sm text-gray-900" title={act.description}>
-                            {act.description}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right align-top">
-                      <div className="space-y-1">
-                        {isEditing ? (
-                          <>
-                            <div className="flex items-center justify-end gap-2">
+                {additionalActions.map((act, index) => {
+                  const totalCost = (act.time / 60) * (act.hourlyRate || 0); // Convert minutes to hours and multiply by hourly rate
+
+                  return (
+                    <TableRow key={index} className="border-t border-gray-100 hover:bg-transparent">
+                      <TableCell className="max-w-0 align-top">
+                        <div className="space-y-1">
+                          {isEditing ? (
+                            <>
                               <Input
-                                type="number"
-                                value={act.time}
+                                value={act.description}
                                 onChange={(e) =>
-                                  updateAdditionalAction(
-                                    index,
-                                    'time',
-                                    parseInt(e.target.value) || 0,
-                                  )
+                                  updateAdditionalAction(index, 'description', e.target.value)
                                 }
                                 className={clsx(
-                                  'w-20 text-center text-sm',
-                                  validationErrors?.[`additionalAction_${index}_time`] &&
+                                  'w-full text-sm',
+                                  validationErrors?.[`additionalAction_${index}_description`] &&
                                     'border-red-500 focus:border-red-500',
                                 )}
-                                placeholder="0"
-                                min="0"
+                                placeholder="Descripción del suplemento"
                               />
-                              <span className="text-xs text-gray-500">min</span>
+                              {validationErrors?.[`additionalAction_${index}_description`] && (
+                                <div className="w-fit rounded bg-red-100 px-2 py-1 text-xs text-red-600">
+                                  {validationErrors[`additionalAction_${index}_description`]}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div className="truncate text-sm text-gray-900" title={act.description}>
+                              {act.description}
                             </div>
                           )}
                         </div>
@@ -225,23 +206,18 @@ export const DamageAdditionalActionsTable = ({
                                 />
                                 <span className="text-xs text-gray-500">min</span>
                               </div>
-                            )}
-                          </>
-                        ) : (
-                          <span className="text-sm font-medium text-gray-600">{act.time} min</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    {isEditing && (
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeAdditionalAction(index)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                              {validationErrors?.[`additionalAction_${index}_time`] && (
+                                <div className="ml-auto w-fit rounded bg-red-100 px-2 py-1 text-xs text-red-600">
+                                  {validationErrors[`additionalAction_${index}_time`]}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-sm font-medium text-gray-600">
+                              {act.time} min
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right align-top">
                         <div className="space-y-1">

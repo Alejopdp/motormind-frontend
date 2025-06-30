@@ -177,8 +177,8 @@ const DamageAssessmentReport = () => {
           </div>
 
           {/* Datos del Vehículo y Siniestro */}
-          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-lg border border-[#e5e7eb] p-4 sm:p-6">
+          <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="rounded-lg border border-[#e5e7eb] p-2 sm:p-4">
               <h3 className="mb-4 font-semibold text-[#111827]">Datos del Vehículo</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
@@ -206,7 +206,7 @@ const DamageAssessmentReport = () => {
               </div>
             </div>
 
-            <div className="rounded-lg border border-[#e5e7eb] p-4 sm:p-6">
+            <div className="rounded-lg border border-[#e5e7eb] p-2 sm:p-4">
               <h3 className="mb-4 font-semibold text-[#111827]">Datos del Siniestro</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
@@ -236,8 +236,8 @@ const DamageAssessmentReport = () => {
           </div>
 
           {/* Resumen de Daños Principales */}
-          <div className="mb-8">
-            <h3 className="mb-4 font-semibold text-[#111827]">Resumen de Daños Principales</h3>
+          <div className="mb-6">
+            <h3 className="mb-2 font-semibold text-[#111827]">Resumen de Daños Principales</h3>
             <div className="rounded-lg bg-[#f9fafb] p-4">
               <ul className="space-y-2 text-sm">
                 {damagesToShow.map((damage, index) => (
@@ -252,7 +252,7 @@ const DamageAssessmentReport = () => {
 
           {/* Fotografías Clave - Solo visibles cuando NO se está generando PDF */}
           {!isGeneratingPDF && (
-            <div className="mb-8">
+            <div className="mb-6">
               <h3 className="mb-4 font-semibold text-[#111827]">Fotografías Clave</h3>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {damageAssessment.images.slice(0, 8).map((image, index) => (
@@ -269,7 +269,7 @@ const DamageAssessmentReport = () => {
           )}
 
           {/* Desglose Detallado de la Valoración */}
-          <div className="mb-8">
+          <div className="mb-6">
             <h3 className="mb-6 text-lg font-bold text-[#111827]">
               DESGLOSE DETALLADO DE LA VALORACIÓN
             </h3>
@@ -303,7 +303,7 @@ const DamageAssessmentReport = () => {
                       (damage.additionalActions || []).map((action) => (
                         <tr key={`${damageIndex}-${action.description}`}>
                           <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
-                            <span className="line-clamp-2">{action.description}</span>
+                            <span>{action.description}</span>
                           </td>
                           <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
                             {damage.action === 'REPLACE'
@@ -343,63 +343,69 @@ const DamageAssessmentReport = () => {
             </div>
 
             {/* Recambios */}
-            <div className="mb-6">
-              <h4 className="mb-3 font-semibold text-[#111827]">RECAMBIOS</h4>
-              <div className="overflow-x-auto">
-                <table className="w-full border border-[#e5e7eb] text-xs sm:text-sm">
-                  <thead className="bg-[#f9fafb]">
-                    <tr>
-                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
-                        DESCRIPCIÓN
-                      </th>
-                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">REF.</th>
-                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">CANT.</th>
-                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
-                        PRECIO
-                      </th>
-                      <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
-                        IMPORTE
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {damagesToShow.map((damage, damageIndex) =>
-                      (damage.spareParts || []).map((part, partIndex) => (
-                        <tr key={`${damageIndex}-${partIndex}`}>
-                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
-                            <span className="line-clamp-2">{part.description}</span>
-                          </td>
-                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
-                            {damage.area.slice(0, 3).toUpperCase()}
-                            {String(damageIndex + 1).padStart(3, '0')}-{String(partIndex + 1)}
-                          </td>
-                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
-                            {part.quantity}
-                          </td>
-                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
-                            €{part.price.toFixed(2)}
-                          </td>
-                          <td className="border border-[#e5e7eb] px-2 py-2 text-xs font-medium sm:px-4 sm:text-sm">
-                            €{(part.quantity * part.price).toFixed(2)}
-                          </td>
-                        </tr>
-                      )),
-                    )}
-                    <tr className="bg-[#f9fafb] font-medium">
-                      <td
-                        colSpan={4}
-                        className="border border-[#e5e7eb] px-2 py-2 text-right text-xs sm:px-4 sm:text-sm"
-                      >
-                        Subtotal Recambios:
-                      </td>
-                      <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
-                        €{partsSubtotal.toFixed(2)}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+            {damagesToShow.some((damage) => damage.spareParts && damage.spareParts.length > 0) && (
+              <div className="mb-6">
+                <h4 className="mb-3 font-semibold text-[#111827]">RECAMBIOS</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full border border-[#e5e7eb] text-xs sm:text-sm">
+                    <thead className="bg-[#f9fafb]">
+                      <tr>
+                        <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                          DESCRIPCIÓN
+                        </th>
+                        <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                          REF.
+                        </th>
+                        <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                          CANT.
+                        </th>
+                        <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                          PRECIO
+                        </th>
+                        <th className="border border-[#e5e7eb] px-2 py-2 text-left sm:px-4">
+                          IMPORTE
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {damagesToShow.map((damage, damageIndex) =>
+                        (damage.spareParts || []).map((part, partIndex) => (
+                          <tr key={`${damageIndex}-${partIndex}`}>
+                            <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                              <span>{part.description}</span>
+                            </td>
+                            <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                              {damage.area.slice(0, 3).toUpperCase()}
+                              {String(damageIndex + 1).padStart(3, '0')}-{String(partIndex + 1)}
+                            </td>
+                            <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                              {part.quantity}
+                            </td>
+                            <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                              €{part.price.toFixed(2)}
+                            </td>
+                            <td className="border border-[#e5e7eb] px-2 py-2 text-xs font-medium sm:px-4 sm:text-sm">
+                              €{(part.quantity * part.price).toFixed(2)}
+                            </td>
+                          </tr>
+                        )),
+                      )}
+                      <tr className="bg-[#f9fafb] font-medium">
+                        <td
+                          colSpan={4}
+                          className="border border-[#e5e7eb] px-2 py-2 text-right text-xs sm:px-4 sm:text-sm"
+                        >
+                          Subtotal Recambios:
+                        </td>
+                        <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
+                          €{partsSubtotal.toFixed(2)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Materiales de Pintura */}
             {groupedPaintMaterials.length > 0 && (
@@ -428,10 +434,10 @@ const DamageAssessmentReport = () => {
                         <tr key={material.type}>
                           <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
                             <div className="flex items-center gap-2">
-                              <span className="rounded bg-gray-100 px-2 py-1 font-mono text-xs">
+                              <span className="rounded bg-[#e5e7eb] px-2 py-1 font-mono text-xs">
                                 {material.code}
                               </span>
-                              <span className="line-clamp-2">{material.description}</span>
+                              <span className="">{material.description}</span>
                             </div>
                           </td>
                           <td className="border border-[#e5e7eb] px-2 py-2 text-xs sm:px-4 sm:text-sm">
