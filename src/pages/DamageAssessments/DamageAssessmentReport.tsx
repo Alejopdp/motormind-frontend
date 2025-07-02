@@ -34,29 +34,45 @@ const DamageAssessmentReport = () => {
   }, [damageAssessmentId]);
 
   const handleDownloadPdf = async () => {
-    const element = contentRef.current;
+    const input = contentRef.current;
+    if (!input) return;
 
     try {
       setIsGeneratingPDF(true);
       enqueueSnackbar('Generando PDF...', { variant: 'info' });
 
-      // Esperar a que el estado se actualice y las imágenes se oculten
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const canvas = await html2canvas(element || document.body);
+      const canvas = await html2canvas(input, {
+        scale: 2,
+        useCORS: true,
+      });
+
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF();
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
 
       const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save('pantalla.pdf');
+      let position = 0;
+      let heightLeft = imgHeight;
 
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+
+      while (heightLeft > pdfHeight) {
+        heightLeft -= pdfHeight;
+        position -= pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+      }
+
+      pdf.save('informe_peritacion.pdf');
       enqueueSnackbar('PDF descargado correctamente', { variant: 'success' });
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Error al generar el PDF:', error);
       enqueueSnackbar('Error al generar el PDF', { variant: 'error' });
     } finally {
       setIsGeneratingPDF(false);
