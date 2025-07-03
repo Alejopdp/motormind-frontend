@@ -2,10 +2,11 @@ import { Button } from '@/components/atoms/Button';
 import { VoiceTextInput } from '@/components/molecules/VoiceTextInput';
 import { useState } from 'react';
 import { LoadingModal } from '../LoadingModal';
+import OBDCodeInput from '../ObdCodeInput';
 
 interface TechnicanObservationsInputFormProps {
   initialDetails?: string;
-  onSubmit: (details: string) => void;
+  onSubmit: (details: string, obdCodes: string[]) => void;
   onGenerateMoreQuestions: () => void;
   disableMoreQuestions?: boolean;
   isLoadingMoreQuestions?: boolean;
@@ -21,10 +22,11 @@ export const TechnicanObservationsInputForm = ({
   isLoadingDiagnosis = false,
 }: TechnicanObservationsInputFormProps) => {
   const [details, setDetails] = useState(initialDetails);
+  const [obdCodes, setObdCodes] = useState<string[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(details);
+    onSubmit(details, obdCodes);
   };
 
   return (
@@ -44,13 +46,18 @@ export const TechnicanObservationsInputForm = ({
               </p>
               <VoiceTextInput
                 placeholder="Observaciones del técnico..."
-                className="min-h-[150px]"
+                className="min-h-[140px]"
                 value={details}
                 onChange={setDetails}
                 disabled={isLoadingMoreQuestions || isLoadingDiagnosis}
               />
             </div>
           </div>
+
+          <OBDCodeInput
+            onChange={setObdCodes}
+            disabled={isLoadingMoreQuestions || isLoadingDiagnosis}
+          />
         </div>
 
         <div className="flex flex-col-reverse gap-3 rounded-b-lg border-t border-gray-200 bg-gray-50 p-4 sm:flex-row sm:flex-wrap sm:justify-end sm:px-6 sm:py-4">

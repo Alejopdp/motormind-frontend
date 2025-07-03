@@ -87,10 +87,11 @@ const DiagnosisQuestions = () => {
 
   const { mutate: createPreliminaryDiagnosisMutation, isPending: isLoadingPreliminary } =
     useMutation({
-      mutationFn: async ({ notes }: { notes: string }) => {
+      mutationFn: async ({ notes, obdCodes }: { notes: string; obdCodes: string[] }) => {
         const response = await createPreliminaryDiagnosisRequest(
           {
             notes,
+            obdCodes,
           },
           undefined,
           { carId: params.carId as string, diagnosisId: params.diagnosisId as string },
@@ -137,8 +138,8 @@ const DiagnosisQuestions = () => {
     );
   }
 
-  const createDiagnosis = (details: string) => {
-    createPreliminaryDiagnosisMutation({ notes: details });
+  const createDiagnosis = (details: string, obdCodes: string[]) => {
+    createPreliminaryDiagnosisMutation({ notes: details, obdCodes });
   };
 
   const onBack = () => {

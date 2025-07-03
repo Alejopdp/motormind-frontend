@@ -243,7 +243,11 @@ const PreliminaryDiagnosis = () => {
           </div>
         </div>
 
-        <OBDCodeInput onChange={setObdCodes} disabled={isLoadingFinalReport} />
+        <OBDCodeInput
+          initialCodes={diagnosis.obdCodes || []}
+          onChange={setObdCodes}
+          disabled={isLoadingFinalReport}
+        />
 
         <div className="space-y-1 sm:space-y-2">
           <p className="block text-sm font-medium sm:text-base">

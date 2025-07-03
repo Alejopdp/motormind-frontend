@@ -36,7 +36,7 @@ const VehicleInformation: React.FC<VehicleInformationProps> = ({
             <div>
               <p className="text-muted text-xs sm:text-sm">Vehículo</p>
               <p className="text-sm font-medium sm:text-base">
-                {car ? `${car.brand} ${car.model} (${car.year})` : '-'}
+                {car ? `${car.brand} ${car.model}` : '-'} {car?.year && `(${car.year})`}
               </p>
             </div>
           </div>

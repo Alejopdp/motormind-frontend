@@ -78,6 +78,7 @@ export type Diagnosis = {
     fuel: string;
     lastRevision: Date;
   };
+  obdCodes?: string[];
   createdBy?: {
     name: string;
     avatar?: string;
