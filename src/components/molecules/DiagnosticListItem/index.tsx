@@ -27,6 +27,7 @@ interface DiagnosticListItemProps {
     name: string;
     avatar?: string;
   };
+  summary: string[];
   status: (typeof DIAGNOSIS_STATUS)[keyof typeof DIAGNOSIS_STATUS];
   timestamp: string;
   className?: string;
@@ -45,6 +46,7 @@ export const DiagnosticListItem = ({
   diagnosisLink,
   status,
   diagnosisId,
+  summary = [],
   onDelete,
 }: DiagnosticListItemProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -82,6 +84,8 @@ export const DiagnosticListItem = ({
         return 'bg-gray-100 text-gray-800 border-gray-200';
       case DIAGNOSIS_STATUS.PRELIMINARY:
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case DIAGNOSIS_STATUS.ASSIGN_OBD_CODES:
+        return 'bg-orange-100 text-orange-800 border-orange-200';
       case DIAGNOSIS_STATUS.IN_REPARATION:
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case DIAGNOSIS_STATUS.REPAIRED:
@@ -95,6 +99,8 @@ export const DiagnosticListItem = ({
     switch (status) {
       case DIAGNOSIS_STATUS.GUIDED_QUESTIONS:
         return 'Preguntas Guíadas';
+      case DIAGNOSIS_STATUS.ASSIGN_OBD_CODES:
+        return 'Asignar Códigos OBD';
       case DIAGNOSIS_STATUS.PRELIMINARY:
         return 'Pre-Diagnóstico';
       case DIAGNOSIS_STATUS.IN_REPARATION:
@@ -177,6 +183,8 @@ export const DiagnosticListItem = ({
 
           {status === DIAGNOSIS_STATUS.GUIDED_QUESTIONS ? (
             <TitledStringList title="Preguntas guiadas:" items={questions} />
+          ) : status === DIAGNOSIS_STATUS.ASSIGN_OBD_CODES ? (
+            <TitledStringList title="Asignar Códigos OBD:" items={summary} />
           ) : status === DIAGNOSIS_STATUS.PRELIMINARY ? (
             <TitledStringList title="Potenciales averías:" items={problems} />
           ) : (

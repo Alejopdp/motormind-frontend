@@ -257,8 +257,8 @@ const FinalReport = () => {
             size="lg"
           >
             <Share2Icon className="h-4 w-4" />
-            <span className="ml-2 sm:hidden">Compartir</span>
-            <span className="ml-2 hidden sm:inline">Compartir</span>
+            <span className="sm:hidden">Compartir</span>
+            <span className="hidden sm:inline">Compartir</span>
           </Button>
 
           {!diagnosis.rating?._id && (
@@ -269,8 +269,8 @@ const FinalReport = () => {
               size="lg"
             >
               <StarIcon className="h-4 w-4" />
-              <span className="ml-2 sm:hidden">Valorar</span>
-              <span className="ml-2 hidden sm:inline">Valorar</span>
+              <span className="sm:hidden">Valorar</span>
+              <span className="hidden sm:inline">Valorar</span>
             </Button>
           )}
         </div>

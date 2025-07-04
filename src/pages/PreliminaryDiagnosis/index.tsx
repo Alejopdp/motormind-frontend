@@ -1,8 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, PlusIcon } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeftIcon,
+  BrainCircuitIcon,
+  FileTextIcon,
+  PlusIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from 'lucide-react';
 
 import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
@@ -32,6 +40,8 @@ const PreliminaryDiagnosis = () => {
   const [obdCodes, setObdCodes] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingMorePossibleReasons, setIsLoadingMorePossibleReasons] = useState(false);
+  const [showInitialFaults, setShowInitialFaults] = useState(true);
+  const [initialFaultsCount, setInitialFaultsCount] = useState(0);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: createFinalReportRequest } = useApi<Diagnosis>(
     'post',
@@ -61,6 +71,20 @@ const PreliminaryDiagnosis = () => {
     refetchOnWindowFocus: true,
     retry: false,
   });
+
+  // Sincronizar obdCodes cuando cambie diagnosis
+  useEffect(() => {
+    if (diagnosis.obdCodes) {
+      setObdCodes(diagnosis.obdCodes);
+    }
+  }, [diagnosis.obdCodes]);
+
+  // Detectar averías iniciales y actualizar contador
+  useEffect(() => {
+    if (diagnosis.preliminary?.possibleReasons && initialFaultsCount === 0) {
+      setInitialFaultsCount(diagnosis.preliminary.possibleReasons.length);
+    }
+  }, [diagnosis.preliminary?.possibleReasons, initialFaultsCount]);
 
   const { symptom } = useSymptom(diagnosis);
   const { mutate: createFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
@@ -162,6 +186,19 @@ const PreliminaryDiagnosis = () => {
       );
 
       if (response.status === 200 && response.data) {
+        // Ocultar averías iniciales cuando se generen nuevas
+        setShowInitialFaults(false);
+
+        // Actualizar el contador para mostrar solo las averías más recientes
+        const currentTotalFaults = response.data.preliminary.possibleReasons.length;
+        const newFaultsCount = currentTotalFaults - initialFaultsCount;
+
+        // Actualizar el contador de averías iniciales para incluir las nuevas
+        setInitialFaultsCount(currentTotalFaults - newFaultsCount);
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
         queryClient.setQueryData(
           ['getDiagnosisById', params.diagnosisId],
           (oldData: { data: Diagnosis } | undefined) => {
@@ -229,16 +266,60 @@ const PreliminaryDiagnosis = () => {
                 <Spinner />
               </div>
             ) : (
-              diagnosis.preliminary.possibleReasons?.map((fault, index) => (
-                <FaultCardCollapsible
-                  key={index}
-                  title={fault.title}
-                  probability={fault.probability as ProbabilityLevel}
-                  reasoning={fault.reasonDetails}
-                  recommendations={fault.diagnosticRecommendations || []}
-                  tools={fault.requiredTools || []}
-                />
-              ))
+              <>
+                {showInitialFaults &&
+                  diagnosis.preliminary.possibleReasons?.map((fault, index) => (
+                    <FaultCardCollapsible
+                      key={index}
+                      title={fault.title}
+                      probability={fault.probability as ProbabilityLevel}
+                      reasoning={fault.reasonDetails}
+                      recommendations={fault.diagnosticRecommendations || []}
+                      tools={fault.requiredTools || []}
+                    />
+                  ))}
+
+                {showInitialFaults &&
+                  initialFaultsCount > 0 &&
+                  diagnosis.preliminary.possibleReasons &&
+                  diagnosis.preliminary.possibleReasons.length > initialFaultsCount && (
+                    <Button
+                      variant="ghost"
+                      onClick={() => setShowInitialFaults(false)}
+                      className="text-primary w-full"
+                      size="sm"
+                    >
+                      <ChevronUpIcon className="h-4 w-4" />
+                      Ocultar {initialFaultsCount} averías iniciales
+                    </Button>
+                  )}
+
+                {!showInitialFaults && initialFaultsCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowInitialFaults(true)}
+                    className="text-primary w-full"
+                    size="sm"
+                  >
+                    <ChevronDownIcon className="h-4 w-4" />
+                    Mostrar {initialFaultsCount} averías iniciales
+                  </Button>
+                )}
+
+                {!showInitialFaults &&
+                  diagnosis.preliminary.possibleReasons
+                    ?.slice(-(diagnosis.preliminary.possibleReasons.length - initialFaultsCount))
+                    .map((fault, index) => (
+                      <FaultCardCollapsible
+                        key={`new-${index}`}
+                        title={fault.title}
+                        probability={fault.probability as ProbabilityLevel}
+                        reasoning={fault.reasonDetails}
+                        recommendations={fault.diagnosticRecommendations || []}
+                        tools={fault.requiredTools || []}
+                      />
+                    ))}
+              </>
             )}
           </div>
         </div>
@@ -273,7 +354,7 @@ const PreliminaryDiagnosis = () => {
           size="lg"
         >
           <ArrowLeftIcon className="h-4 w-4" />
-          <span className="ml-2 sm:block">Volver</span>
+          <span className="sm:block">Volver</span>
         </Button>
 
         <div className="flex w-full sm:w-auto sm:gap-3">
@@ -287,7 +368,7 @@ const PreliminaryDiagnosis = () => {
               variant="outline"
             >
               <PlusIcon className="h-4 w-4" />
-              <span className="ml-2">Generar más posibles averías</span>
+              <span>Generar más posibles averías</span>
             </Button>
           )}
 
@@ -298,7 +379,7 @@ const PreliminaryDiagnosis = () => {
             size="lg"
           >
             <FileTextIcon className="h-4 w-4" />
-            <span className="ml-2">Generar Informe Final</span>
+            <span>Generar Informe Final</span>
           </Button>
         </div>
       </div>

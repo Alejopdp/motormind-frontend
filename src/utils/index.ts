@@ -59,6 +59,8 @@ export const diagnosisLink = (diagnosis: Diagnosis, back?: boolean) => {
 
   if (diagnosis.status === DIAGNOSIS_STATUS.GUIDED_QUESTIONS) {
     path = back ? 'questions?back=true' : 'questions';
+  } else if (diagnosis.status === DIAGNOSIS_STATUS.ASSIGN_OBD_CODES) {
+    path = back ? 'obd-codes?back=true' : 'obd-codes';
   } else if (diagnosis.status === DIAGNOSIS_STATUS.PRELIMINARY) {
     path = back ? 'preliminary-report?back=true' : 'preliminary-report';
   } else if (

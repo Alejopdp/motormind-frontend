@@ -2,15 +2,13 @@ import { Button } from '@/components/atoms/Button';
 import { VoiceTextInput } from '@/components/molecules/VoiceTextInput';
 import { useState } from 'react';
 import { LoadingModal } from '../LoadingModal';
-import OBDCodeInput from '../ObdCodeInput';
-
 interface TechnicanObservationsInputFormProps {
   initialDetails?: string;
-  onSubmit: (details: string, obdCodes: string[]) => void;
+  onSubmit: (details: string) => void;
   onGenerateMoreQuestions: () => void;
   disableMoreQuestions?: boolean;
   isLoadingMoreQuestions?: boolean;
-  isLoadingDiagnosis?: boolean;
+  isLoadingAnswers?: boolean;
 }
 
 export const TechnicanObservationsInputForm = ({
@@ -19,14 +17,13 @@ export const TechnicanObservationsInputForm = ({
   onGenerateMoreQuestions,
   disableMoreQuestions = false,
   isLoadingMoreQuestions = false,
-  isLoadingDiagnosis = false,
+  isLoadingAnswers = false,
 }: TechnicanObservationsInputFormProps) => {
   const [details, setDetails] = useState(initialDetails);
-  const [obdCodes, setObdCodes] = useState<string[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(details, obdCodes);
+    onSubmit(details);
   };
 
   return (
@@ -49,15 +46,10 @@ export const TechnicanObservationsInputForm = ({
                 className="min-h-[140px]"
                 value={details}
                 onChange={setDetails}
-                disabled={isLoadingMoreQuestions || isLoadingDiagnosis}
+                disabled={isLoadingMoreQuestions || isLoadingAnswers}
               />
             </div>
           </div>
-
-          <OBDCodeInput
-            onChange={setObdCodes}
-            disabled={isLoadingMoreQuestions || isLoadingDiagnosis}
-          />
         </div>
 
         <div className="flex flex-col-reverse gap-3 rounded-b-lg border-t border-gray-200 bg-gray-50 p-4 sm:flex-row sm:flex-wrap sm:justify-end sm:px-6 sm:py-4">
@@ -80,24 +72,24 @@ export const TechnicanObservationsInputForm = ({
             </Button>
           )}
           <Button
-            disabled={isLoadingMoreQuestions || isLoadingDiagnosis || details.length === 0}
+            disabled={isLoadingMoreQuestions || isLoadingAnswers || details.length === 0}
             type="submit"
             className="w-full sm:w-auto"
             size="lg"
           >
-            {isLoadingDiagnosis ? (
-              'Creando...'
+            {isLoadingAnswers ? (
+              'Guardando...'
             ) : (
               <>
-                <span className="sm:hidden">Crear Informe Preliminar</span>
-                <span className="hidden sm:inline">Crear Informe Preliminar</span>
+                <span className="sm:hidden">Guardar y Continuar</span>
+                <span className="hidden sm:inline">Guardar Respuestas y Continuar</span>
               </>
             )}
           </Button>
         </div>
       </form>
 
-      <LoadingModal isOpen={isLoadingDiagnosis} message="Generando informe preliminar" />
+      <LoadingModal isOpen={isLoadingAnswers} message="Guardando..." />
     </>
   );
 };

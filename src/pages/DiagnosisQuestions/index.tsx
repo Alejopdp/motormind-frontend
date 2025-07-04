@@ -23,10 +23,29 @@ const DiagnosisQuestions = () => {
   const { execute: getCarById } = useApi<Car>('get', '/cars/:carId');
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: generateQuestions } = useApi<Diagnosis>('post', '/cars/:carId/questions');
-  const { execute: createPreliminaryDiagnosisRequest } = useApi<Diagnosis>(
-    'post',
-    '/cars/:carId/diagnosis/:diagnosisId/preliminary',
+  const { execute: saveAnswersRequest } = useApi<Diagnosis>(
+    'put',
+    '/cars/:carId/diagnosis/:diagnosisId/answers',
   );
+
+  const { mutate: saveAnswersMutation, isPending: isLoadingAnswers } = useMutation({
+    mutationFn: async (answers: string) => {
+      const response = await saveAnswersRequest({ answers }, undefined, {
+        carId: params.carId as string,
+        diagnosisId: params.diagnosisId as string,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      enqueueSnackbar('Respuestas guardadas correctamente', { variant: 'success' });
+      navigate(`/cars/${params.carId}/diagnosis/${params.diagnosisId}/obd-codes`);
+    },
+    onError: () => {
+      enqueueSnackbar('Error al guardar las respuestas. Por favor, inténtalo de nuevo.', {
+        variant: 'error',
+      });
+    },
+  });
 
   const {
     data: { data: car = {} as Car } = { data: {} as Car },
@@ -85,29 +104,6 @@ const DiagnosisQuestions = () => {
     },
   });
 
-  const { mutate: createPreliminaryDiagnosisMutation, isPending: isLoadingPreliminary } =
-    useMutation({
-      mutationFn: async ({ notes, obdCodes }: { notes: string; obdCodes: string[] }) => {
-        const response = await createPreliminaryDiagnosisRequest(
-          {
-            notes,
-            obdCodes,
-          },
-          undefined,
-          { carId: params.carId as string, diagnosisId: params.diagnosisId as string },
-        );
-        return response.data;
-      },
-      onSuccess: (data) => {
-        navigate(`/cars/${params.carId}/diagnosis/${data._id}/preliminary-report`);
-      },
-      onError: () => {
-        enqueueSnackbar('Error al generar el diagnóstico. Por favor, inténtalo de nuevo.', {
-          variant: 'error',
-        });
-      },
-    });
-
   const carDescription = useCarPlateOrVin(car);
 
   if (isLoadingCar || isLoadingDiagnosis)
@@ -138,8 +134,8 @@ const DiagnosisQuestions = () => {
     );
   }
 
-  const createDiagnosis = (details: string, obdCodes: string[]) => {
-    createPreliminaryDiagnosisMutation({ notes: details, obdCodes });
+  const saveAnswers = (notes: string) => {
+    saveAnswersMutation(notes);
   };
 
   const onBack = () => {
@@ -168,10 +164,10 @@ const DiagnosisQuestions = () => {
           />
 
           <TechnicanObservationsInputForm
-            onSubmit={createDiagnosis}
-            onGenerateMoreQuestions={() => generateQuestionsMutation()}
+            onSubmit={saveAnswers}
+            onGenerateMoreQuestions={generateQuestionsMutation}
             isLoadingMoreQuestions={isLoadingQuestions}
-            isLoadingDiagnosis={isLoadingPreliminary}
+            isLoadingAnswers={isLoadingAnswers}
             disableMoreQuestions={isLoadingQuestions || (diagnosisData?.questions.length ?? 0) > 7}
           />
         </div>
