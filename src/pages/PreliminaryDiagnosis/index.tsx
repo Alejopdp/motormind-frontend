@@ -2,15 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import {
-  AlertCircle,
-  ArrowLeftIcon,
-  BrainCircuitIcon,
-  FileTextIcon,
-  PlusIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, PlusIcon } from 'lucide-react';
 
 import { Button } from '@/components/atoms/Button';
 import Spinner from '@/components/atoms/Spinner';
@@ -40,8 +32,7 @@ const PreliminaryDiagnosis = () => {
   const [obdCodes, setObdCodes] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingMorePossibleReasons, setIsLoadingMorePossibleReasons] = useState(false);
-  const [showInitialFaults, setShowInitialFaults] = useState(true);
-  const [initialFaultsCount, setInitialFaultsCount] = useState(0);
+  const [showOldReasons, setShowOldReasons] = useState(false);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: createFinalReportRequest } = useApi<Diagnosis>(
     'post',
@@ -79,13 +70,6 @@ const PreliminaryDiagnosis = () => {
     }
   }, [diagnosis.obdCodes]);
 
-  // Detectar averías iniciales y actualizar contador
-  useEffect(() => {
-    if (diagnosis.preliminary?.possibleReasons && initialFaultsCount === 0) {
-      setInitialFaultsCount(diagnosis.preliminary.possibleReasons.length);
-    }
-  }, [diagnosis.preliminary?.possibleReasons, initialFaultsCount]);
-
   const { symptom } = useSymptom(diagnosis);
   const { mutate: createFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
     mutationFn: async ({
@@ -122,6 +106,41 @@ const PreliminaryDiagnosis = () => {
   });
 
   const carDescription = useCarPlateOrVin(diagnosis.car);
+
+  // Filtrar averías para mostrar las nuevas por defecto
+  const getReasonsToShow = () => {
+    if (!diagnosis.preliminary?.possibleReasons) return [];
+
+    if (
+      !diagnosis.preliminary.newPossibleReasons ||
+      diagnosis.preliminary.newPossibleReasons.length === 0
+    ) {
+      // Si no hay nuevas averías, mostrar todas
+      return diagnosis.preliminary.possibleReasons;
+    }
+
+    if (showOldReasons) {
+      // Mostrar averías viejas
+      const oldIndices = diagnosis.preliminary.oldPossibleReasons || [];
+      return oldIndices
+        .map((index) => diagnosis.preliminary.possibleReasons[parseInt(index)])
+        .filter(Boolean);
+    } else {
+      // Mostrar averías nuevas (por defecto)
+      const newIndices = diagnosis.preliminary.newPossibleReasons;
+      return newIndices
+        .map((index) => diagnosis.preliminary.possibleReasons[parseInt(index)])
+        .filter(Boolean);
+    }
+  };
+
+  const reasonsToShow = getReasonsToShow();
+  const hasOldReasons =
+    diagnosis.preliminary?.oldPossibleReasons &&
+    diagnosis.preliminary.oldPossibleReasons.length > 0;
+  const hasNewReasons =
+    diagnosis.preliminary?.newPossibleReasons &&
+    diagnosis.preliminary.newPossibleReasons.length > 0;
 
   if (isLoadingDiagnosis)
     return (
@@ -186,16 +205,6 @@ const PreliminaryDiagnosis = () => {
       );
 
       if (response.status === 200 && response.data) {
-        // Ocultar averías iniciales cuando se generen nuevas
-        setShowInitialFaults(false);
-
-        // Actualizar el contador para mostrar solo las averías más recientes
-        const currentTotalFaults = response.data.preliminary.possibleReasons.length;
-        const newFaultsCount = currentTotalFaults - initialFaultsCount;
-
-        // Actualizar el contador de averías iniciales para incluir las nuevas
-        setInitialFaultsCount(currentTotalFaults - newFaultsCount);
-
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -210,6 +219,8 @@ const PreliminaryDiagnosis = () => {
                   preliminary: {
                     ...oldData.data.preliminary,
                     possibleReasons: response.data.preliminary.possibleReasons,
+                    oldPossibleReasons: response.data.preliminary.oldPossibleReasons,
+                    newPossibleReasons: response.data.preliminary.newPossibleReasons,
                     moreReasonsRequestsQuantity:
                       response.data.preliminary.moreReasonsRequestsQuantity ??
                       oldData.data.preliminary.moreReasonsRequestsQuantity,
@@ -267,58 +278,38 @@ const PreliminaryDiagnosis = () => {
               </div>
             ) : (
               <>
-                {showInitialFaults &&
-                  diagnosis.preliminary.possibleReasons?.map((fault, index) => (
-                    <FaultCardCollapsible
-                      key={index}
-                      title={fault.title}
-                      probability={fault.probability as ProbabilityLevel}
-                      reasoning={fault.reasonDetails}
-                      recommendations={fault.diagnosticRecommendations || []}
-                      tools={fault.requiredTools || []}
-                    />
-                  ))}
-
-                {showInitialFaults &&
-                  initialFaultsCount > 0 &&
-                  diagnosis.preliminary.possibleReasons &&
-                  diagnosis.preliminary.possibleReasons.length > initialFaultsCount && (
+                {hasOldReasons && hasNewReasons && (
+                  <div className="flex items-center justify-between rounded-lg bg-blue-50 p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-blue-900">
+                        {showOldReasons
+                          ? `Mostrando ${reasonsToShow.length} averías anteriores`
+                          : `Mostrando ${reasonsToShow.length} averías más recientes`}
+                      </span>
+                    </div>
                     <Button
-                      variant="ghost"
-                      onClick={() => setShowInitialFaults(false)}
-                      className="text-primary w-full"
+                      variant="outline"
                       size="sm"
+                      onClick={() => setShowOldReasons(!showOldReasons)}
+                      className="text-xs"
                     >
-                      <ChevronUpIcon className="h-4 w-4" />
-                      Ocultar {initialFaultsCount} averías iniciales
+                      {showOldReasons
+                        ? `Ver ${diagnosis.preliminary.newPossibleReasons?.length || 0} nuevas`
+                        : `Ver ${diagnosis.preliminary.oldPossibleReasons?.length || 0} anteriores`}
                     </Button>
-                  )}
-
-                {!showInitialFaults && initialFaultsCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => setShowInitialFaults(true)}
-                    className="text-primary w-full"
-                    size="sm"
-                  >
-                    <ChevronDownIcon className="h-4 w-4" />
-                    Mostrar {initialFaultsCount} averías iniciales
-                  </Button>
+                  </div>
                 )}
 
-                {!showInitialFaults &&
-                  diagnosis.preliminary.possibleReasons
-                    ?.slice(-(diagnosis.preliminary.possibleReasons.length - initialFaultsCount))
-                    .map((fault, index) => (
-                      <FaultCardCollapsible
-                        key={`new-${index}`}
-                        title={fault.title}
-                        probability={fault.probability as ProbabilityLevel}
-                        reasoning={fault.reasonDetails}
-                        recommendations={fault.diagnosticRecommendations || []}
-                        tools={fault.requiredTools || []}
-                      />
-                    ))}
+                {reasonsToShow?.map((fault, index) => (
+                  <FaultCardCollapsible
+                    key={index}
+                    title={fault.title}
+                    probability={fault.probability as ProbabilityLevel}
+                    reasoning={fault.reasonDetails}
+                    recommendations={fault.diagnosticRecommendations || []}
+                    tools={fault.requiredTools || []}
+                  />
+                ))}
               </>
             )}
           </div>

@@ -23,6 +23,8 @@ export type Diagnosis = {
       diagnosticRecommendations: string[];
       requiredTools: string[];
     }[];
+    oldPossibleReasons?: string[];
+    newPossibleReasons?: string[];
   };
   finalNotes: string;
   diagnosis: {
