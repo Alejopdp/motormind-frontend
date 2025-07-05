@@ -18,10 +18,11 @@ import AiEvaluationDetails from '@/pages/AiEvaluationDetails';
 import PromptManager from '@/pages/PromptManager';
 import PromptDetail from '@/pages/PromptDetails';
 import Metrics from '@/pages/Metrics';
-import DamageAssessments from './pages/DamageAssessments';
-import CreateDamageAssessment from './pages/DamageAssessments/CreateDamageAssessment';
-import DamageAssessmentDetail from './pages/DamageAssessments/DamageAssessmentDetail';
-import DamageAssessmentReport from './pages/DamageAssessments/DamageAssessmentReport';
+import DamageAssessments from '@/pages/DamageAssessments';
+import CreateDamageAssessment from '@/pages/DamageAssessments/CreateDamageAssessment';
+import DamageAssessmentDetail from '@/pages/DamageAssessments/DamageAssessmentDetail';
+import DamageAssessmentReport from '@/pages/DamageAssessments/DamageAssessmentReport';
+import DiagnosisOBDCodes from '@/pages/DiagnosisOBDCodes';
 
 const router = createBrowserRouter([
   {
@@ -103,6 +104,14 @@ const router = createBrowserRouter([
     element: (
       <ErrorBoundary>
         <DiagnosisQuestions />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/cars/:carId/diagnosis/:diagnosisId/obd-codes',
+    element: (
+      <ErrorBoundary>
+        <DiagnosisOBDCodes />
       </ErrorBoundary>
     ),
   },

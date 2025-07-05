@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AlertCircle, ArrowLeftIcon, BrainCircuitIcon, FileTextIcon, PlusIcon } from 'lucide-react';
 
@@ -32,6 +32,7 @@ const PreliminaryDiagnosis = () => {
   const [obdCodes, setObdCodes] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingMorePossibleReasons, setIsLoadingMorePossibleReasons] = useState(false);
+  const [showOldReasons, setShowOldReasons] = useState(false);
   const { execute: getDiagnosisById } = useApi<Diagnosis>('get', '/cars/diagnosis/:diagnosisId');
   const { execute: createFinalReportRequest } = useApi<Diagnosis>(
     'post',
@@ -61,6 +62,13 @@ const PreliminaryDiagnosis = () => {
     refetchOnWindowFocus: true,
     retry: false,
   });
+
+  // Sincronizar obdCodes cuando cambie diagnosis
+  useEffect(() => {
+    if (diagnosis.obdCodes) {
+      setObdCodes(diagnosis.obdCodes);
+    }
+  }, [diagnosis.obdCodes]);
 
   const { symptom } = useSymptom(diagnosis);
   const { mutate: createFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
@@ -98,6 +106,41 @@ const PreliminaryDiagnosis = () => {
   });
 
   const carDescription = useCarPlateOrVin(diagnosis.car);
+
+  // Filtrar averías para mostrar las nuevas por defecto
+  const getReasonsToShow = () => {
+    if (!diagnosis.preliminary?.possibleReasons) return [];
+
+    if (
+      !diagnosis.preliminary.newPossibleReasons ||
+      diagnosis.preliminary.newPossibleReasons.length === 0
+    ) {
+      // Si no hay nuevas averías, mostrar todas
+      return diagnosis.preliminary.possibleReasons;
+    }
+
+    if (showOldReasons) {
+      // Mostrar averías viejas
+      const oldIndices = diagnosis.preliminary.oldPossibleReasons || [];
+      return oldIndices
+        .map((index) => diagnosis.preliminary.possibleReasons[parseInt(index)])
+        .filter(Boolean);
+    } else {
+      // Mostrar averías nuevas (por defecto)
+      const newIndices = diagnosis.preliminary.newPossibleReasons;
+      return newIndices
+        .map((index) => diagnosis.preliminary.possibleReasons[parseInt(index)])
+        .filter(Boolean);
+    }
+  };
+
+  const reasonsToShow = getReasonsToShow();
+  const hasOldReasons =
+    diagnosis.preliminary?.oldPossibleReasons &&
+    diagnosis.preliminary.oldPossibleReasons.length > 0;
+  const hasNewReasons =
+    diagnosis.preliminary?.newPossibleReasons &&
+    diagnosis.preliminary.newPossibleReasons.length > 0;
 
   if (isLoadingDiagnosis)
     return (
@@ -162,6 +205,9 @@ const PreliminaryDiagnosis = () => {
       );
 
       if (response.status === 200 && response.data) {
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
         queryClient.setQueryData(
           ['getDiagnosisById', params.diagnosisId],
           (oldData: { data: Diagnosis } | undefined) => {
@@ -173,6 +219,8 @@ const PreliminaryDiagnosis = () => {
                   preliminary: {
                     ...oldData.data.preliminary,
                     possibleReasons: response.data.preliminary.possibleReasons,
+                    oldPossibleReasons: response.data.preliminary.oldPossibleReasons,
+                    newPossibleReasons: response.data.preliminary.newPossibleReasons,
                     moreReasonsRequestsQuantity:
                       response.data.preliminary.moreReasonsRequestsQuantity ??
                       oldData.data.preliminary.moreReasonsRequestsQuantity,
@@ -229,21 +277,49 @@ const PreliminaryDiagnosis = () => {
                 <Spinner />
               </div>
             ) : (
-              diagnosis.preliminary.possibleReasons?.map((fault, index) => (
-                <FaultCardCollapsible
-                  key={index}
-                  title={fault.title}
-                  probability={fault.probability as ProbabilityLevel}
-                  reasoning={fault.reasonDetails}
-                  recommendations={fault.diagnosticRecommendations || []}
-                  tools={fault.requiredTools || []}
-                />
-              ))
+              <>
+                {hasOldReasons && hasNewReasons && (
+                  <div className="flex items-center justify-between rounded-lg bg-blue-50 p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-blue-900">
+                        {showOldReasons
+                          ? `Mostrando ${reasonsToShow.length} averías anteriores`
+                          : `Mostrando ${reasonsToShow.length} averías más recientes`}
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowOldReasons(!showOldReasons)}
+                      className="text-xs"
+                    >
+                      {showOldReasons
+                        ? `Ver ${diagnosis.preliminary.newPossibleReasons?.length || 0} nuevas`
+                        : `Ver ${diagnosis.preliminary.oldPossibleReasons?.length || 0} anteriores`}
+                    </Button>
+                  </div>
+                )}
+
+                {reasonsToShow?.map((fault, index) => (
+                  <FaultCardCollapsible
+                    key={index}
+                    title={fault.title}
+                    probability={fault.probability as ProbabilityLevel}
+                    reasoning={fault.reasonDetails}
+                    recommendations={fault.diagnosticRecommendations || []}
+                    tools={fault.requiredTools || []}
+                  />
+                ))}
+              </>
             )}
           </div>
         </div>
 
-        <OBDCodeInput onChange={setObdCodes} disabled={isLoadingFinalReport} />
+        <OBDCodeInput
+          initialCodes={diagnosis.obdCodes || []}
+          onChange={setObdCodes}
+          disabled={isLoadingFinalReport}
+        />
 
         <div className="space-y-1 sm:space-y-2">
           <p className="block text-sm font-medium sm:text-base">
@@ -269,7 +345,7 @@ const PreliminaryDiagnosis = () => {
           size="lg"
         >
           <ArrowLeftIcon className="h-4 w-4" />
-          <span className="ml-2 sm:block">Volver</span>
+          <span className="sm:block">Volver</span>
         </Button>
 
         <div className="flex w-full sm:w-auto sm:gap-3">
@@ -283,7 +359,7 @@ const PreliminaryDiagnosis = () => {
               variant="outline"
             >
               <PlusIcon className="h-4 w-4" />
-              <span className="ml-2">Generar más posibles averías</span>
+              <span>Generar más posibles averías</span>
             </Button>
           )}
 
@@ -294,7 +370,7 @@ const PreliminaryDiagnosis = () => {
             size="lg"
           >
             <FileTextIcon className="h-4 w-4" />
-            <span className="ml-2">Generar Informe Final</span>
+            <span>Generar Informe Final</span>
           </Button>
         </div>
       </div>

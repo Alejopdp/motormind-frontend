@@ -8,12 +8,48 @@ import { diagnosisLink, formatToddmmyyyy } from '@/utils';
 import { Button } from '@/components/atoms/Button';
 import { Dropdown } from '@/components/atoms/Dropdown';
 import { DeleteDiagnosisModal } from '../DeleteDiagnosisModal';
+import { DIAGNOSIS_STATUS } from '@/constants';
+import { Badge } from '@/components/atoms/Badge';
 
 interface FaultsHistoryItemProps {
   diagnosis: Diagnosis;
   index: number;
   onDelete?: (diagnosisId: string) => void;
 }
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case DIAGNOSIS_STATUS.GUIDED_QUESTIONS:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+    case DIAGNOSIS_STATUS.PRELIMINARY:
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case DIAGNOSIS_STATUS.ASSIGN_OBD_CODES:
+      return 'bg-orange-100 text-orange-800 border-orange-200';
+    case DIAGNOSIS_STATUS.IN_REPARATION:
+      return 'bg-blue-100 text-blue-800 border-blue-200';
+    case DIAGNOSIS_STATUS.REPAIRED:
+      return 'bg-green-100 text-green-800 border-green-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
+
+const getStatusText = (status: string) => {
+  switch (status) {
+    case DIAGNOSIS_STATUS.GUIDED_QUESTIONS:
+      return 'Preguntas Guíadas';
+    case DIAGNOSIS_STATUS.ASSIGN_OBD_CODES:
+      return 'Asignar Códigos OBD';
+    case DIAGNOSIS_STATUS.PRELIMINARY:
+      return 'Pre-Diagnóstico';
+    case DIAGNOSIS_STATUS.IN_REPARATION:
+      return 'En Reparación';
+    case DIAGNOSIS_STATUS.REPAIRED:
+      return 'Reparado';
+    default:
+      return status;
+  }
+};
 
 export const FaultsHistoryItem = ({ diagnosis, index, onDelete }: FaultsHistoryItemProps) => {
   const { symptom } = useSymptom(diagnosis);
@@ -57,10 +93,20 @@ export const FaultsHistoryItem = ({ diagnosis, index, onDelete }: FaultsHistoryI
         >
           <div className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
-              <p className="text-muted text-xs sm:text-sm">
-                Fecha:{' '}
-                {diagnosis.createdAt ? formatToddmmyyyy(new Date(diagnosis.createdAt)) || '-' : '-'}
-              </p>
+              <div className="flex flex-col space-y-1 sm:flex-row sm:items-center">
+                <p className="text-muted mr-2 text-xs sm:text-sm">
+                  Fecha:{' '}
+                  {diagnosis.createdAt
+                    ? formatToddmmyyyy(new Date(diagnosis.createdAt)) || '-'
+                    : '-'}
+                </p>
+                <Badge
+                  variant="outline"
+                  className={`${getStatusColor(diagnosis.status)} truncate px-2 py-0.5 text-xs font-medium`}
+                >
+                  {getStatusText(diagnosis.status)}
+                </Badge>
+              </div>
 
               {/* Dropdown de opciones */}
               {onDelete && (
@@ -99,7 +145,7 @@ export const FaultsHistoryItem = ({ diagnosis, index, onDelete }: FaultsHistoryI
                 </div>
               )}
             </div>
-            <p className="text-sm font-medium sm:text-base">{symptom}</p>
+            <p className="mt-2 text-sm font-medium sm:mt-0 sm:text-base">{symptom}</p>
           </div>
         </div>
       </Link>

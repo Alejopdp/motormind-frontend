@@ -130,6 +130,7 @@ const Vehicles = () => {
           <VehicleList
             vehicles={cars}
             isLoading={isLoadingCars}
+            onAddVehicle={() => setIsCreateModalOpen(true)}
             // previousPage={handlePreviousPage}
             // nextPage={handleNextPage}
             // total={total}

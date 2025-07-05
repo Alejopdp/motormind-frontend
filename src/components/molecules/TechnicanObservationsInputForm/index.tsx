@@ -2,14 +2,13 @@ import { Button } from '@/components/atoms/Button';
 import { VoiceTextInput } from '@/components/molecules/VoiceTextInput';
 import { useState } from 'react';
 import { LoadingModal } from '../LoadingModal';
-
 interface TechnicanObservationsInputFormProps {
   initialDetails?: string;
   onSubmit: (details: string) => void;
   onGenerateMoreQuestions: () => void;
   disableMoreQuestions?: boolean;
   isLoadingMoreQuestions?: boolean;
-  isLoadingDiagnosis?: boolean;
+  isLoadingAnswers?: boolean;
 }
 
 export const TechnicanObservationsInputForm = ({
@@ -18,7 +17,7 @@ export const TechnicanObservationsInputForm = ({
   onGenerateMoreQuestions,
   disableMoreQuestions = false,
   isLoadingMoreQuestions = false,
-  isLoadingDiagnosis = false,
+  isLoadingAnswers = false,
 }: TechnicanObservationsInputFormProps) => {
   const [details, setDetails] = useState(initialDetails);
 
@@ -44,10 +43,10 @@ export const TechnicanObservationsInputForm = ({
               </p>
               <VoiceTextInput
                 placeholder="Observaciones del técnico..."
-                className="min-h-[150px]"
+                className="min-h-[140px]"
                 value={details}
                 onChange={setDetails}
-                disabled={isLoadingMoreQuestions || isLoadingDiagnosis}
+                disabled={isLoadingMoreQuestions || isLoadingAnswers}
               />
             </div>
           </div>
@@ -73,24 +72,24 @@ export const TechnicanObservationsInputForm = ({
             </Button>
           )}
           <Button
-            disabled={isLoadingMoreQuestions || isLoadingDiagnosis || details.length === 0}
+            disabled={isLoadingMoreQuestions || isLoadingAnswers || details.length === 0}
             type="submit"
             className="w-full sm:w-auto"
             size="lg"
           >
-            {isLoadingDiagnosis ? (
-              'Creando...'
+            {isLoadingAnswers ? (
+              'Guardando...'
             ) : (
               <>
-                <span className="sm:hidden">Crear Informe Preliminar</span>
-                <span className="hidden sm:inline">Crear Informe Preliminar</span>
+                <span className="sm:hidden">Guardar y Continuar</span>
+                <span className="hidden sm:inline">Guardar Respuestas y Continuar</span>
               </>
             )}
           </Button>
         </div>
       </form>
 
-      <LoadingModal isOpen={isLoadingDiagnosis} message="Generando informe preliminar" />
+      <LoadingModal isOpen={isLoadingAnswers} message="Guardando..." />
     </>
   );
 };

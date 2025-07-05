@@ -96,6 +96,8 @@ const Diagnoses = () => {
     switch (status) {
       case DIAGNOSIS_STATUS.GUIDED_QUESTIONS:
         return 'Preguntas Guíadas';
+      case DIAGNOSIS_STATUS.ASSIGN_OBD_CODES:
+        return 'Asignar Códigos OBD';
       case DIAGNOSIS_STATUS.PRELIMINARY:
         return 'Pre-Diagnóstico';
       case DIAGNOSIS_STATUS.IN_REPARATION:
@@ -154,6 +156,9 @@ const Diagnoses = () => {
                 <SelectItem value={DIAGNOSIS_STATUS.GUIDED_QUESTIONS}>
                   {getStatusText(DIAGNOSIS_STATUS.GUIDED_QUESTIONS)}
                 </SelectItem>
+                <SelectItem value={DIAGNOSIS_STATUS.ASSIGN_OBD_CODES}>
+                  {getStatusText(DIAGNOSIS_STATUS.ASSIGN_OBD_CODES)}
+                </SelectItem>
                 <SelectItem value={DIAGNOSIS_STATUS.PRELIMINARY}>
                   {getStatusText(DIAGNOSIS_STATUS.PRELIMINARY)}
                 </SelectItem>
@@ -189,6 +194,7 @@ const Diagnoses = () => {
                 <DiagnosticListItem
                   key={index}
                   vehicle={diagnosis.car}
+                  summary={[diagnosis.fault, diagnosis.answers]}
                   problems={diagnosis.preliminary?.possibleReasons?.map(({ title }) => title) || []}
                   questions={diagnosis.questions || []}
                   technician={diagnosis.createdBy}
