@@ -59,6 +59,8 @@ export const diagnosisLink = (diagnosis: Diagnosis, back?: boolean) => {
 
   if (diagnosis.status === DIAGNOSIS_STATUS.GUIDED_QUESTIONS) {
     path = back ? 'questions?back=true' : 'questions';
+  } else if (diagnosis.status === DIAGNOSIS_STATUS.ASSIGN_OBD_CODES) {
+    path = back ? 'obd-codes?back=true' : 'obd-codes';
   } else if (diagnosis.status === DIAGNOSIS_STATUS.PRELIMINARY) {
     path = back ? 'preliminary-report?back=true' : 'preliminary-report';
   } else if (
@@ -69,4 +71,29 @@ export const diagnosisLink = (diagnosis: Diagnosis, back?: boolean) => {
   }
 
   return `${mainLink}/${path}`;
+};
+
+export const onChangePrice = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  update: (value: number) => void,
+) => {
+  const value = e.target.value;
+
+  // Si está vacío, permitir borrar
+  if (value === '') {
+    update(0);
+    return;
+  }
+
+  // Eliminar ceros a la izquierda y actualizar el input
+  const cleanValue = value.replace(/^0+/, '') || '0';
+  if (cleanValue !== value) {
+    e.target.value = cleanValue;
+  }
+
+  // Convertir a número y validar
+  const numValue = parseFloat(cleanValue);
+  if (!isNaN(numValue) && numValue >= 0) {
+    update(numValue);
+  }
 };

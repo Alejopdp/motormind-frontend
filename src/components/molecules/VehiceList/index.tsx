@@ -7,6 +7,7 @@ import { VehicleListItem } from './VehicleListItem';
 interface VehicleListProps {
   vehicles: Car[];
   isLoading?: boolean;
+  onAddVehicle: () => void;
   // previousPage: () => void;
   // nextPage: () => void;
   // total: number;
@@ -17,6 +18,7 @@ interface VehicleListProps {
 export const VehicleList = ({
   vehicles,
   isLoading = false,
+  onAddVehicle,
   // previousPage,
   // nextPage,
   // total,
@@ -41,7 +43,7 @@ export const VehicleList = ({
         <p className="text-muted mb-4">
           No hay vehículos registrados o que coincidan con tu búsqueda.
         </p>
-        <Button>Añadir Vehículo</Button>
+        <Button onClick={onAddVehicle}>Añadir Vehículo</Button>
       </div>
     );
   }

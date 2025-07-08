@@ -23,6 +23,8 @@ export type Diagnosis = {
       diagnosticRecommendations: string[];
       requiredTools: string[];
     }[];
+    oldPossibleReasons?: string[];
+    newPossibleReasons?: string[];
   };
   finalNotes: string;
   diagnosis: {
@@ -78,6 +80,7 @@ export type Diagnosis = {
     fuel: string;
     lastRevision: Date;
   };
+  obdCodes?: string[];
   createdBy?: {
     name: string;
     avatar?: string;

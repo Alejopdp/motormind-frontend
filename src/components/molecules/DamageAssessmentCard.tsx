@@ -1,43 +1,95 @@
-import { CarIcon, ImageIcon } from 'lucide-react';
+import { CarIcon, MoreVertical } from 'lucide-react';
 import { DamageAssessment } from '@/types/DamageAssessment';
 import { Link } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface DamageAssessmentCardProps {
   assessment: DamageAssessment;
 }
 
+const stateMap = {
+  PENDING_REVIEW: 'Pendiente de Validación',
+  DAMAGES_CONFIRMED: 'Daños Confirmados',
+};
+
 export const DamageAssessmentCard: React.FC<DamageAssessmentCardProps> = ({ assessment }) => {
-  const { car, description, images, createdAt, _id } = assessment;
+  const { car, createdAt, _id, state, damages } = assessment;
+
+  const damagesToShow =
+    state === 'DAMAGES_CONFIRMED' ? damages.filter((d) => d.isConfirmed) : damages;
+
   return (
-    <Link to={`/damage-assessments/${_id}`}>
-      {' '}
-      {/* Futuro detalle */}
-      <div className="w-full cursor-pointer rounded-lg border border-gray-300 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]">
-        <div className="mb-2 flex items-center justify-between">
+    <Link to={`/damage-assessments/${_id}`} className="block">
+      <div className="mb-4 rounded-lg border border-gray-300 bg-white p-4 transition-colors duration-200 hover:bg-[#EAF2FD]">
+        <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-100">
-              <CarIcon className="text-primary h-5 w-5" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+              <CarIcon className="text-primary h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm font-medium">
+              <p className="font-semibold text-gray-800">
                 {car?.brand} {car?.model}
               </p>
-              <p className="text-xs text-gray-500">{car?.plate || car?.vinCode}</p>
+              <p className="text-sm text-gray-500">{car?.plate || car?.vinCode} • Siniestro: -</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-xs text-gray-500">
-              <ImageIcon className="h-4 w-4" />
-              {images.length}
-            </div>
+            <span
+              className={`rounded-md px-2 py-1 text-xs font-medium ${
+                state === 'PENDING_REVIEW'
+                  ? 'bg-purple-100 text-purple-700'
+                  : 'bg-green-100 text-green-700'
+              }`}
+            >
+              {stateMap[state]}
+            </span>
+
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                console.log('Open menu');
+              }}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <MoreVertical className="h-5 w-5" />
+            </button>
           </div>
         </div>
-        <div className="mb-2 line-clamp-2 min-h-[1.5em] text-xs text-gray-700">
-          {description || <span className="text-gray-400 italic">Sin descripción</span>}
+
+        <div className="mt-4 space-y-3 pl-1">
+          <div className="text-sm">
+            <span className="text-gray-500">Aseguradora:</span>{' '}
+            <span className="text-gray-800">{assessment.insuranceCompany}</span>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Daños detectados:</p>
+            {damagesToShow.length > 0 ? (
+              <ul className="mt-1 ml-5 list-disc space-y-1 text-sm text-gray-800">
+                {damagesToShow.slice(0, 2).map((damage) => (
+                  <li key={damage._id}>{damage.description}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-1 ml-5 text-sm text-gray-500">No se detectaron daños.</p>
+            )}
+            {damagesToShow.length > 2 && (
+              <p className="mt-1 ml-5 text-xs text-blue-500">y {damagesToShow.length - 2} más...</p>
+            )}
+          </div>
         </div>
-        <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-          <span className="text-xs text-gray-400">
-            Creado: {new Date(createdAt).toLocaleString()}
+
+        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+          <div className="flex items-center gap-2">
+            <img src="https://i.pravatar.cc/24" alt="Creator" className="h-6 w-6 rounded-full" />
+            <span className="text-sm text-gray-700">Carlos Ruiz</span>
+          </div>
+          <span className="text-sm text-gray-500">
+            {formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: es })
+              .charAt(0)
+              .toUpperCase() +
+              formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: es }).slice(1)}
           </span>
         </div>
       </div>

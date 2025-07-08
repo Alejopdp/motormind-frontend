@@ -18,10 +18,11 @@ import AiEvaluationDetails from '@/pages/AiEvaluationDetails';
 import PromptManager from '@/pages/PromptManager';
 import PromptDetail from '@/pages/PromptDetails';
 import Metrics from '@/pages/Metrics';
-import DamageAssessments from './pages/DamageAssessments';
-import CreateDamageAssessment from './pages/DamageAssessments/CreateDamageAssessment';
-import DamageAssessmentDetail from './pages/DamageAssessments/DamageAssessmentDetail';
-import { DamageAssessmentProvider } from '@/context/DamageAssessment.context';
+import DamageAssessments from '@/pages/DamageAssessments';
+import CreateDamageAssessment from '@/pages/DamageAssessments/CreateDamageAssessment';
+import DamageAssessmentDetail from '@/pages/DamageAssessments/DamageAssessmentDetail';
+import DamageAssessmentReport from '@/pages/DamageAssessments/DamageAssessmentReport';
+import DiagnosisOBDCodes from '@/pages/DiagnosisOBDCodes';
 
 const router = createBrowserRouter([
   {
@@ -107,6 +108,14 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: '/cars/:carId/diagnosis/:diagnosisId/obd-codes',
+    element: (
+      <ErrorBoundary>
+        <DiagnosisOBDCodes />
+      </ErrorBoundary>
+    ),
+  },
+  {
     path: '/cars/:carId/diagnosis/:diagnosisId/preliminary-report',
     element: (
       <ErrorBoundary>
@@ -174,9 +183,7 @@ const router = createBrowserRouter([
     path: '/damage-assessments/create',
     element: (
       <ErrorBoundary>
-        <DamageAssessmentProvider>
-          <CreateDamageAssessment />
-        </DamageAssessmentProvider>
+        <CreateDamageAssessment />
       </ErrorBoundary>
     ),
   },
@@ -184,9 +191,15 @@ const router = createBrowserRouter([
     path: '/damage-assessments/:damageAssessmentId',
     element: (
       <ErrorBoundary>
-        <DamageAssessmentProvider>
-          <DamageAssessmentDetail />
-        </DamageAssessmentProvider>
+        <DamageAssessmentDetail />
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: '/damage-assessments/:damageAssessmentId/report',
+    element: (
+      <ErrorBoundary>
+        <DamageAssessmentReport />
       </ErrorBoundary>
     ),
   },

@@ -91,10 +91,10 @@ export const Sidebar = ({ className }: SidebarNavigationProps) => {
           const passesRoleCheck = !item.roles || item.roles.includes(user.role);
 
           if (item.id === 'peritajes') {
-            if (import.meta.env.MODE === 'development') {
+            if (import.meta.env.VITE_NODE_ENV === 'development') {
               return true;
             }
-            if (import.meta.env.MODE === 'production') {
+            if (import.meta.env.VITE_NODE_ENV === 'production') {
               const isAllowedWorkshop = ALLOWED_WORKSHOP_IDS_FOR_PERITAJES.includes(
                 user.workshopId,
               );

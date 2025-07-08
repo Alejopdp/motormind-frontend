@@ -1,26 +1,63 @@
 import { Car } from './Car';
 import { DocumentLink } from './Diagnosis';
+import { PaintMaterialType } from './PaintMaterial';
+
+export enum DamageSeverity {
+    SEV1 = 'SEV1',
+    SEV2 = 'SEV2',
+    SEV3 = 'SEV3',
+    SEV4 = 'SEV4',
+    SEV5 = 'SEV5',
+}
+
+export enum DamageAction {
+    POLISH = 'POLISH',
+    RENOVATE = 'RENOVATE',
+    QUICK_REPAIR = 'QUICK_REPAIR',
+    PAINT = 'PAINT',
+    REPAIR_AND_PAINT = 'REPAIR_AND_PAINT',
+    REPLACE = 'REPLACE',
+}
 
 export enum DamageType {
     SCRATCH = 'scratch',
     DENT = 'dent',
 }
 
-export enum DamageSeverity {
-    LOW = 'low',
-    MEDIUM = 'medium',
-    HIGH = 'high'
+export interface SparePart {
+    description: string;
+    reference: string;
+    quantity: number;
+    price: number;
+}
+
+export interface AdditionalAction {
+    description: string;
+    time: number; // in minutes
+    hourlyRate: number; // hourly rate in euros
+}
+
+export interface PaintWork {
+    type: PaintMaterialType;
+    description: string;
+    quantity: number;
+    price: number;
 }
 
 export interface Damage {
     _id?: string;
     area: string;
-    subarea: string;
+    subarea?: string;
     description: string;
     type: DamageType;
     severity: DamageSeverity;
     resources: DocumentLink[];
     isConfirmed: boolean | null;
+    action?: DamageAction;
+    spareParts?: SparePart[];
+    additionalActions?: AdditionalAction[];
+    paintWorks?: PaintWork[];
+    notes?: string;
 }
 
 export interface DamageAssessment {
@@ -37,4 +74,7 @@ export interface DamageAssessment {
     createdAt: string;
     updatedAt: string;
     state: 'PENDING_REVIEW' | 'DAMAGES_CONFIRMED';
+    notes?: string;
+    insuranceCompany: string;
+    claimNumber?: string;
 } 

@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { apiUrl } from '@/constants/env';
 import { AiDiagnosisEvaluation } from '@/types/AiDiagnosisEvaluation';
+import { Damage, DamageAssessment } from '@/types/DamageAssessment';
 
 export class ApiService {
   private static instance: ApiService;
@@ -101,8 +102,47 @@ export class ApiService {
     diagnosisId: string,
   ): Promise<AiDiagnosisEvaluation[]> {
     const response = await this.get<AiDiagnosisEvaluation[]>(
-      `/audits/evaluations/diagnosis/${diagnosisId}`,
+      `/audit/evaluations/diagnosis/${diagnosisId}`,
     );
+    return response.data;
+  }
+
+  // Métodos para gestión de daños en assessments
+  async updateDamage(
+    assessmentId: string,
+    damageId: string,
+    damageData: Partial<Damage>,
+  ): Promise<DamageAssessment> {
+    const response = await this.put<DamageAssessment>(
+      `/damage-assessments/${assessmentId}/damages/${damageId}`,
+      damageData,
+    );
+    return response.data;
+  }
+
+  async deleteDamage(assessmentId: string, damageId: string): Promise<DamageAssessment> {
+    const response = await this.delete<DamageAssessment>(
+      `/damage-assessments/${assessmentId}/damages/${damageId}`,
+    );
+    return response.data;
+  }
+
+  async addDamage(assessmentId: string, damageData: Partial<Damage>): Promise<DamageAssessment> {
+    const response = await this.post<DamageAssessment>(
+      `/damage-assessments/${assessmentId}/damages`,
+      damageData,
+    );
+    return response.data;
+  }
+
+  // Método para actualizar notas del damage assessment
+  async updateDamageAssessmentNotes(
+    assessmentId: string,
+    notes: string,
+  ): Promise<DamageAssessment> {
+    const response = await this.put<DamageAssessment>(`/damage-assessments/${assessmentId}`, {
+      notes,
+    });
     return response.data;
   }
 
@@ -111,6 +151,8 @@ export class ApiService {
     const response = await this.delete<{ message: string }>(`/diagnoses/${diagnosisId}`);
     return response.data;
   }
+
+
 }
 
 // Exporta la instancia singleton por defecto

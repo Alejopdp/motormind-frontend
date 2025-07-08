@@ -84,6 +84,7 @@ const Dashboard = () => {
                     problems={
                       diagnosis.preliminary?.possibleReasons.map(({ title }) => title) || []
                     }
+                    summary={[diagnosis.fault, diagnosis.answers]}
                     questions={diagnosis.questions || []}
                     technician={diagnosis.createdBy}
                     status={
