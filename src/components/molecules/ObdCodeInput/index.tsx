@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 import { Input } from '@/components/atoms/Input';
@@ -13,6 +13,11 @@ interface OBDCodeInputProps {
 export default function OBDCodeInput({ initialCodes = [], onChange, disabled }: OBDCodeInputProps) {
   const [codes, setCodes] = useState<string[]>(initialCodes);
   const [inputValue, setInputValue] = useState('');
+
+  // Sincronizar codes cuando cambie initialCodes
+  useEffect(() => {
+    setCodes(initialCodes);
+  }, [initialCodes]);
 
   const addCode = (code: string) => {
     const trimmedCode = code.trim().toUpperCase();
