@@ -70,6 +70,8 @@ const PreliminaryDiagnosis = () => {
     }
   }, [diagnosis.obdCodes]);
 
+  console.log('diagnosis', diagnosis);
+
   const { symptom } = useSymptom(diagnosis);
   const { mutate: createFinalReportMutation, isPending: isLoadingFinalReport } = useMutation({
     mutationFn: async ({
@@ -316,7 +318,7 @@ const PreliminaryDiagnosis = () => {
         </div>
 
         <OBDCodeInput
-          initialCodes={diagnosis.obdCodes || []}
+          initialCodes={obdCodes || []}
           onChange={setObdCodes}
           disabled={isLoadingFinalReport}
         />
