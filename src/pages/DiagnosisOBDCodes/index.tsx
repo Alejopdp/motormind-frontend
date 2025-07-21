@@ -120,7 +120,7 @@ const DiagnosisOBDCodes = () => {
           symptoms={symptom}
           notes={diagnosis.notes}
           questions={diagnosis.questions}
-          answers={diagnosis.processedAnswers ?? ''}
+          answers={diagnosis.processedAnswers || diagnosis.answers || ''}
         />
 
         <OBDCodeInput
