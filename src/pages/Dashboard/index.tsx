@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FileSearch, PlusIcon } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
 import { diagnosisLink, formatDate } from '@/utils';
 import { Diagnosis } from '@/types/Diagnosis';
@@ -12,9 +12,11 @@ import Spinner from '@/components/atoms/Spinner';
 import { CreateDiagnosticModal } from '@/components/organisms/CreateDiagnosticModal';
 import { Button } from '@/components/atoms/Button';
 import { FloatingButton } from '@/components/atoms/FloatingButton';
+import apiService from '@/service/api.service';
 
 const Dashboard = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const queryClient = useQueryClient();
   const { execute: getDiagnosesRequest } = useApi<{ data: Diagnosis[] }>('get', '/diagnoses');
 
   const {
@@ -39,6 +41,22 @@ const Dashboard = () => {
       enqueueSnackbar(`Error: No se pudieron obtener los diagnósticos`, { variant: 'error' });
     }
   }, [isError, error]);
+
+  const handleDeleteDiagnosis = async (diagnosisId: string) => {
+    try {
+      await apiService.deleteDiagnosis(diagnosisId);
+      enqueueSnackbar('Diagnóstico eliminado correctamente', { variant: 'success' });
+
+      // Invalidar múltiples queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['diagnoses'] });
+      queryClient.invalidateQueries({ queryKey: ['getDiagnosesByCarId'] });
+      queryClient.removeQueries({ queryKey: ['getDiagnosisById', diagnosisId] });
+      queryClient.removeQueries({ queryKey: ['diagnosis', diagnosisId] });
+    } catch (error) {
+      console.error('Error deleting diagnosis:', error);
+      enqueueSnackbar('Error al eliminar el diagnóstico', { variant: 'error' });
+    }
+  };
 
   return (
     <div className="flex flex-grow flex-col">
@@ -91,6 +109,7 @@ const Dashboard = () => {
                       diagnosis.status as (typeof DIAGNOSIS_STATUS)[keyof typeof DIAGNOSIS_STATUS]
                     }
                     timestamp={formatDate(diagnosis.createdAt)}
+                    onDelete={handleDeleteDiagnosis}
                   />
                 ))}
               </div>
