@@ -100,6 +100,14 @@ const DamageAssessments = () => {
                 </SelectContent>
               </Select>
             </div>
+            {import.meta.env.VITE_WIZARD_V2_ENABLED === 'true' ? (
+              <a
+                href="/damage-assessments/preview-id/wizard-v2?step=intake"
+                className="hidden h-8 w-8 items-center justify-center rounded bg-blue-600 px-3 text-white sm:flex sm:h-auto sm:w-auto"
+              >
+                Probar Wizard V2
+              </a>
+            ) : null}
             <Button
               onClick={() => setIsCreateModalOpen(true)}
               className="hidden h-8 w-8 sm:flex sm:h-auto sm:w-auto"
