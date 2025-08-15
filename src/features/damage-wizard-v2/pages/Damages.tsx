@@ -22,27 +22,35 @@ const Damages = () => {
   };
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="space-y-4 p-6">
       <h2 className="text-xl font-semibold">Daños detectados</h2>
       <div className="grid gap-3">
         {(state.detectedDamages || []).map((d) => {
           const checked = (state.confirmedDamageIds || []).includes(d.id);
           return (
-            <div key={d.id} className={`border rounded p-3 flex items-center justify-between ${checked ? 'border-blue-500' : 'border-gray-200'}`}>
+            <div
+              key={d.id}
+              className={`flex items-center justify-between rounded border p-3 ${checked ? 'border-blue-500' : 'border-gray-200'}`}
+            >
               <div>
-                <div className="font-medium">{d.area} {d.subarea ? `- ${d.subarea}` : ''}</div>
+                <div className="font-medium">
+                  {d.area} {d.subarea ? `- ${d.subarea}` : ''}
+                </div>
                 <div className="text-sm text-gray-600">{d.type}</div>
               </div>
               <div className="flex items-center gap-3">
-                <Badge variant="neutral">{d.severity}</Badge>
+                <Badge variant="secondary">{d.severity}</Badge>
                 <input type="checkbox" checked={checked} onChange={() => toggle(d.id)} />
               </div>
             </div>
           );
         })}
       </div>
-      <div className="flex justify-between items-center">
-        <div className="text-sm text-gray-600">Confirmados: {(state.confirmedDamageIds || []).length} / {(state.detectedDamages || []).length}</div>
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-gray-600">
+          Confirmados: {(state.confirmedDamageIds || []).length} /{' '}
+          {(state.detectedDamages || []).length}
+        </div>
         <Button onClick={confirm}>Confirmar daños</Button>
       </div>
     </div>
@@ -50,5 +58,3 @@ const Damages = () => {
 };
 
 export default Damages;
-
-
