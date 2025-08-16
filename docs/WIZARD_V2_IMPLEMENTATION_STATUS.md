@@ -59,6 +59,7 @@
 Ningún item en progreso actualmente.
 
 ### 7. ImagePreview - Paridad 1:1 ✅
+
 - **Estados hover**: opacity-0 group-hover:opacity-100 transition-opacity
 - **Grid responsive**: grid-cols-2 md:grid-cols-4 gap-4
 - **Imagen**: w-full h-24 object-cover + border-border
@@ -66,6 +67,7 @@ Ningún item en progreso actualmente.
 - **Reutilizable**: Componente independiente para cualquier wizard step
 
 ### 7.1. ImageRemoveButton - Componente Separado ✅
+
 - **Botón eliminar**: absolute -top-2 -right-2 + bg-destructive + w-6 h-6
 - **Estados**: opacity-0 group-hover:opacity-100 transition-opacity
 - **Símbolo**: × (multiply symbol) + text-xs
@@ -73,7 +75,17 @@ Ningún item en progreso actualmente.
 - **Customizable**: className prop para variants de tamaño
 - **Ejemplo**: `examples/ImageRemoveButtonExample.tsx`
 
-### 8. Ejemplo Completo - Página Intake ✅
+### 8. DamageCard - Paridad 1:1 ✅
+
+- **Estados**: 3/3 implementados (pending/confirmed/rejected)
+- **Severidades**: 3/3 con colores exactos (leve/medio/grave)
+- **Confidence badge**: 3 niveles con colores dinámicos (≥90%, ≥80%, <80%)
+- **Interacciones**: hover:shadow-lg + scale-[1.02] + active:scale-[0.98]
+- **Status icons**: CheckCircle2 verde + XCircle rojo + posición exacta
+- **Click behavior**: pending→confirmed, confirmed→rejected, rejected→confirmed
+- **Ejemplo**: `examples/DamageCardExample.tsx` con 6 variantes
+
+### 9. Ejemplo Completo - Página Intake ✅
 
 - **Integración**: WizardStepper + PageShell + SectionPaper + DragZone + ImagePreview
 - **Estados**: Formulario funcional con validación y preview de imágenes con hover
@@ -117,14 +129,15 @@ Ningún item en progreso actualmente.
 - **Estados**: 3/3 implementados correctamente ✅
 - **Interactividad**: Hover + click funcionando ✅
 
-### PageShell + SectionPaper + DragZone + ImagePreview
+### PageShell + SectionPaper + DragZone + ImagePreview + DamageCard
 
 - **Diferencia visual**: ≤ 1px en todos los componentes ✅
 - **Tokens**: 100% usando sistema mapeado, zero hardcoded ✅
 - **Layout**: Estructura idéntica al prototipo ✅
-- **Estados interactivos**: Drag/hover/error/focus/remove funcionando ✅
+- **Estados interactivos**: Drag/hover/error/focus/remove/click funcionando ✅
 - **Integración**: Funciona perfectamente en conjunto ✅
-- **Hover states**: Botón eliminar con opacity-0 → 100 exacto ✅
+- **Hover states**: Botón eliminar + card scaling exactos ✅
+- **Status system**: 3 estados con transiciones fluidas ✅
 
 ## 🛠️ Comandos de Desarrollo
 

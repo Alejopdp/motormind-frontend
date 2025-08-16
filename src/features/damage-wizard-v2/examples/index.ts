@@ -6,7 +6,7 @@
 export { WizardStepperExample } from './WizardStepperExample';
 export { IntakePageExample } from './IntakePageExample';
 export { ImageRemoveButtonExample } from './ImageRemoveButtonExample';
+export { DamageCardExample } from './DamageCardExample';
 
 // Para agregar nuevos ejemplos:
-// export { DamageCardExample } from './DamageCardExample';
 // export { ProgressCardExample } from './ProgressCardExample';

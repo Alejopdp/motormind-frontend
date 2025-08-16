@@ -11,14 +11,48 @@ body {
 }
 
 @theme {
-  --color-background: #f9fafb;
-  --color-primary: #2753a2;
-  --color-primary-foreground: #fafafa;
-  --color-secondary: #e5e7eb;
-  --color-secondary-foreground: #374152;
-  --color-muted: #6b7280;
-  --color-muted-foreground: #fafafa;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #fafafa;
-  --color-input: #6b7280;
+  /* Base colors - matching motormind-design */
+  --color-background: hsl(210 20% 98%);
+  --color-foreground: hsl(215 25% 10%);
+  
+  /* Cards */
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(215 25% 10%);
+  
+  /* Primary - Professional Blue */
+  --color-primary: hsl(219 70% 58%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-primary-muted: hsl(219 25% 85%);
+  
+  /* Success - Confirmation Green */
+  --color-success: hsl(158 64% 52%);
+  --color-success-foreground: hsl(0 0% 100%);
+  --color-success-muted: hsl(158 30% 85%);
+  
+  /* Warning - Attention Orange */
+  --color-warning: hsl(35 84% 62%);
+  --color-warning-foreground: hsl(0 0% 100%);
+  --color-warning-muted: hsl(35 25% 85%);
+  
+  /* Secondary/Muted */
+  --color-secondary: hsl(215 16% 95%);
+  --color-secondary-foreground: hsl(215 25% 15%);
+  
+  --color-muted: hsl(215 16% 95%);
+  --color-muted-foreground: hsl(215 15% 45%);
+  
+  --color-accent: hsl(215 16% 92%);
+  --color-accent-foreground: hsl(215 25% 15%);
+  
+  /* Destructive */
+  --color-destructive: hsl(0 72% 51%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  
+  /* Borders and inputs */
+  --color-border: hsl(215 12% 88%);
+  --color-input: hsl(215 12% 88%);
+  --color-ring: hsl(219 70% 58%);
+  
+  /* Border radius */
+  --radius: 0.5rem;
 }

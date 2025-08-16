@@ -2,29 +2,32 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 type Column = { key: string; header: string };
 
-export const ValuationTable = ({ columns, data }: { columns: Column[]; data: any[] }) => {
-  return (
-    <div className="border rounded">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((c) => (
-              <TableHead key={c.key}>{c.header}</TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((row, idx) => (
-            <TableRow key={idx}>
-              {columns.map((c) => (
-                <TableCell key={c.key}>{String(row[c.key] ?? '')}</TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
+type ValuationTableProps = {
+  columns: Column[];
+  data: any[];
 };
 
-
+export const ValuationTable = ({ columns, data }: ValuationTableProps) => {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          {columns.map((column) => (
+            <TableHead key={column.key}>{column.header}</TableHead>
+          ))}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.map((row, index) => (
+          <TableRow key={index}>
+            {columns.map((column) => (
+              <TableCell key={column.key}>
+                {row[column.key]}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+};

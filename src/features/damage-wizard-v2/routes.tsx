@@ -47,6 +47,13 @@ const WizardV2Router = () => {
   return Component;
 };
 
+export const wizardV2Routes = [
+  {
+    path: '/damage-assessments/:id/wizard-v2',
+    element: <WizardV2Entry />,
+  },
+];
+
 export default WizardV2Entry;
 
 

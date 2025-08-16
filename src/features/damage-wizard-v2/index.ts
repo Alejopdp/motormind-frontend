@@ -1,3 +1,1 @@
-export * from './routes';
-export * from './context/WizardV2Context';
-
+export { wizardV2Routes } from './routes';

@@ -1,100 +1,168 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
-import { ValuationTable } from '../components/ValuationTable';
+import { Badge } from '@/components/atoms/Badge';
 import { useWizardV2 } from '../context/WizardV2Context';
+import { PageShell } from '../components/PageShell';
+import { SectionPaper } from '../components/SectionPaper';
+import { WizardStepper } from '../components/WizardStepper';
+import { ValuationTable } from '../components/ValuationTable';
+
+import valuationMock from '../mocks/valuation.json';
 
 const Valuation = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
-  const { state, setState } = useWizardV2();
+  const { setState } = useWizardV2();
 
-  if (!state.valuation) {
-    // mock valuation from operations
-    const labor = (state.operations || []).map((op) => ({
-      mappingId: op.mappingId,
-      partName: op.partName,
-      operation: op.mainOperation?.operation || 'REPAIR',
-      hours: 1.5,
-      rate: 38,
-      total: 57,
-      source: 'user_override' as const,
-    }));
-    const paint = (state.operations || [])
-      .filter((op) => op.paint?.apply)
-      .map((op) => ({
-        mappingId: op.mappingId,
-        partName: op.partName,
-        job: 'Pintura daño medio',
-        paintHours: 4.2,
-        paintLaborTotal: 160,
-        units: 1,
-        unitPrice: 35,
-        materialsTotal: 40,
-        total: 200,
-      }));
-    const parts: Array<{ ref: string; partName: string; unitPrice: number; qty: number; total: number }> = [];
-    const totals = {
-      labor: labor.reduce((a, b) => a + b.total, 0),
-      paintLabor: paint.reduce((a, b) => a + b.paintLaborTotal, 0),
-      paintMaterials: paint.reduce((a, b) => a + b.materialsTotal, 0),
-      parts: parts.reduce((a, b) => a + b.total, 0),
-      grandTotal: 0,
-      currency: 'EUR',
-    };
-    totals.grandTotal = totals.labor + totals.paintLabor + totals.paintMaterials + totals.parts;
-    setState((prev) => ({ ...prev, status: 'valuated', valuation: { labor, paint, parts, totals } }));
-  }
+
 
   const finalize = () => {
+    setState((prev) => ({ ...prev, status: 'valuated' }));
     setParams({ step: 'finalize' });
     navigate(`?step=finalize`, { replace: true });
   };
 
-  const v = state.valuation!;
+  const sourceConfig = {
+    autodata: { color: 'bg-blue-100 text-blue-800', label: 'Autodata' },
+    segment_lookup: { color: 'bg-green-100 text-green-800', label: 'Segment' },
+    calc: { color: 'bg-purple-100 text-purple-800', label: 'Calc' },
+    user_override: { color: 'bg-orange-100 text-orange-800', label: 'Override' },
+    no_data: { color: 'bg-red-100 text-red-800', label: 'No Data' },
+  };
+
+  // Transform mock data for tables
+  const laborData = valuationMock.labor.map((item) => ({
+    ...item,
+    source: (
+      <Badge
+        variant="outline"
+        className={sourceConfig[item.source as keyof typeof sourceConfig].color}
+      >
+        {sourceConfig[item.source as keyof typeof sourceConfig].label}
+      </Badge>
+    ),
+    hours: `${item.hours}h`,
+    rate: `€${item.rate}/h`,
+    total: `€${item.total}`,
+  }));
+
+  const paintData = valuationMock.paint.map((item) => ({
+    ...item,
+    paintHours: `${item.paintHours}h`,
+    paintLaborTotal: `€${item.paintLaborTotal}`,
+    unitPrice: `€${item.unitPrice}`,
+    materialsTotal: `€${item.materialsTotal}`,
+    total: `€${item.total}`,
+  }));
+
+  const partsData = valuationMock.parts.map((item) => ({
+    ...item,
+    unitPrice: `€${item.unitPrice}`,
+    total: `€${item.total}`,
+  }));
 
   return (
-    <div className="p-6 space-y-6">
-      <h2 className="text-xl font-semibold">Valoración</h2>
-      <div className="grid gap-6">
-        <div>
-          <h3 className="font-medium mb-2">Mano de obra (sin pintura)</h3>
-          <ValuationTable
-            columns={[{ key: 'partName', header: 'Pieza' }, { key: 'operation', header: 'Operación' }, { key: 'hours', header: 'Horas MO' }, { key: 'rate', header: '€/h' }, { key: 'total', header: 'Total MO' }, { key: 'source', header: 'Fuente' }]}
-            data={v.labor as any}
-          />
+    <PageShell
+      header={<WizardStepper currentStep="valuation" completedSteps={['intake', 'damages', 'operations']} />}
+      title="Valoración del peritaje"
+      subtitle="Revisa los costes calculados para cada operación"
+      content={
+        <div className="space-y-6">
+          {/* Table 1: Mano de obra (sin pintura) */}
+          <SectionPaper title="Mano de obra (sin pintura)">
+            <ValuationTable
+              columns={[
+                { key: 'partName', header: 'Pieza' },
+                { key: 'operation', header: 'Operación' },
+                { key: 'hours', header: 'Horas MO' },
+                { key: 'rate', header: 'Tarifa (€/h)' },
+                { key: 'total', header: 'Total MO (€)' },
+                { key: 'source', header: 'Fuente' },
+              ]}
+              data={laborData}
+            />
+          </SectionPaper>
+
+          {/* Table 2: Pintura */}
+          <SectionPaper title="Pintura - Mano de obra y materiales">
+            <ValuationTable
+              columns={[
+                { key: 'partName', header: 'Pieza' },
+                { key: 'job', header: 'Trabajo' },
+                { key: 'paintHours', header: 'Horas MO Pintura' },
+                { key: 'paintLaborTotal', header: 'Total MO Pintura (€)' },
+                { key: 'units', header: 'Unidades' },
+                { key: 'unitPrice', header: '€/unidad' },
+                { key: 'materialsTotal', header: 'Total Materiales (€)' },
+                { key: 'total', header: 'Total Pintura (€)' },
+              ]}
+              data={paintData}
+            />
+          </SectionPaper>
+
+          {/* Table 3: Recambios */}
+          <SectionPaper title="Recambios">
+            <ValuationTable
+              columns={[
+                { key: 'ref', header: 'Ref' },
+                { key: 'partName', header: 'Pieza' },
+                { key: 'unitPrice', header: 'Precio unitario' },
+                { key: 'qty', header: 'Cantidad' },
+                { key: 'total', header: 'Total' },
+              ]}
+              data={partsData}
+            />
+          </SectionPaper>
+
+          {/* Totals card */}
+          <SectionPaper title="Resumen de costes">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">
+                  €{valuationMock.totals.labor}
+                </div>
+                <div className="text-sm text-gray-600">MO</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">
+                  €{valuationMock.totals.paintLabor}
+                </div>
+                <div className="text-sm text-gray-600">MO Pintura</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">
+                  €{valuationMock.totals.paintMaterials}
+                </div>
+                <div className="text-sm text-gray-600">Materiales</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">
+                  €{valuationMock.totals.parts}
+                </div>
+                <div className="text-sm text-gray-600">Recambios</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  €{valuationMock.totals.grandTotal}
+                </div>
+                <div className="text-sm text-gray-600">Total</div>
+              </div>
+            </div>
+            <div className="mt-4 text-center text-sm text-gray-500">
+              Moneda: {valuationMock.totals.currency}
+            </div>
+          </SectionPaper>
         </div>
-        <div>
-          <h3 className="font-medium mb-2">Pintura</h3>
-          <ValuationTable
-            columns={[{ key: 'partName', header: 'Pieza' }, { key: 'job', header: 'Trabajo' }, { key: 'paintHours', header: 'Horas MO Pintura' }, { key: 'paintLaborTotal', header: 'Total MO Pintura (€)' }, { key: 'units', header: 'Unidades' }, { key: 'unitPrice', header: '€/unidad' }, { key: 'materialsTotal', header: 'Total Materiales (€)' }, { key: 'total', header: 'Total Pintura (€)' }]}
-            data={v.paint as any}
-          />
+      }
+      footer={
+        <div className="flex justify-end">
+          <Button onClick={finalize} className="px-6">
+            Finalizar
+          </Button>
         </div>
-        <div>
-          <h3 className="font-medium mb-2">Recambios</h3>
-          <ValuationTable
-            columns={[{ key: 'ref', header: 'Ref' }, { key: 'partName', header: 'Pieza' }, { key: 'unitPrice', header: 'Precio unitario' }, { key: 'qty', header: 'Cantidad' }, { key: 'total', header: 'Total' }]}
-            data={v.parts as any}
-          />
-        </div>
-        <div className="border rounded p-4">
-          <div className="font-medium mb-2">Totales</div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm">
-            <div>MO: {v.totals.labor} {v.totals.currency}</div>
-            <div>MO Pintura: {v.totals.paintLabor} {v.totals.currency}</div>
-            <div>Materiales: {v.totals.paintMaterials} {v.totals.currency}</div>
-            <div>Recambios: {v.totals.parts} {v.totals.currency}</div>
-            <div className="font-semibold">Total: {v.totals.grandTotal} {v.totals.currency}</div>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-end">
-        <Button onClick={finalize}>Finalizar</Button>
-      </div>
-    </div>
+      }
+    />
   );
 };
 
 export default Valuation;
-
-
