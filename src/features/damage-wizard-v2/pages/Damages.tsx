@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus, Zap, Check, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
-import { useWizardV2 } from '../context/WizardV2Context';
+import { useWizardV2 } from '../hooks/useWizardV2';
 import { PageShell } from '../components/PageShell';
 import { WizardStepper } from '../components/WizardStepper';
 import { DamageCard } from '../components/DamageCard';
@@ -13,7 +13,7 @@ import damagesMock from '../mocks/damages.json';
 const Damages = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
-  const { state, setState } = useWizardV2();
+  const { state, confirmDamages } = useWizardV2();
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [selectedDamages, setSelectedDamages] = useState<string[]>([]);
@@ -30,17 +30,7 @@ const Damages = () => {
           if (prev >= 100) {
             clearInterval(interval);
             setIsProcessing(false);
-            // Load mock damages
-            setState((prev) => ({
-              ...prev,
-              detectedDamages: damagesMock.damages.map((d) => ({
-                id: d.id,
-                area: d.title,
-                subarea: d.subtitle,
-                type: d.subtitle?.toLowerCase() || 'scratch',
-                severity: d.severity === 'leve' ? 'SEV1' : d.severity === 'medio' ? 'SEV2' : 'SEV3',
-              })),
-            }));
+            // Mock damages loading completed (handled by hook now)
             return 100;
           }
           return prev + Math.random() * 15;
@@ -48,7 +38,7 @@ const Damages = () => {
       }, 500);
       return () => clearInterval(interval);
     }
-  }, [state.detectedDamages, setState]);
+  }, [state.detectedDamages]);
 
   const toggleDamage = (id: string) => {
     setSelectedDamages((prev) =>
@@ -61,14 +51,14 @@ const Damages = () => {
     setSelectedDamages(allIds);
   };
 
-  const confirmSelected = () => {
-    setState((prev) => ({
-      ...prev,
-      confirmedDamageIds: selectedDamages,
-      status: 'damages_confirmed',
-    }));
-    setParams({ step: 'operations' });
-    navigate(`?step=operations`, { replace: true });
+  const confirmSelected = async () => {
+    try {
+      await confirmDamages(selectedDamages);
+      setParams({ step: 'operations' });
+      navigate(`?step=operations`, { replace: true });
+    } catch (error) {
+      console.error('Error confirming damages:', error);
+    }
   };
 
   const filteredDamages = showOnlyConfident

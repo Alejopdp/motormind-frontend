@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useWizardV2 } from '../context/WizardV2Context';
+import { useWizardV2 } from '../hooks/useWizardV2';
 import { PageShell } from '../components/PageShell';
 import { WizardStepper } from '../components/WizardStepper';
 import { LaborTable } from '../components/LaborTable';
@@ -19,7 +19,7 @@ import {
 const ValuationNew = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
-  const { setState } = useWizardV2();
+  const { generateValuation } = useWizardV2();
 
   // Mock data - replace with real data
   const [laborOperations, setLaborOperations] = useState<LaborOperation[]>([
@@ -176,10 +176,14 @@ const ValuationNew = () => {
     console.log('Opening settings...');
   };
 
-  const handleFinalize = () => {
-    setState((prev) => ({ ...prev, status: 'valuated' }));
-    setParams({ step: 'finalize' });
-    navigate(`?step=finalize`, { replace: true });
+  const handleFinalize = async () => {
+    try {
+      await generateValuation();
+      setParams({ step: 'finalize' });
+      navigate(`?step=finalize`, { replace: true });
+    } catch (error) {
+      console.error('Error generating valuation:', error);
+    }
   };
 
   return (

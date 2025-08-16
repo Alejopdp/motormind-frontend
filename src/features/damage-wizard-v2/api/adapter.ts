@@ -1,0 +1,316 @@
+/**
+ * Adaptadores para transformar datos entre backend y frontend
+ * 
+ * Backend → Frontend: Transforma respuestas del API a tipos del frontend
+ * Frontend → Backend: Transforma datos del frontend para envío al API
+ */
+
+import {
+  BackendDetectedDamage,
+  BackendLaborOperation,
+  BackendPaintOperation,
+  BackendSparePart,
+  BackendValuation,
+  BackendDamagesResponse,
+  BackendValuationResponse,
+  BackendIntakePayload,
+  BackendConfirmDamagesPayload,
+} from '../types/backend.types';
+
+import {
+  Damage,
+  LaborOperation,
+  PaintOperation,
+  PaintMaterial,
+  SparePart,
+  ValuationTotals,
+} from '../types';
+
+// ============================================================================
+// BACKEND → FRONTEND (Respuestas del API)
+// ============================================================================
+
+/**
+ * Adapta daños detectados del backend a formato frontend
+ */
+export const adaptDetectedDamages = (backendDamages: BackendDetectedDamage[]): Damage[] => {
+  return backendDamages.map(damage => ({
+    id: damage._id,
+    zone: damage.area,
+    subzone: damage.subarea,
+    type: damage.type,
+    severity: adaptSeverity(damage.severity),
+    confidence: damage.confidence,
+    imageUrl: damage.tchekData?.imageUrl || '/placeholder-damage.jpg',
+    status: 'pending' as const,
+  }));
+};
+
+/**
+ * Adapta severidad del backend (SEV1/2/3) a frontend (leve/medio/grave)
+ */
+export const adaptSeverity = (backendSeverity: 'SEV1' | 'SEV2' | 'SEV3'): 'leve' | 'medio' | 'grave' => {
+  switch (backendSeverity) {
+    case 'SEV1': return 'leve';
+    case 'SEV2': return 'medio';
+    case 'SEV3': return 'grave';
+    default: return 'medio';
+  }
+};
+
+/**
+ * Adapta operaciones de mano de obra del backend a frontend
+ */
+export const adaptLaborOperations = (backendOperations: BackendLaborOperation[]): LaborOperation[] => {
+  return backendOperations.map(op => ({
+    id: op.mappingId,
+    piece: op.partName,
+    operation: op.operation,
+    hours: op.hours,
+    rate: op.rate,
+    total: op.total,
+    source: adaptDataSource(op.source),
+    isManuallyAdjusted: op.isManuallyAdjusted || false,
+  }));
+};
+
+/**
+ * Adapta operaciones de pintura del backend a frontend
+ */
+export const adaptPaintOperations = (backendPaintOps: BackendPaintOperation[]): PaintOperation[] => {
+  return backendPaintOps.map(op => ({
+    id: op.mappingId,
+    piece: op.partName,
+    operation: op.job,
+    hours: op.paintHours,
+    rate: op.paintLaborRate || 45, // Fallback rate
+    total: op.paintLaborTotal,
+  }));
+};
+
+/**
+ * Adapta materiales de pintura del backend a frontend
+ */
+export const adaptPaintMaterials = (backendPaintOps: BackendPaintOperation[]): PaintMaterial[] => {
+  return backendPaintOps
+    .filter(op => op.units && op.unitPrice)
+    .map(op => ({
+      id: `${op.mappingId}-material`,
+      piece: op.partName,
+      description: `Materiales para ${op.job}`,
+      units: `${op.units}L`,
+      pricePerUnit: op.unitPrice!,
+      total: op.materialsTotal,
+    }));
+};
+
+/**
+ * Adapta recambios del backend a frontend
+ */
+export const adaptSpareParts = (backendParts: BackendSparePart[]): SparePart[] => {
+  return backendParts.map(part => ({
+    id: part.ref,
+    piece: part.partName,
+    reference: part.ref,
+    description: part.partName,
+    quantity: part.qty,
+    unitPrice: part.unitPrice,
+    total: part.total,
+    isManuallyAdjusted: part.isManuallyAdjusted || false,
+  }));
+};
+
+/**
+ * Adapta totales de valoración del backend a frontend
+ */
+export const adaptValuationTotals = (backendTotals: BackendValuation['totals']): ValuationTotals => {
+  const subtotal = backendTotals.grandTotal - (backendTotals.tax || 0);
+  const tax = backendTotals.tax || subtotal * 0.21; // Fallback 21% IVA
+  
+  return {
+    laborWithoutPaint: backendTotals.labor,
+    paintLabor: backendTotals.paintLabor,
+    paintMaterials: backendTotals.paintMaterials,
+    spareParts: backendTotals.parts,
+    subtotal,
+    tax,
+    total: backendTotals.grandTotal,
+  };
+};
+
+/**
+ * Adapta fuente de datos del backend a frontend
+ */
+export const adaptDataSource = (backendSource: string): 'autodata' | 'manual' => {
+  switch (backendSource) {
+    case 'autodata':
+    case 'segment_lookup':
+      return 'autodata';
+    case 'user_override':
+    case 'manual':
+    case 'calc':
+    case 'no_data':
+    default:
+      return 'manual';
+  }
+};
+
+/**
+ * Adapta respuesta completa de daños detectados
+ */
+export const adaptDamagesResponse = (response: BackendDamagesResponse) => {
+  return {
+    damages: adaptDetectedDamages(response.detectedDamages),
+    images: response.images,
+    car: response.car,
+    workflow: response.workflow,
+    tchekAggregates: response.tchekAggregates,
+  };
+};
+
+/**
+ * Adapta respuesta completa de operaciones
+ */
+export const adaptOperationsResponse = (response: any) => {
+  return {
+    operations: response.operations,
+    metadata: response.metadata,
+  };
+};
+
+/**
+ * Adapta respuesta completa de valoración
+ */
+export const adaptValuationResponse = (response: BackendValuationResponse) => {
+  const { valuation } = response;
+  
+  return {
+    laborOperations: adaptLaborOperations(valuation.labor),
+    paintOperations: adaptPaintOperations(valuation.paint),
+    paintMaterials: adaptPaintMaterials(valuation.paint),
+    spareParts: valuation.parts ? adaptSpareParts(valuation.parts) : [],
+    totals: adaptValuationTotals(valuation.totals),
+    metadata: response.metadata,
+  };
+};
+
+// ============================================================================
+// FRONTEND → BACKEND (Payloads para envío)
+// ============================================================================
+
+/**
+ * Prepara payload de intake para el backend
+ */
+export const prepareIntakePayload = (data: {
+  plate: string;
+  claimDescription: string;
+  images: string[];
+}): BackendIntakePayload => {
+  return {
+    vehicleInfo: {
+      plate: data.plate,
+    },
+    images: data.images,
+    description: data.claimDescription,
+  };
+};
+
+/**
+ * Prepara payload de confirmación de daños para el backend
+ */
+export const prepareConfirmDamagesPayload = (
+  confirmedDamageIds: string[],
+  edits?: Array<{ damageId: string; changes: any }>
+): BackendConfirmDamagesPayload => {
+  return {
+    confirmedDamageIds,
+    edits: edits || [],
+  };
+};
+
+/**
+ * Prepara cambios de operaciones para el backend
+ */
+export const prepareOperationsPayload = (operations: any[]) => {
+  return {
+    operations: operations.map(op => ({
+      mappingId: op.id || op.mappingId,
+      changes: op,
+    })),
+  };
+};
+
+// ============================================================================
+// UTILIDADES DE VALIDACIÓN
+// ============================================================================
+
+/**
+ * Valida que una respuesta del backend tenga la estructura esperada
+ */
+export const validateBackendResponse = <T>(
+  response: any,
+  requiredFields: (keyof T)[]
+): response is T => {
+  if (!response || typeof response !== 'object') {
+    return false;
+  }
+  
+  return requiredFields.every(field => field in response);
+};
+
+/**
+ * Crea un daño de fallback si la respuesta del backend es inválida
+ */
+export const createFallbackDamage = (id: string): Damage => ({
+  id,
+  zone: 'Zona desconocida',
+  type: 'Daño detectado',
+  severity: 'medio',
+  confidence: 50,
+  imageUrl: '/placeholder-damage.jpg',
+  status: 'pending',
+});
+
+/**
+ * Crea totales de fallback si la respuesta del backend es inválida
+ */
+export const createFallbackTotals = (): ValuationTotals => ({
+  laborWithoutPaint: 0,
+  paintLabor: 0,
+  paintMaterials: 0,
+  spareParts: 0,
+  subtotal: 0,
+  tax: 0,
+  total: 0,
+});
+
+// ============================================================================
+// HELPERS DE CONVERSIÓN
+// ============================================================================
+
+/**
+ * Convierte fecha ISO string a Date object con fallback
+ */
+export const parseBackendDate = (dateString?: string): Date => {
+  if (!dateString) return new Date();
+  try {
+    return new Date(dateString);
+  } catch {
+    return new Date();
+  }
+};
+
+/**
+ * Convierte números con fallback a 0
+ */
+export const parseBackendNumber = (value: any, fallback = 0): number => {
+  const parsed = Number(value);
+  return isNaN(parsed) ? fallback : parsed;
+};
+
+/**
+ * Convierte string con fallback
+ */
+export const parseBackendString = (value: any, fallback = ''): string => {
+  return typeof value === 'string' ? value : fallback;
+};

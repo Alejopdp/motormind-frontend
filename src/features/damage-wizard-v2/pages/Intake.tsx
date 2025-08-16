@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Car, Upload } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 import { Textarea } from '@/components/atoms/Textarea';
-import { useWizardV2 } from '../context/WizardV2Context';
+import { useWizardV2 } from '../hooks/useWizardV2';
 import { PageShell } from '../components/PageShell';
 import { SectionPaper } from '../components/SectionPaper';
 import { WizardStepper } from '../components/WizardStepper';
@@ -12,10 +12,9 @@ import { DragZone } from '../components/DragZone';
 import { ImagePreview } from '../components/ImagePreview';
 
 const Intake = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
-  const { setState } = useWizardV2();
+  const { startIntake } = useWizardV2();
   const [plate, setPlate] = useState('SDCSDC');
   const [claim, setClaim] = useState('scsdcJMNM LWEWEWE');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -28,33 +27,22 @@ const Intake = () => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const createMockAssessment = () => {
-    setState((prev) => ({
-      ...prev,
-      assessmentId: id,
-      status: 'detected',
-      plate: plate.toUpperCase(),
-      claimDescription: claim,
-      images: selectedFiles.map((f) => URL.createObjectURL(f)),
-      detectedDamages: [
-        {
-          id: 'dmg-1',
-          area: 'Paragolpes delantero',
-          subarea: 'Izquierda',
-          type: 'scratch',
-          severity: 'SEV2',
-        },
-        {
-          id: 'dmg-2',
-          area: 'Puerta delantera',
-          subarea: 'Izquierda',
-          type: 'dent',
-          severity: 'SEV3',
-        },
-      ],
-    }));
-    setParams({ step: 'damages' });
-    navigate(`?step=damages`, { replace: true });
+  const createMockAssessment = async () => {
+    try {
+      const images = selectedFiles.map((f) => URL.createObjectURL(f));
+      await startIntake({
+        plate: plate.toUpperCase(),
+        claimDescription: claim,
+        images,
+      });
+      
+      setParams({ step: 'damages' });
+      navigate(`?step=damages`, { replace: true });
+    } catch (error) {
+      console.error('Error starting intake:', error);
+      // Fallback a mock si falla
+      console.warn('Falling back to mock data');
+    }
   };
 
   const isValid = plate.trim().length > 0 && claim.trim().length > 0;

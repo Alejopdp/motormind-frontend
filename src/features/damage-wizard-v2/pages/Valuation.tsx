@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
-import { useWizardV2 } from '../context/WizardV2Context';
+import { useWizardV2 } from '../hooks/useWizardV2';
 import { PageShell } from '../components/PageShell';
 import { SectionPaper } from '../components/SectionPaper';
 import { WizardStepper } from '../components/WizardStepper';
@@ -12,14 +12,18 @@ import valuationMock from '../mocks/valuation.json';
 const Valuation = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
-  const { setState } = useWizardV2();
+  const { generateValuation } = useWizardV2();
 
 
 
-  const finalize = () => {
-    setState((prev) => ({ ...prev, status: 'valuated' }));
-    setParams({ step: 'finalize' });
-    navigate(`?step=finalize`, { replace: true });
+  const finalize = async () => {
+    try {
+      await generateValuation();
+      setParams({ step: 'finalize' });
+      navigate(`?step=finalize`, { replace: true });
+    } catch (error) {
+      console.error('Error generating valuation:', error);
+    }
   };
 
   const sourceConfig = {

@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/atoms/Select';
 import { Badge } from '@/components/atoms/Badge';
-import { useWizardV2 } from '../context/WizardV2Context';
+import { useWizardV2 } from '../hooks/useWizardV2';
 import { PageShell } from '../components/PageShell';
 import { SectionPaper } from '../components/SectionPaper';
 import { WizardStepper } from '../components/WizardStepper';
@@ -18,7 +18,7 @@ import { OperationKind } from '../types';
 const Operations = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
-  const { setState } = useWizardV2();
+  const { saveOperations } = useWizardV2();
 
 
 
@@ -52,10 +52,14 @@ const Operations = () => {
     console.log(`Updated operation ${id} to ${operation}`);
   };
 
-  const goValuation = () => {
-    setState((prev) => ({ ...prev, status: 'operations_defined' }));
-    setParams({ step: 'valuation' });
-    navigate(`?step=valuation`, { replace: true });
+  const goValuation = async () => {
+    try {
+      await saveOperations(mockOperations);
+      setParams({ step: 'valuation' });
+      navigate(`?step=valuation`, { replace: true });
+    } catch (error) {
+      console.error('Error saving operations:', error);
+    }
   };
 
   const severityConfig = {
