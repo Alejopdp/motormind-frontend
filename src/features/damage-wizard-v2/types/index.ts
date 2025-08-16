@@ -19,6 +19,82 @@ export interface Damage {
   status: DamageStatus;
 }
 
+/**
+ * Estadísticas para BatchActions component
+ * Compatible con el repo de diseño
+ */
+export interface BatchActionStats {
+  total: number;
+  confirmed: number;
+  rejected: number;
+  pending: number;
+}
+
+/**
+ * Operación de mano de obra (sin pintura)
+ */
+export interface LaborOperation {
+  id: string;
+  piece: string;
+  operation: string;
+  hours: number;
+  rate: number; // €/hour
+  total: number;
+  source: 'autodata' | 'manual';
+  isManuallyAdjusted?: boolean;
+}
+
+/**
+ * Operación de pintura (mano de obra)
+ */
+export interface PaintOperation {
+  id: string;
+  piece: string;
+  operation: string;
+  hours: number;
+  rate: number; // €/hour
+  total: number;
+}
+
+/**
+ * Material de pintura
+ */
+export interface PaintMaterial {
+  id: string;
+  piece: string;
+  description: string;
+  units: string; // e.g., "0.5L"
+  pricePerUnit: number; // €/unit
+  total: number;
+}
+
+/**
+ * Recambio/Pieza
+ */
+export interface SparePart {
+  id: string;
+  piece: string;
+  reference: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  isManuallyAdjusted?: boolean;
+}
+
+/**
+ * Resumen de totales para valoración
+ */
+export interface ValuationTotals {
+  laborWithoutPaint: number;
+  paintLabor: number;
+  paintMaterials: number;
+  spareParts: number;
+  subtotal: number;
+  tax: number; // IVA 21%
+  total: number;
+}
+
 export type DamageSource = 'autodata' | 'segment_lookup' | 'calc' | 'user_override' | 'no_data';
 
 export type WizardStepKey = 
