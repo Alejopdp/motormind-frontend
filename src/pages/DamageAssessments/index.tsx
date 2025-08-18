@@ -78,9 +78,7 @@ const DamageAssessments = () => {
         <div className="sticky top-0 z-10 flex flex-col items-center justify-between bg-white px-6 py-2 shadow-xs sm:flex-row sm:px-8 sm:py-4 lg:flex-row">
           <div className="lg:w-1/3">
             <h1 className="mr-2 py-0.5 text-xl font-semibold sm:py-0 lg:text-2xl">Peritajes</h1>
-            <p className="text-muted hidden xl:block">
-              Listado de peritajes realizados en el taller
-            </p>
+            <p className="hidden xl:block">Listado de peritajes realizados en el taller</p>
           </div>
 
           <div className="mt-2 flex w-full flex-col justify-end gap-2 space-y-2 sm:mt-0 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-2 lg:w-2/3">

@@ -19,8 +19,8 @@ const Intake = () => {
   const { startIntake } = useWizardV2();
   const { upload, isLoading: isUploading } = useFileUpload();
   const { searchCar, isLoading: isSearchingCar, error: carSearchError } = useCarSearch();
-  const [plate, setPlate] = useState('SDCSDC');
-  const [claim, setClaim] = useState('scsdcJMNM LWEWEWE');
+  const [plate, setPlate] = useState('');
+  const [claim, setClaim] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -32,15 +32,15 @@ const Intake = () => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-    const createAssessment = async () => {
+  const createAssessment = async () => {
     try {
       setIsCreating(true);
-      
+
       // 1. Buscar/crear el coche primero (como en el flujo original)
       console.log('🔍 Buscando/creando coche por matrícula:', plate);
       const car = await searchCar({ plate: plate.toUpperCase() });
       console.log('✅ Coche encontrado/creado:', car);
-      
+
       // 2. Subir imágenes con el carId (si hay alguna)
       let imageUrls: string[] = [];
       if (selectedFiles.length > 0) {
@@ -49,14 +49,14 @@ const Intake = () => {
         imageUrls = uploadResult.keys;
         console.log('✅ Imágenes subidas:', imageUrls);
       }
-      
+
       // 3. Crear el assessment con las URLs reales y el carId
       const assessmentId = await startIntake({
         plate: plate.toUpperCase(),
         claimDescription: claim,
         images: imageUrls,
       });
-      
+
       // Navegar con el ID real del assessment
       navigate(`/damage-assessments/${assessmentId}/wizard-v2?step=damages`, { replace: true });
     } catch (error) {
@@ -108,9 +108,7 @@ const Intake = () => {
                   {claim.length}/500
                 </div>
                 {carSearchError && (
-                  <div className="mt-2 text-sm text-red-600">
-                    Error: {carSearchError}
-                  </div>
+                  <div className="mt-2 text-sm text-red-600">Error: {carSearchError}</div>
                 )}
               </div>
             </div>
@@ -125,15 +123,18 @@ const Intake = () => {
       }
       footer={
         <div className="flex justify-end">
-                    <Button 
-            onClick={createAssessment} 
-            disabled={!isValid || isCreating || isUploading || isSearchingCar} 
+          <Button
+            onClick={createAssessment}
+            disabled={!isValid || isCreating || isUploading || isSearchingCar}
             className="px-6"
           >
-            {isSearchingCar ? 'Buscando coche...' : 
-             isUploading ? 'Subiendo imágenes...' :
-             isCreating ? 'Creando assessment...' : 
-             'Crear assessment'}
+            {isSearchingCar
+              ? 'Buscando coche...'
+              : isUploading
+                ? 'Subiendo imágenes...'
+                : isCreating
+                  ? 'Creando assessment...'
+                  : 'Crear assessment'}
           </Button>
         </div>
       }

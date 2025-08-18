@@ -100,7 +100,7 @@ export const DragZone = ({
         className={cn(
           'rounded-lg border-2 border-dashed p-8 text-center transition-colors',
           isDragActive
-            ? 'border-primary bg-primary-muted/20'
+            ? 'border-primary bg-primary/20'
             : error
               ? 'border-destructive'
               : 'border-border',
@@ -111,7 +111,7 @@ export const DragZone = ({
         onDrop={handleDrop}
       >
         {/* Upload icon */}
-        <Upload className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+        <Upload className="text-muted mx-auto mb-4 h-12 w-12" />
 
         {/* Main instruction */}
         <p className="mb-2 text-lg font-medium">
@@ -119,12 +119,12 @@ export const DragZone = ({
         </p>
 
         {/* Requirements */}
-        <p className="text-muted-foreground mb-4 text-sm">
+        <p className="text-muted mb-4 text-sm">
           Máximo {maxFiles} imágenes • JPG, JPEG, PNG • Máximo {maxSizeMB}MB cada una
         </p>
 
         {/* Recommendation */}
-        <p className="text-muted-foreground mb-4 text-xs">
+        <p className="text-muted mb-4 text-xs">
           Recomendado: fotos de 360° alrededor del vehículo con buena luz.
         </p>
 

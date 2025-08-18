@@ -19,9 +19,9 @@ export const PageShell = ({
   narrow = false,
 }: PageShellProps) => {
   const maxWidth = narrow ? 'max-w-4xl' : 'max-w-7xl';
-  
+
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="bg-background min-h-screen pb-32">
       {/* Header slot (WizardStepper) - will be rendered by parent */}
       {header}
 
@@ -30,16 +30,8 @@ export const PageShell = ({
         {/* Title section */}
         {(title || subtitle) && (
           <div className="mb-8">
-            {title && (
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                {title}
-              </h1>
-            )}
-            {subtitle && (
-              <p className="text-muted-foreground">
-                {subtitle}
-              </p>
-            )}
+            {title && <h1 className="text-foreground mb-2 text-3xl font-bold">{title}</h1>}
+            {subtitle && <p className="text-muted">{subtitle}</p>}
           </div>
         )}
 
@@ -49,10 +41,8 @@ export const PageShell = ({
 
       {/* Footer slot (sticky toolbar) */}
       {footer && (
-        <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-50">
-          <div className={`${maxWidth} mx-auto p-4`}>
-            {footer}
-          </div>
+        <div className="bg-card border-border fixed right-0 bottom-0 left-0 z-50 border-t shadow-lg">
+          <div className={`${maxWidth} mx-auto p-4`}>{footer}</div>
         </div>
       )}
     </div>

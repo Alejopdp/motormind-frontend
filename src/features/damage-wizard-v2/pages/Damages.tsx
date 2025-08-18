@@ -165,7 +165,7 @@ const Damages = () => {
     <PageShell
       header={<WizardStepper currentStep="damages" completedSteps={['intake']} />}
       title="Verificación de Daños"
-      subtitle="SDCSDC"
+      subtitle="Seleccioná los daños que se detectaron en las imágenes."
       content={
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredDamages.map((damage) => (
