@@ -4,43 +4,44 @@ import { createContext, useContext, useReducer, ReactNode } from 'react';
 // TIPOS - Estado del Wizard V2
 // ============================================================================
 
-export type WizardV2Status = 
+export type WizardV2Status =
   | 'idle'
-  | 'processing'     // Tchek analizando imágenes
-  | 'detected'       // Daños detectados, listo para confirmar
-  | 'damages_confirmed'  // Daños confirmados, listo para operaciones
+  | 'processing' // Tchek analizando imágenes
+  | 'detected' // Daños detectados, listo para confirmar
+  | 'damages_confirmed' // Daños confirmados, listo para operaciones
   | 'operations_defined' // Operaciones definidas, listo para valoración
-  | 'valuated'       // Valoración completa, listo para finalizar
-  | 'completed'      // Peritaje finalizado
-  | 'error';         // Error en algún paso
+  | 'valuated' // Valoración completa, listo para finalizar
+  | 'completed' // Peritaje finalizado
+  | 'error'; // Error en algún paso
 
 export interface WizardV2State {
   // Identificación
   assessmentId?: string;
+  carId?: string;
   status: WizardV2Status;
-  
+
   // Datos de entrada (Intake)
   plate?: string;
   claimDescription?: string;
   images: string[];
-  
+
   // Datos procesados por el backend
-  detectedDamages?: any[];  // Tipo específico del backend, se adaptará
+  detectedDamages?: any; // Respuesta completa del backend con imágenes incluidas
   confirmedDamageIds?: string[];
-  operations?: any[];       // Tipo específico del backend, se adaptará
-  valuation?: any;          // Tipo específico del backend, se adaptará
-  
+  operations?: any[]; // Tipo específico del backend, se adaptará
+  valuation?: any; // Tipo específico del backend, se adaptará
+
   // Metadatos y flags
   flags?: {
     usedMockTchek?: boolean;
     hasNoDataLabor?: boolean;
-    isUsingMockData?: boolean;  // Para diferenciar mock vs real
+    isUsingMockData?: boolean; // Para diferenciar mock vs real
   };
-  
+
   // Estado de UI
   loading: boolean;
   error?: string;
-  
+
   // Navegación
   currentStep: 'intake' | 'damages' | 'operations' | 'valuation' | 'finalize';
   canGoBack: boolean;
@@ -51,14 +52,15 @@ export interface WizardV2State {
 // ACCIONES
 // ============================================================================
 
-type WizardV2Action = 
+type WizardV2Action =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | undefined }
   | { type: 'SET_STATUS'; payload: WizardV2Status }
   | { type: 'SET_CURRENT_STEP'; payload: WizardV2State['currentStep'] }
+  | { type: 'SET_CAR_ID'; payload: string }
   | { type: 'START_INTAKE'; payload: { plate: string; claimDescription: string; images: string[] } }
   | { type: 'INTAKE_SUCCESS'; payload: { assessmentId: string; status: WizardV2Status } }
-  | { type: 'SET_DETECTED_DAMAGES'; payload: any[] }
+  | { type: 'SET_DETECTED_DAMAGES'; payload: any }
   | { type: 'CONFIRM_DAMAGES'; payload: string[] }
   | { type: 'SET_OPERATIONS'; payload: any[] }
   | { type: 'SET_VALUATION'; payload: any }
@@ -82,21 +84,27 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
-      
+
     case 'SET_ERROR':
       return { ...state, error: action.payload, loading: false };
-      
+
     case 'SET_STATUS':
       return { ...state, status: action.payload };
-      
+
     case 'SET_CURRENT_STEP':
-      return { 
-        ...state, 
+      return {
+        ...state,
         currentStep: action.payload,
         canGoBack: action.payload !== 'intake',
-        canGoNext: false  // Se habilitará según el estado de cada step
+        canGoNext: false, // Se habilitará según el estado de cada step
       };
-      
+
+    case 'SET_CAR_ID':
+      return {
+        ...state,
+        carId: action.payload,
+      };
+
     case 'START_INTAKE':
       return {
         ...state,
@@ -107,7 +115,7 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
         loading: true,
         error: undefined,
       };
-      
+
     case 'INTAKE_SUCCESS':
       return {
         ...state,
@@ -116,16 +124,16 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
         loading: false,
         canGoNext: true,
       };
-      
+
     case 'SET_DETECTED_DAMAGES':
       return {
         ...state,
         detectedDamages: action.payload,
         status: 'detected',
         loading: false,
-        canGoNext: false,  // Se habilita cuando se confirmen daños
+        canGoNext: false, // Se habilita cuando se confirmen daños
       };
-      
+
     case 'CONFIRM_DAMAGES':
       return {
         ...state,
@@ -133,7 +141,7 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
         status: 'damages_confirmed',
         canGoNext: action.payload.length > 0,
       };
-      
+
     case 'SET_OPERATIONS':
       return {
         ...state,
@@ -141,7 +149,7 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
         status: 'operations_defined',
         canGoNext: true,
       };
-      
+
     case 'SET_VALUATION':
       return {
         ...state,
@@ -149,7 +157,7 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
         status: 'valuated',
         canGoNext: true,
       };
-      
+
     case 'FINALIZE_SUCCESS':
       return {
         ...state,
@@ -157,10 +165,10 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
         loading: false,
         canGoNext: false,
       };
-      
+
     case 'RESET_WIZARD':
       return initialState;
-      
+
     default:
       return state;
   }
@@ -173,11 +181,12 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
 interface WizardV2ContextType {
   state: WizardV2State;
   dispatch: React.Dispatch<WizardV2Action>;
-  
+
   // Acciones de conveniencia
   setLoading: (loading: boolean) => void;
   setError: (error?: string) => void;
   setCurrentStep: (step: WizardV2State['currentStep']) => void;
+  setCarId: (carId: string) => void;
   resetWizard: () => void;
 }
 
@@ -193,28 +202,26 @@ interface WizardV2ProviderProps {
 
 export const WizardV2Provider = ({ children }: WizardV2ProviderProps) => {
   const [state, dispatch] = useReducer(wizardV2Reducer, initialState);
-  
+
   // Acciones de conveniencia
   const setLoading = (loading: boolean) => dispatch({ type: 'SET_LOADING', payload: loading });
   const setError = (error?: string) => dispatch({ type: 'SET_ERROR', payload: error });
-  const setCurrentStep = (step: WizardV2State['currentStep']) => 
+  const setCurrentStep = (step: WizardV2State['currentStep']) =>
     dispatch({ type: 'SET_CURRENT_STEP', payload: step });
+  const setCarId = (carId: string) => dispatch({ type: 'SET_CAR_ID', payload: carId });
   const resetWizard = () => dispatch({ type: 'RESET_WIZARD' });
-  
+
   const value: WizardV2ContextType = {
     state,
     dispatch,
     setLoading,
     setError,
     setCurrentStep,
+    setCarId,
     resetWizard,
   };
-  
-  return (
-    <WizardV2Context.Provider value={value}>
-      {children}
-    </WizardV2Context.Provider>
-  );
+
+  return <WizardV2Context.Provider value={value}>{children}</WizardV2Context.Provider>;
 };
 
 // ============================================================================

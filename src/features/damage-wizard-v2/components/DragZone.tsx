@@ -1,6 +1,7 @@
 import { Upload, AlertCircle } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { cn } from '@/utils/cn';
+import { Button } from '@/components/atoms/Button';
 
 type DragZoneProps = {
   onFilesSelected: (files: File[]) => void;
@@ -22,7 +23,7 @@ export const DragZone = ({
   const [isDragActive, setIsDragActive] = useState(false);
   const [internalError, setInternalError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Use external error if provided, otherwise use internal error
   const error = externalError || internalError;
 
@@ -97,12 +98,12 @@ export const DragZone = ({
       {/* Drag zone */}
       <div
         className={cn(
-          'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
-          isDragActive 
-            ? 'border-primary bg-primary-muted/20' 
+          'rounded-lg border-2 border-dashed p-8 text-center transition-colors',
+          isDragActive
+            ? 'border-primary bg-primary-muted/20'
             : error
-            ? 'border-destructive'
-            : 'border-border'
+              ? 'border-destructive'
+              : 'border-border',
         )}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -110,35 +111,31 @@ export const DragZone = ({
         onDrop={handleDrop}
       >
         {/* Upload icon */}
-        <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        
+        <Upload className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+
         {/* Main instruction */}
-        <p className="text-lg font-medium mb-2">
+        <p className="mb-2 text-lg font-medium">
           Arrastra las imágenes aquí o haz clic para seleccionar
         </p>
-        
+
         {/* Requirements */}
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-muted-foreground mb-4 text-sm">
           Máximo {maxFiles} imágenes • JPG, JPEG, PNG • Máximo {maxSizeMB}MB cada una
         </p>
-        
+
         {/* Recommendation */}
-        <p className="text-xs text-muted-foreground mb-4">
+        <p className="text-muted-foreground mb-4 text-xs">
           Recomendado: fotos de 360° alrededor del vehículo con buena luz.
         </p>
-        
-        {/* Select files button - matching design repo */}
-        <button
-          type="button"
-          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-          onClick={handleClick}
-        >
+
+        {/* Select files button - using existing Button component */}
+        <Button variant="outline" onClick={handleClick}>
           Seleccionar Archivos
-        </button>
+        </Button>
 
         {/* Error message */}
         {error && (
-          <div className="mt-4 flex items-center gap-2 rounded-md bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+          <div className="bg-destructive/10 border-destructive/20 text-destructive mt-4 flex items-center gap-2 rounded-md border p-3 text-sm">
             <AlertCircle className="h-4 w-4" />
             {error}
           </div>

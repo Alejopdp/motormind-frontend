@@ -14,8 +14,6 @@ const Valuation = () => {
   const [, setParams] = useSearchParams();
   const { generateValuation } = useWizardV2();
 
-
-
   const finalize = async () => {
     try {
       await generateValuation();
@@ -23,6 +21,10 @@ const Valuation = () => {
       navigate(`?step=finalize`, { replace: true });
     } catch (error) {
       console.error('Error generating valuation:', error);
+      // Fallback a navegación directa en caso de error
+      console.warn('Fallback: navegando a finalize después de error');
+      setParams({ step: 'finalize' });
+      navigate(`?step=finalize`, { replace: true });
     }
   };
 
@@ -67,7 +69,12 @@ const Valuation = () => {
 
   return (
     <PageShell
-      header={<WizardStepper currentStep="valuation" completedSteps={['intake', 'damages', 'operations']} />}
+      header={
+        <WizardStepper
+          currentStep="valuation"
+          completedSteps={['intake', 'damages', 'operations']}
+        />
+      }
       title="Valoración del peritaje"
       subtitle="Revisa los costes calculados para cada operación"
       content={

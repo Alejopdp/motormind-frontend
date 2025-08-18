@@ -7,6 +7,11 @@ import { PageShell } from '../components/PageShell';
 import { WizardStepper } from '../components/WizardStepper';
 import { DamageCard } from '../components/DamageCard';
 import { ProgressCard } from '../components/ProgressCard';
+import {
+  adaptBackendDamagesResponse,
+  BackendDamagesResponse,
+  mapSelectedDamageIdsToIndices,
+} from '../adapters/damageAdapter';
 
 import damagesMock from '../mocks/damages.json';
 
@@ -19,18 +24,36 @@ const Damages = () => {
   const [selectedDamages, setSelectedDamages] = useState<string[]>([]);
   const [showOnlyConfident, setShowOnlyConfident] = useState(false);
 
-
-
-  // Simulate processing on mount
+  // Manejar estado de procesamiento
   useEffect(() => {
-    if (!state.detectedDamages || state.detectedDamages.length === 0) {
+    console.log('🔄 Damages useEffect - Estado actual:', {
+      detectedDamages: !!state.detectedDamages,
+      damagesCount: state.detectedDamages?.detectedDamages?.length || 0,
+      status: state.status,
+      isProcessing,
+    });
+
+    // Si ya tenemos datos de daños, no mostrar spinner
+    if (
+      state.detectedDamages &&
+      state.detectedDamages.detectedDamages &&
+      state.detectedDamages.detectedDamages.length > 0
+    ) {
+      console.log('✅ Datos de daños disponibles, ocultando spinner');
+      setIsProcessing(false);
+      setProgress(100);
+      return;
+    }
+
+    // Si el estado es 'processing', mostrar spinner
+    if (state.status === 'processing') {
+      console.log('⏳ Estado processing, mostrando spinner');
       setIsProcessing(true);
       const interval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
             setIsProcessing(false);
-            // Mock damages loading completed (handled by hook now)
             return 100;
           }
           return prev + Math.random() * 15;
@@ -38,7 +61,14 @@ const Damages = () => {
       }, 500);
       return () => clearInterval(interval);
     }
-  }, [state.detectedDamages]);
+
+    // Si no hay datos y no está procesando, mostrar spinner temporal
+    if (!state.detectedDamages) {
+      console.log('❓ No hay datos, mostrando spinner temporal');
+      setIsProcessing(true);
+      setProgress(0);
+    }
+  }, [state.detectedDamages, state.status, isProcessing]);
 
   const toggleDamage = (id: string) => {
     setSelectedDamages((prev) =>
@@ -47,23 +77,91 @@ const Damages = () => {
   };
 
   const confirmAll = () => {
-    const allIds = damagesMock.damages.map((d) => d.id);
+    const allIds = damagesData.map((d) => d.id);
     setSelectedDamages(allIds);
   };
 
   const confirmSelected = async () => {
     try {
-      await confirmDamages(selectedDamages);
+      // Si tenemos metadatos del backend, usar mapeo correcto
+      if (adaptedDamagesWithMeta) {
+        const mappedIndices = mapSelectedDamageIdsToIndices(
+          selectedDamages,
+          adaptedDamagesWithMeta,
+        );
+        console.log('🔄 Mapeando IDs frontend a índices backend:', {
+          selectedDamages,
+          mappedIndices,
+        });
+        await confirmDamages(mappedIndices.map(String)); // Convertir índices a strings
+      } else {
+        // Fallback para datos mock
+        await confirmDamages(selectedDamages);
+      }
+
       setParams({ step: 'operations' });
       navigate(`?step=operations`, { replace: true });
     } catch (error) {
       console.error('Error confirming damages:', error);
+      // En caso de error, seguimos adelante para no bloquear el flujo
+      console.warn('Fallback: navegando a operations después de error');
+      setParams({ step: 'operations' });
+      navigate(`?step=operations`, { replace: true });
     }
   };
 
+  // Usar datos reales del backend si están disponibles, sino usar mock
+  const { damagesData, adaptedDamagesWithMeta } = (() => {
+    // Si tenemos datos del backend, adaptarlos
+    if (
+      state.detectedDamages &&
+      state.detectedDamages.detectedDamages &&
+      state.detectedDamages.detectedDamages.length > 0
+    ) {
+      console.log('🔄 Adaptando datos del backend:', state.detectedDamages);
+
+      // state.detectedDamages contiene la respuesta completa del backend
+      const backendResponse = state.detectedDamages as BackendDamagesResponse;
+      const adaptedDamagesRaw = adaptBackendDamagesResponse(backendResponse);
+
+      console.log('✅ Datos adaptados:', adaptedDamagesRaw);
+
+      // Aplicar estados de selección con tipado correcto
+      const damagesData = adaptedDamagesRaw.map((damage) => ({
+        id: damage.id,
+        zone: damage.zone,
+        subzone: damage.subzone,
+        type: damage.type,
+        severity: damage.severity,
+        confidence: damage.confidence,
+        imageUrl: damage.imageUrl,
+        status: (selectedDamages.includes(damage.id) ? 'confirmed' : 'pending') as
+          | 'confirmed'
+          | 'pending',
+      }));
+
+      return { damagesData, adaptedDamagesWithMeta: adaptedDamagesRaw };
+    }
+
+    // Fallback a datos mock
+    console.log('📄 Usando datos mock');
+    const damagesData = damagesMock.damages.map((d) => ({
+      id: d.id,
+      zone: d.title,
+      subzone: d.subtitle,
+      type: 'Daño detectado',
+      severity: d.severity as 'leve' | 'medio' | 'grave',
+      confidence: d.confidencePct || 85,
+      imageUrl: d.imageUrl,
+      status: (selectedDamages.includes(d.id) ? 'confirmed' : 'pending') as 'confirmed' | 'pending',
+    }));
+
+    return { damagesData, adaptedDamagesWithMeta: null };
+  })();
+
   const filteredDamages = showOnlyConfident
-    ? damagesMock.damages.filter((d) => d.confidencePct && d.confidencePct > 85)
-    : damagesMock.damages;
+    ? damagesData.filter((d) => d.confidence && d.confidence > 85)
+    : damagesData;
 
   if (isProcessing) {
     return (
@@ -90,22 +188,13 @@ const Damages = () => {
           {filteredDamages.map((damage) => (
             <DamageCard
               key={damage.id}
-              damage={{
-                id: damage.id,
-                zone: damage.title,
-                subzone: damage.subtitle,
-                type: 'Daño detectado',
-                severity: damage.severity as 'leve' | 'medio' | 'grave',
-                confidence: damage.confidencePct || 85,
-                imageUrl: damage.imageUrl,
-                status: selectedDamages.includes(damage.id) ? 'confirmed' : 'pending'
-              }}
+              damage={damage}
               onStatusChange={(id, status) => {
                 if (status === 'confirmed') {
                   toggleDamage(id);
                 } else {
                   // Remove from selected if rejected
-                  setSelectedDamages(prev => prev.filter(selectedId => selectedId !== id));
+                  setSelectedDamages((prev) => prev.filter((selectedId) => selectedId !== id));
                 }
               }}
             />
@@ -117,7 +206,7 @@ const Damages = () => {
           {/* Left side - Counter */}
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Check className="h-4 w-4 text-blue-500" />
-            {selectedDamages.length} de {damagesMock.damages.length} confirmados
+            {selectedDamages.length} de {damagesData.length} confirmados
           </div>
 
           {/* Right side - Action buttons */}

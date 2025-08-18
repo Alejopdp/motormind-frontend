@@ -23,7 +23,7 @@ import CreateDamageAssessment from '@/pages/DamageAssessments/CreateDamageAssess
 import DamageAssessmentDetail from '@/pages/DamageAssessments/DamageAssessmentDetail';
 import DamageAssessmentReport from '@/pages/DamageAssessments/DamageAssessmentReport';
 import DiagnosisOBDCodes from '@/pages/DiagnosisOBDCodes';
-import { WizardV2Entry } from '@/features/damage-wizard-v2/routes';
+import { WizardV2Entry, WizardV2NewEntry } from '@/features/damage-wizard-v2/routes';
 
 const router = createBrowserRouter([
   {
@@ -181,6 +181,14 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: '/damage-assessments/new',
+    element: (
+      <ErrorBoundary>
+        <WizardV2NewEntry />
+      </ErrorBoundary>
+    ),
+  },
+  {
     path: '/damage-assessments/create',
     element: (
       <ErrorBoundary>
@@ -188,6 +196,7 @@ const router = createBrowserRouter([
       </ErrorBoundary>
     ),
   },
+
   {
     path: '/damage-assessments/:damageAssessmentId',
     element: (

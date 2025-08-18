@@ -20,8 +20,6 @@ const Operations = () => {
   const [, setParams] = useSearchParams();
   const { saveOperations } = useWizardV2();
 
-
-
   // Mock operations based on confirmed damages
   const mockOperations = [
     {
@@ -59,6 +57,10 @@ const Operations = () => {
       navigate(`?step=valuation`, { replace: true });
     } catch (error) {
       console.error('Error saving operations:', error);
+      // Fallback a navegación directa en caso de error
+      console.warn('Fallback: navegando a valuation después de error');
+      setParams({ step: 'valuation' });
+      navigate(`?step=valuation`, { replace: true });
     }
   };
 

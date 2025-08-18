@@ -43,7 +43,7 @@ interface UseWizardV2Return {
   goBack: () => void;
   
   // Acciones del flujo
-  startIntake: (data: IntakeData) => Promise<void>;
+  startIntake: (data: IntakeData) => Promise<string>;
   confirmDamages: (confirmedIds: string[]) => Promise<void>;
   saveOperations: (operations: any[]) => Promise<void>;
   generateValuation: () => Promise<void>;
@@ -167,8 +167,8 @@ export const useWizardV2 = (): UseWizardV2Return => {
         const adaptedResponse = adaptDamagesResponse(convertedResponse);
         
         if (adaptedResponse.workflow?.status !== 'processing') {
-          // Detección completa
-          dispatch({ type: 'SET_DETECTED_DAMAGES', payload: adaptedResponse.damages });
+          // Detección completa - guardar respuesta completa
+          dispatch({ type: 'SET_DETECTED_DAMAGES', payload: convertedResponse });
           logger.info('Damage detection completed', { 
             damagesCount: adaptedResponse.damages.length,
             status: adaptedResponse.workflow?.status 
@@ -218,7 +218,7 @@ export const useWizardV2 = (): UseWizardV2Return => {
   // ACCIONES DEL FLUJO
   // ============================================================================
 
-  const startIntake = useCallback(async (data: IntakeData): Promise<void> => {
+  const startIntake = useCallback(async (data: IntakeData): Promise<string> => {
     try {
       setLoading(true);
       setError(undefined);
@@ -255,11 +255,14 @@ export const useWizardV2 = (): UseWizardV2Return => {
         // Si ya está detectado, cargar daños directamente
         const damagesResponse = await damageAssessmentApi.getDetectedDamages(response.id);
         const convertedResponse = convertApiResponse(damagesResponse);
-        const adaptedResponse = adaptDamagesResponse(convertedResponse);
-        dispatch({ type: 'SET_DETECTED_DAMAGES', payload: adaptedResponse.damages });
+        // Guardar la respuesta completa para que el frontend pueda acceder a las imágenes
+        dispatch({ type: 'SET_DETECTED_DAMAGES', payload: convertedResponse });
       }
       
       logger.info(SUCCESS_MESSAGES.INTAKE_CREATED);
+      
+      // Retornar el ID del assessment creado
+      return response.id;
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;

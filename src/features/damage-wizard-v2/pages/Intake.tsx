@@ -5,6 +5,8 @@ import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 import { Textarea } from '@/components/atoms/Textarea';
 import { useWizardV2 } from '../hooks/useWizardV2';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { useCarSearch } from '@/hooks/useCarSearch';
 import { PageShell } from '../components/PageShell';
 import { SectionPaper } from '../components/SectionPaper';
 import { WizardStepper } from '../components/WizardStepper';
@@ -13,11 +15,14 @@ import { ImagePreview } from '../components/ImagePreview';
 
 const Intake = () => {
   const navigate = useNavigate();
-  const [, setParams] = useSearchParams();
+  const [,] = useSearchParams();
   const { startIntake } = useWizardV2();
+  const { upload, isLoading: isUploading } = useFileUpload();
+  const { searchCar, isLoading: isSearchingCar, error: carSearchError } = useCarSearch();
   const [plate, setPlate] = useState('SDCSDC');
   const [claim, setClaim] = useState('scsdcJMNM LWEWEWE');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
 
   const handleFilesSelected = (files: File[]) => {
     setSelectedFiles((prev) => [...prev, ...files]);
@@ -27,21 +32,40 @@ const Intake = () => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const createMockAssessment = async () => {
+    const createAssessment = async () => {
     try {
-      const images = selectedFiles.map((f) => URL.createObjectURL(f));
-      await startIntake({
+      setIsCreating(true);
+      
+      // 1. Buscar/crear el coche primero (como en el flujo original)
+      console.log('🔍 Buscando/creando coche por matrícula:', plate);
+      const car = await searchCar({ plate: plate.toUpperCase() });
+      console.log('✅ Coche encontrado/creado:', car);
+      
+      // 2. Subir imágenes con el carId (si hay alguna)
+      let imageUrls: string[] = [];
+      if (selectedFiles.length > 0) {
+        console.log('📤 Subiendo imágenes con carId:', car._id);
+        const uploadResult = await upload(selectedFiles, { carId: car._id }, 'damage-assessment');
+        imageUrls = uploadResult.keys;
+        console.log('✅ Imágenes subidas:', imageUrls);
+      }
+      
+      // 3. Crear el assessment con las URLs reales y el carId
+      const assessmentId = await startIntake({
         plate: plate.toUpperCase(),
         claimDescription: claim,
-        images,
+        images: imageUrls,
       });
       
-      setParams({ step: 'damages' });
-      navigate(`?step=damages`, { replace: true });
+      // Navegar con el ID real del assessment
+      navigate(`/damage-assessments/${assessmentId}/wizard-v2?step=damages`, { replace: true });
     } catch (error) {
-      console.error('Error starting intake:', error);
-      // Fallback a mock si falla
-      console.warn('Falling back to mock data');
+      console.error('❌ Error creando assessment:', error);
+      // Mostrar error específico según el paso que falló
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -83,6 +107,11 @@ const Intake = () => {
                 <div className="text-muted-foreground mt-2 ml-auto w-fit text-xs">
                   {claim.length}/500
                 </div>
+                {carSearchError && (
+                  <div className="mt-2 text-sm text-red-600">
+                    Error: {carSearchError}
+                  </div>
+                )}
               </div>
             </div>
           </SectionPaper>
@@ -96,8 +125,15 @@ const Intake = () => {
       }
       footer={
         <div className="flex justify-end">
-          <Button onClick={createMockAssessment} disabled={!isValid} className="px-6">
-            Crear assessment
+                    <Button 
+            onClick={createAssessment} 
+            disabled={!isValid || isCreating || isUploading || isSearchingCar} 
+            className="px-6"
+          >
+            {isSearchingCar ? 'Buscando coche...' : 
+             isUploading ? 'Subiendo imágenes...' :
+             isCreating ? 'Creando assessment...' : 
+             'Crear assessment'}
           </Button>
         </div>
       }

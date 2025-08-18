@@ -222,6 +222,11 @@ export const prepareConfirmDamagesPayload = (
   confirmedDamageIds: string[],
   edits?: Array<{ damageId: string; changes: any }>
 ): BackendConfirmDamagesPayload => {
+  // Por ahora, enviamos los IDs tal como están
+  // El backend necesitará ser compatible con estos IDs adaptados
+  // O necesitamos un mapeo reverso a los datos originales
+  console.log('🔄 Preparing confirm damages payload:', { confirmedDamageIds, edits });
+  
   return {
     confirmedDamageIds,
     edits: edits || [],
