@@ -9,6 +9,7 @@ import { DamageCard } from '../components/DamageCard';
 import { ProgressCard } from '../components/ProgressCard';
 import { adaptBackendDamagesResponse, BackendDamagesResponse } from '../adapters/damageAdapter';
 import { mapFrontendIdsToBackendIds } from '../utils/damageMapping';
+import { BackendDamage } from '../types/backend.types';
 
 import damagesMock from '../mocks/damages.json';
 
@@ -124,7 +125,13 @@ const Damages = () => {
           | 'pending',
       }));
 
-      return { damagesData, adaptedDamagesWithMeta: adaptedDamagesRaw };
+      // Convertir a formato esperado por mapFrontendIdsToBackendIds
+      const adaptedDamagesWithMeta = adaptedDamagesRaw.map((damage) => ({
+        id: damage.id,
+        __originalData: damage.__originalData as BackendDamage,
+      }));
+
+      return { damagesData, adaptedDamagesWithMeta };
     }
 
     // Fallback a datos mock
@@ -146,6 +153,7 @@ const Damages = () => {
     ? damagesData.filter((d) => d.confidence && d.confidence > 85)
     : damagesData;
 
+  // Si está procesando, mostrar ProgressCard como contenido del layout
   if (isProcessing) {
     return (
       <PageShell

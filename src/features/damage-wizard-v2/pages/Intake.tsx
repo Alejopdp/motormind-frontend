@@ -12,6 +12,7 @@ import { SectionPaper } from '../components/SectionPaper';
 import { WizardStepper } from '../components/WizardStepper';
 import { DragZone } from '../components/DragZone';
 import { ImagePreview } from '../components/ImagePreview';
+import { ProgressCard } from '../components/ProgressCard';
 
 const Intake = () => {
   const navigate = useNavigate();
@@ -22,7 +23,8 @@ const Intake = () => {
   const [plate, setPlate] = useState('');
   const [claim, setClaim] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const handleFilesSelected = (files: File[]) => {
     setSelectedFiles((prev) => [...prev, ...files]);
@@ -34,7 +36,19 @@ const Intake = () => {
 
   const createAssessment = async () => {
     try {
-      setIsCreating(true);
+      setIsProcessing(true);
+      setProgress(0);
+
+      // Simular progreso inicial
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + Math.random() * 15;
+        });
+      }, 500);
 
       // 1. Buscar/crear el coche primero (como en el flujo original)
       console.log('🔍 Buscando/creando coche por matrícula:', plate);
@@ -57,6 +71,10 @@ const Intake = () => {
         images: imageUrls,
       });
 
+      // Completar progreso
+      setProgress(100);
+      clearInterval(progressInterval);
+
       // Navegar con el ID real del assessment
       navigate(`/damage-assessments/${assessmentId}/wizard-v2?step=damages`, { replace: true });
     } catch (error) {
@@ -64,12 +82,28 @@ const Intake = () => {
       // Mostrar error específico según el paso que falló
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       alert(`Error: ${errorMessage}`);
-    } finally {
-      setIsCreating(false);
+      setIsProcessing(false);
+      setProgress(0);
     }
   };
 
   const isValid = plate.trim().length > 0 && claim.trim().length > 0;
+
+  // Si está procesando, mostrar como paso 2 (damages) con stepper visible
+  if (isProcessing) {
+    return (
+      <PageShell
+        header={<WizardStepper currentStep="damages" completedSteps={['intake']} />}
+        content={
+          <ProgressCard
+            title="Detectando daños"
+            description="Estamos procesando las imágenes... esto puede tardar unos minutos."
+            progress={progress}
+          />
+        }
+      />
+    );
+  }
 
   return (
     <PageShell
@@ -125,16 +159,10 @@ const Intake = () => {
         <div className="flex justify-end">
           <Button
             onClick={createAssessment}
-            disabled={!isValid || isCreating || isUploading || isSearchingCar}
+            disabled={!isValid || isUploading || isSearchingCar}
             className="px-6"
           >
-            {isSearchingCar
-              ? 'Buscando coche...'
-              : isUploading
-                ? 'Subiendo imágenes...'
-                : isCreating
-                  ? 'Creando assessment...'
-                  : 'Crear assessment'}
+            Crear assessment
           </Button>
         </div>
       }

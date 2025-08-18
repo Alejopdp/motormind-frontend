@@ -1,11 +1,13 @@
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { useEffect } from 'react';
 
 type ProgressCardProps = {
   title: string;
   description: string;
   progress?: number;
   className?: string;
+  asOverlay?: boolean;
 };
 
 export const ProgressCard = ({
@@ -13,41 +15,58 @@ export const ProgressCard = ({
   description,
   progress = 0,
   className,
+  asOverlay = false,
 }: ProgressCardProps) => {
-  return (
+  // Bloquear scroll cuando el overlay está activo
+  useEffect(() => {
+    if (asOverlay) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [asOverlay]);
+
+  const cardContent = (
     <div
       className={cn(
-        'mx-auto max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm',
+        'mx-auto w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 shadow-lg',
         className,
       )}
       role="status"
       aria-live="polite"
     >
       {/* Icon */}
-      <div className="mb-4 flex justify-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-          <ArrowRight className="h-6 w-6 text-blue-600" />
+      <div className="mb-6 flex justify-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
+          <ArrowRight className="h-8 w-8 text-blue-600" />
         </div>
       </div>
 
       {/* Title */}
-      <h3 className="mb-2 text-center text-lg font-semibold text-gray-900">{title}</h3>
+      <h3 className="mb-3 text-center text-xl font-semibold text-gray-900">{title}</h3>
 
       {/* Description */}
-      <p className="mb-6 text-center text-sm text-gray-600">{description}</p>
+      <p className="mb-8 text-center text-sm leading-relaxed text-gray-600">{description}</p>
 
-      {/* Progress bar */}
-      <div className="mb-2">
-        <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-          <div
-            className="h-full bg-blue-500 transition-all duration-300 ease-out"
-            style={{ width: `${Math.min(progress, 100)}%` }}
-          />
-        </div>
+      {/* Progress percentage - Comentado */}
+      {/* <p className="text-center text-sm font-medium text-gray-700">
+        {Math.round(progress)}% completado
+      </p> */}
+    </div>
+  );
+
+  if (asOverlay) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
+        {cardContent}
       </div>
+    );
+  }
 
-      {/* Progress percentage */}
-      <p className="text-center text-sm text-gray-500">{Math.round(progress)}% completado</p>
+  return (
+    <div className="flex min-h-[calc(100vh-200px)] w-full items-center justify-center">
+      {cardContent}
     </div>
   );
 };
