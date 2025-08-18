@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
 import { useWizardV2 } from '../hooks/useWizardV2';
@@ -15,20 +15,34 @@ const Valuation = () => {
   const [, setParams] = useSearchParams();
   const { state, generateValuation, finalizeAssessment } = useWizardV2();
   const [isGenerating, setIsGenerating] = useState(false);
+  const hasGeneratedValuation = useRef(false);
 
-  // Cargar valoración si no existe
+  // Cargar valoración si no existe (solo una vez)
   useEffect(() => {
-    if (state.assessmentId && !state.valuation && !isGenerating) {
+    console.log('🔄 Valuation useEffect triggered:', {
+      assessmentId: state.assessmentId,
+      hasValuation: !!state.valuation,
+      isGenerating,
+      hasGenerated: hasGeneratedValuation.current
+    });
+
+    if (state.assessmentId && !state.valuation && !isGenerating && !hasGeneratedValuation.current) {
+      console.log('✅ Starting valuation generation...');
+      hasGeneratedValuation.current = true;
       handleGenerateValuation();
     }
-  }, [state.assessmentId, state.valuation, isGenerating]);
+  }, [state.assessmentId]); // Solo depende del assessmentId
 
   const handleGenerateValuation = async () => {
+    console.log('🚀 handleGenerateValuation called');
     try {
       setIsGenerating(true);
       await generateValuation();
+      console.log('✅ Valuation generated successfully');
     } catch (error) {
-      console.error('Error generating valuation:', error);
+      console.error('❌ Error generating valuation:', error);
+      // Reset flag en caso de error para permitir reintento
+      hasGeneratedValuation.current = false;
     } finally {
       setIsGenerating(false);
     }
@@ -209,19 +223,19 @@ const Valuation = () => {
               <div className="rounded-lg bg-blue-50 p-4">
                 <h3 className="text-sm font-medium text-blue-900">Mano de obra</h3>
                 <p className="mt-1 text-2xl font-bold text-blue-600">
-                  €{valuationMock.totals.labor}
+                  €{state.valuation?.compact?.totals?.labor || valuationMock.totals.labor}
                 </p>
               </div>
               <div className="rounded-lg bg-green-50 p-4">
                 <h3 className="text-sm font-medium text-green-900">Pintura</h3>
                 <p className="mt-1 text-2xl font-bold text-green-600">
-                  €{valuationMock.totals.paint}
+                  €{state.valuation?.compact?.totals?.paintLabor || valuationMock.totals.paintLabor}
                 </p>
               </div>
               <div className="rounded-lg bg-purple-50 p-4">
                 <h3 className="text-sm font-medium text-purple-900">Total</h3>
                 <p className="mt-1 text-2xl font-bold text-purple-600">
-                  €{valuationMock.totals.grandTotal}
+                  €{state.valuation?.compact?.totals?.grandTotal || valuationMock.totals.grandTotal}
                 </p>
               </div>
             </div>
