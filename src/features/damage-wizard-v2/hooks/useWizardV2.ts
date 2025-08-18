@@ -13,7 +13,7 @@ import {
   prepareIntakePayload,
   prepareConfirmDamagesPayload,
 } from '../api/adapter';
-import { BackendDamagesResponse } from '../types/backend.types';
+import { BackendDamagesResponse, BackendDamage } from '../types/backend.types';
 import {
   POLLING_INTERVAL,
   MAX_POLLING_ATTEMPTS,
@@ -46,7 +46,7 @@ export interface UseWizardV2Return {
   startIntake: (data: IntakeData) => Promise<string>;
   pollForDamages: (assessmentId: string) => Promise<void>;
   confirmDamages: (confirmedIds: string[]) => Promise<void>;
-  saveOperations: (operations: any[]) => Promise<void>;
+  saveOperations: (operations: BackendDamage[]) => Promise<void>;
   generateValuation: () => Promise<void>;
   finalizeAssessment: () => Promise<void>;
   loadAssessmentData: () => Promise<void>;
@@ -313,7 +313,7 @@ export const useWizardV2 = (): UseWizardV2Return => {
     }
   }, [assessmentId, setLoading, setError, dispatch]);
 
-  const saveOperations = useCallback(async (operations: any[]): Promise<void> => {
+  const saveOperations = useCallback(async (operations: BackendDamage[]): Promise<void> => {
     if (!assessmentId) {
       throw new Error(ERROR_MESSAGES.ASSESSMENT_NOT_FOUND);
     }
@@ -392,7 +392,7 @@ export const useWizardV2 = (): UseWizardV2Return => {
       // Si hay confirmedDamages, actualizar el contexto
       if (response.confirmedDamages && response.confirmedDamages.length > 0) {
         const payload = {
-          ids: response.confirmedDamages.map((d: any) => d._id || `${d.area}-${d.subarea}`),
+          ids: response.confirmedDamages.map((d: BackendDamage) => d._id || `${d.area}-${d.subarea}`),
           damages: response.confirmedDamages
         };
 

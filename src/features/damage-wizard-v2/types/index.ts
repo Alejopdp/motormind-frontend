@@ -97,7 +97,7 @@ export interface ValuationTotals {
 
 export type DamageSource = 'autodata' | 'segment_lookup' | 'calc' | 'user_override' | 'no_data';
 
-export type WizardStepKey = 
+export type WizardStepKey =
   | 'intake'
   | 'damages'
   | 'operations'
@@ -155,3 +155,24 @@ export type MockPartItem = {
   qty: number;
   total: number;
 };
+
+export type WizardV2Status =
+  | 'idle'
+  | 'processing'
+  | 'detected'
+  | 'damages_confirmed'
+  | 'operations_defined'
+  | 'valuated'
+  | 'completed'
+  | 'error';
+
+export type WorkflowStatus = 'processing' | 'detected' | 'damages_confirmed' | 'operations_defined' | 'valuated' | 'completed' | 'error';
+
+export interface FrontendOperation {
+  id: string;
+  partName: string;
+  damageType: string;
+  severity: 'leve' | 'medio' | 'grave';
+  operation: OperationKind;
+  originalDamage: any; // Referencia al daño original del backend
+}

@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { BackendDamageAssessment, BackendDamage } from '../types/backend.types';
 
 // ============================================================================
 // TIPOS - Estado del Wizard V2
@@ -26,11 +27,11 @@ export interface WizardV2State {
   images: string[];
 
   // Datos procesados por el backend
-  detectedDamages?: any; // Respuesta completa del backend con imágenes incluidas
+  detectedDamages?: BackendDamageAssessment; // Respuesta completa del backend con imágenes incluidas
   confirmedDamageIds?: string[];
-  confirmedDamages?: any[]; // Datos completos de los daños confirmados
-  operations?: any[]; // Tipo específico del backend, se adaptará
-  valuation?: any; // Tipo específico del backend, se adaptará
+  confirmedDamages?: BackendDamage[]; // Datos completos de los daños confirmados
+  operations?: BackendDamage[]; // Tipo específico del backend, se adaptará
+  valuation?: BackendDamageAssessment; // Tipo específico del backend, se adaptará
 
   // Metadatos y flags
   flags?: {
@@ -62,10 +63,10 @@ type WizardV2Action =
   | { type: 'SET_CAR_ID'; payload: string }
   | { type: 'START_INTAKE'; payload: { plate: string; claimDescription: string; images: string[] } }
   | { type: 'INTAKE_SUCCESS'; payload: { assessmentId: string; status: WizardV2Status } }
-  | { type: 'SET_DETECTED_DAMAGES'; payload: any }
-  | { type: 'CONFIRM_DAMAGES'; payload: { ids: string[]; damages: any[] } }
-  | { type: 'SET_OPERATIONS'; payload: any[] }
-  | { type: 'SET_VALUATION'; payload: any }
+  | { type: 'SET_DETECTED_DAMAGES'; payload: BackendDamageAssessment }
+  | { type: 'CONFIRM_DAMAGES'; payload: { ids: string[]; damages: BackendDamage[] } }
+  | { type: 'SET_OPERATIONS'; payload: BackendDamage[] }
+  | { type: 'SET_VALUATION'; payload: BackendDamageAssessment }
   | { type: 'FINALIZE_SUCCESS' }
   | { type: 'RESET_WIZARD' };
 

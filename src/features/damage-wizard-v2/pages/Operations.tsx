@@ -7,7 +7,8 @@ import { WizardStepper } from '../components/WizardStepper';
 import { NoConfirmedDamagesMessage } from '../components/NoConfirmedDamagesMessage';
 import { OperationsInfoAlert } from '../components/OperationsInfoAlert';
 import { OperationCard } from '../components/OperationCard';
-import { OperationKind } from '../types';
+import { OperationKind, FrontendOperation } from '../types';
+import { BackendDamage, DamageSeverity } from '../types/backend.types';
 
 const Operations = () => {
   const navigate = useNavigate();
@@ -27,25 +28,21 @@ const Operations = () => {
   }, [state.assessmentId]);
 
   // Función para mapear severidad del backend a formato del frontend
-  const mapSeverity = (backendSeverity: string): 'leve' | 'medio' | 'grave' => {
-    const severityMap: Record<string, 'leve' | 'medio' | 'grave'> = {
-      SEV1: 'leve',
-      SEV2: 'medio',
-      SEV3: 'grave',
-      leve: 'leve',
-      medio: 'medio',
-      grave: 'grave',
-      LIGHT: 'leve',
-      MEDIUM: 'medio',
-      HEAVY: 'grave',
+  const mapSeverity = (backendSeverity: DamageSeverity): 'leve' | 'medio' | 'grave' => {
+    const severityMap: Record<DamageSeverity, 'leve' | 'medio' | 'grave'> = {
+      [DamageSeverity.SEV1]: 'leve',
+      [DamageSeverity.SEV2]: 'medio',
+      [DamageSeverity.SEV3]: 'grave',
+      [DamageSeverity.SEV4]: 'grave',
+      [DamageSeverity.SEV5]: 'grave',
     };
     return severityMap[backendSeverity] || 'medio';
   };
 
   // Transformar daños confirmados a formato de operaciones
-  const operations = confirmedDamages.map((damage: any, index: number) => ({
+  const operations: FrontendOperation[] = confirmedDamages.map((damage: BackendDamage, index: number) => ({
     id: `op-${index + 1}`,
-    partName: damage.area || damage.partName || 'Pieza sin nombre',
+    partName: damage.area || 'Pieza sin nombre',
     damageType: damage.description || damage.type || 'Daño detectado',
     severity: mapSeverity(damage.severity),
     operation: 'REPARAR' as OperationKind, // Operación por defecto
@@ -59,7 +56,7 @@ const Operations = () => {
 
   const goValuation = async () => {
     try {
-      await saveOperations(operations);
+      await saveOperations(confirmedDamages);
       setParams({ step: 'valuation' });
       navigate(`?step=valuation`, { replace: true });
     } catch (error) {
