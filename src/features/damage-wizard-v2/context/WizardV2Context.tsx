@@ -28,6 +28,7 @@ export interface WizardV2State {
   // Datos procesados por el backend
   detectedDamages?: any; // Respuesta completa del backend con imágenes incluidas
   confirmedDamageIds?: string[];
+  confirmedDamages?: any[]; // Datos completos de los daños confirmados
   operations?: any[]; // Tipo específico del backend, se adaptará
   valuation?: any; // Tipo específico del backend, se adaptará
 
@@ -57,11 +58,12 @@ type WizardV2Action =
   | { type: 'SET_ERROR'; payload: string | undefined }
   | { type: 'SET_STATUS'; payload: WizardV2Status }
   | { type: 'SET_CURRENT_STEP'; payload: WizardV2State['currentStep'] }
+  | { type: 'SET_ASSESSMENT_ID'; payload: string }
   | { type: 'SET_CAR_ID'; payload: string }
   | { type: 'START_INTAKE'; payload: { plate: string; claimDescription: string; images: string[] } }
   | { type: 'INTAKE_SUCCESS'; payload: { assessmentId: string; status: WizardV2Status } }
   | { type: 'SET_DETECTED_DAMAGES'; payload: any }
-  | { type: 'CONFIRM_DAMAGES'; payload: string[] }
+  | { type: 'CONFIRM_DAMAGES'; payload: { ids: string[]; damages: any[] } }
   | { type: 'SET_OPERATIONS'; payload: any[] }
   | { type: 'SET_VALUATION'; payload: any }
   | { type: 'FINALIZE_SUCCESS' }
@@ -99,6 +101,12 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
         canGoNext: false, // Se habilitará según el estado de cada step
       };
 
+    case 'SET_ASSESSMENT_ID':
+      return {
+        ...state,
+        assessmentId: action.payload,
+      };
+
     case 'SET_CAR_ID':
       return {
         ...state,
@@ -134,13 +142,28 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
         canGoNext: false, // Se habilita cuando se confirmen daños
       };
 
-    case 'CONFIRM_DAMAGES':
-      return {
+    case 'CONFIRM_DAMAGES': {
+      console.log('🔄 Reducer: CONFIRM_DAMAGES action', {
+        payload: action.payload,
+        currentConfirmedDamages: state.confirmedDamages?.length || 0,
+      });
+
+      const newState = {
         ...state,
-        confirmedDamageIds: action.payload,
-        status: 'damages_confirmed',
-        canGoNext: action.payload.length > 0,
+        confirmedDamageIds: action.payload.ids,
+        confirmedDamages: action.payload.damages,
+        status: 'damages_confirmed' as WizardV2Status,
+        canGoNext: action.payload.ids.length > 0,
       };
+
+      console.log('✅ Reducer: New state after CONFIRM_DAMAGES', {
+        confirmedDamagesCount: newState.confirmedDamages?.length || 0,
+        status: newState.status,
+        canGoNext: newState.canGoNext,
+      });
+
+      return newState;
+    }
 
     case 'SET_OPERATIONS':
       return {

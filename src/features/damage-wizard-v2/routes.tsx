@@ -55,8 +55,8 @@ export const WizardV2Entry = () => {
         setIsLoading(true);
         setError(null);
 
-        // Intentar cargar el summary del assessment
-        const response = await damageAssessmentApi.getDetectedDamages(id);
+        // Intentar cargar el assessment completo
+        const response = await damageAssessmentApi.getAssessment(id);
 
         if (!mounted) return;
 
@@ -175,11 +175,43 @@ const WizardV2Router = ({ assessmentData }: WizardV2RouterProps) => {
       hasAssessmentData: !!assessmentData,
       hasDetectedDamages: !!state.detectedDamages,
       step,
+      assessmentDataKeys: assessmentData ? Object.keys(assessmentData as any) : [],
+      assessmentId: assessmentData ? (assessmentData as any)._id : 'NO_ID',
     });
 
     if (assessmentData) {
       console.log('📊 Cargando datos del assessment en el contexto');
-      dispatch({ type: 'SET_DETECTED_DAMAGES', payload: assessmentData });
+
+      // Establecer el assessmentId si está disponible
+      if ((assessmentData as any)._id) {
+        console.log('🆔 Estableciendo assessmentId en el contexto:', (assessmentData as any)._id);
+        dispatch({ type: 'SET_ASSESSMENT_ID', payload: (assessmentData as any)._id });
+      } else {
+        console.warn('⚠️ Router: No se encontró _id en assessmentData');
+      }
+
+      // Cargar detectedDamages si están disponibles
+      if ((assessmentData as any).detectedDamages) {
+        dispatch({ type: 'SET_DETECTED_DAMAGES', payload: assessmentData });
+      }
+
+      // Cargar confirmedDamages si están disponibles
+      if (
+        (assessmentData as any).confirmedDamages &&
+        (assessmentData as any).confirmedDamages.length > 0
+      ) {
+        console.log('✅ Encontrados confirmedDamages en assessmentData, actualizando contexto...');
+        dispatch({
+          type: 'CONFIRM_DAMAGES',
+          payload: {
+            ids: (assessmentData as any).confirmedDamages.map(
+              (d: any) => d._id || `${d.area}-${d.subarea}`,
+            ),
+            damages: (assessmentData as any).confirmedDamages,
+          },
+        });
+      }
+
       const workflowStatus = (assessmentData as { workflow?: { status?: string } })?.workflow
         ?.status;
       if (workflowStatus) {
@@ -187,7 +219,7 @@ const WizardV2Router = ({ assessmentData }: WizardV2RouterProps) => {
         dispatch({ type: 'SET_STATUS', payload: workflowStatus as WorkflowStatus });
       }
     }
-  }, [assessmentData, dispatch, step]);
+  }, [assessmentData, step]); // Removido dispatch para evitar bucle infinito
 
   const Component = useMemo(() => {
     switch (step) {

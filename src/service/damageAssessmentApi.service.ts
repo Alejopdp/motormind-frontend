@@ -41,6 +41,11 @@ class DamageAssessmentApiService {
         return data;
     }
 
+    async getAssessment(assessmentId: string) {
+        const { data } = await this.api.get(`/damage-assessments/${assessmentId}?_t=${Date.now()}`);
+        return data;
+    }
+
     async confirmDamages(assessmentId: string, confirmedDamageIds: string[], edits: Array<Record<string, unknown>> = []) {
         const { data } = await this.api.patch(`/damage-assessments/${assessmentId}/damages/confirm`, { confirmedDamageIds, edits });
         return data;

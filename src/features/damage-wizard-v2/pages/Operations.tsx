@@ -1,5 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertTriangle, Settings } from 'lucide-react';
+import { useEffect } from 'react';
 import { Button } from '@/components/atoms/Button';
 import {
   Select,
@@ -18,32 +19,67 @@ import { OperationKind } from '../types';
 const Operations = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
-  const { saveOperations } = useWizardV2();
+  const { state, saveOperations, loadAssessmentData } = useWizardV2();
 
-  // Mock operations based on confirmed damages
-  const mockOperations = [
-    {
-      id: 'op-1',
-      partName: 'Paragolpes delantero',
-      damageType: 'Arañazo profundo',
-      severity: 'medio' as const,
-      operation: 'REPARAR' as OperationKind,
-    },
-    {
-      id: 'op-2',
-      partName: 'Puerta delantera izq',
-      damageType: 'Panel inferior - Abolladura',
-      severity: 'grave' as const,
-      operation: 'REPARAR_Y_PINTAR' as OperationKind,
-    },
-    {
-      id: 'op-3',
-      partName: 'Capó',
-      damageType: 'Rayado superficial',
-      severity: 'leve' as const,
-      operation: 'PULIR' as OperationKind,
-    },
-  ];
+  // Obtener daños confirmados del estado del wizard
+  const confirmedDamages = state.confirmedDamages || [];
+
+  console.log('🔍 Operations component state:', {
+    assessmentId: state.assessmentId,
+    confirmedDamagesCount: confirmedDamages.length,
+    status: state.status,
+    currentStep: state.currentStep,
+    confirmedDamages: confirmedDamages, // Log completo para debug
+  });
+
+  // Cargar datos del assessment siempre que estemos en el paso de Operations
+  useEffect(() => {
+    console.log('🔄 Operations useEffect triggered', {
+      assessmentId: state.assessmentId,
+      confirmedDamagesLength: confirmedDamages.length,
+      status: state.status,
+    });
+
+    if (state.assessmentId) {
+      console.log('🔄 Operations: Cargando datos del assessment...', {
+        assessmentId: state.assessmentId,
+        currentConfirmedDamages: confirmedDamages.length,
+        status: state.status,
+      });
+
+      loadAssessmentData().catch((error) => {
+        console.error('Error cargando datos del assessment:', error);
+      });
+    } else {
+      console.log('⚠️ Operations: No hay assessmentId disponible');
+    }
+  }, [state.assessmentId]); // Removido loadAssessmentData para evitar bucle infinito
+
+  // Función para mapear severidad del backend a formato del frontend
+  const mapSeverity = (backendSeverity: string): 'leve' | 'medio' | 'grave' => {
+    const severityMap: Record<string, 'leve' | 'medio' | 'grave'> = {
+      SEV1: 'leve',
+      SEV2: 'medio',
+      SEV3: 'grave',
+      leve: 'leve',
+      medio: 'medio',
+      grave: 'grave',
+      LIGHT: 'leve',
+      MEDIUM: 'medio',
+      HEAVY: 'grave',
+    };
+    return severityMap[backendSeverity] || 'medio';
+  };
+
+  // Transformar daños confirmados a formato de operaciones
+  const operations = confirmedDamages.map((damage: any, index: number) => ({
+    id: `op-${index + 1}`,
+    partName: damage.area || damage.partName || 'Pieza sin nombre',
+    damageType: damage.description || damage.type || 'Daño detectado',
+    severity: mapSeverity(damage.severity),
+    operation: 'REPARAR' as OperationKind, // Operación por defecto
+    originalDamage: damage, // Mantener referencia al daño original
+  }));
 
   const updateOperation = (id: string, operation: OperationKind) => {
     // In a real implementation, this would update the state
@@ -52,7 +88,7 @@ const Operations = () => {
 
   const goValuation = async () => {
     try {
-      await saveOperations(mockOperations);
+      await saveOperations(operations);
       setParams({ step: 'valuation' });
       navigate(`?step=valuation`, { replace: true });
     } catch (error) {
@@ -69,6 +105,39 @@ const Operations = () => {
     medio: { color: 'bg-yellow-100 text-yellow-800', label: 'Medio' },
     grave: { color: 'bg-red-100 text-red-800', label: 'Grave' },
   };
+
+  // Mostrar mensaje si no hay daños confirmados
+  if (operations.length === 0) {
+    return (
+      <PageShell
+        header={<WizardStepper currentStep="operations" completedSteps={['intake', 'damages']} />}
+        title="Operaciones de reparación"
+        subtitle="Define las operaciones necesarias para cada daño confirmado"
+        content={
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <AlertTriangle className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No hay daños confirmados</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                No se encontraron daños confirmados para definir operaciones.
+              </p>
+              <div className="mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setParams({ step: 'damages' });
+                    navigate(`?step=damages`, { replace: true });
+                  }}
+                >
+                  Volver a Daños
+                </Button>
+              </div>
+            </div>
+          </div>
+        }
+      />
+    );
+  }
 
   return (
     <PageShell
@@ -93,7 +162,7 @@ const Operations = () => {
 
           {/* Operations list */}
           <div className="space-y-4">
-            {mockOperations.map((op) => {
+            {operations.map((op) => {
               const severityStyle = severityConfig[op.severity];
               return (
                 <SectionPaper key={op.id}>

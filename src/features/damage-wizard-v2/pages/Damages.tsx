@@ -7,11 +7,7 @@ import { PageShell } from '../components/PageShell';
 import { WizardStepper } from '../components/WizardStepper';
 import { DamageCard } from '../components/DamageCard';
 import { ProgressCard } from '../components/ProgressCard';
-import {
-  adaptBackendDamagesResponse,
-  BackendDamagesResponse,
-  mapSelectedDamageIdsToIndices,
-} from '../adapters/damageAdapter';
+import { adaptBackendDamagesResponse, BackendDamagesResponse } from '../adapters/damageAdapter';
 
 import damagesMock from '../mocks/damages.json';
 
@@ -85,15 +81,25 @@ const Damages = () => {
     try {
       // Si tenemos metadatos del backend, usar mapeo correcto
       if (adaptedDamagesWithMeta) {
-        const mappedIndices = mapSelectedDamageIdsToIndices(
-          selectedDamages,
-          adaptedDamagesWithMeta,
-        );
-        console.log('🔄 Mapeando IDs frontend a índices backend:', {
-          selectedDamages,
-          mappedIndices,
-        });
-        await confirmDamages(mappedIndices.map(String)); // Convertir índices a strings
+        // Mapear IDs del frontend a IDs reales del backend
+        const backendIds = selectedDamages
+          .map((frontendId) => {
+            const adaptedDamage = adaptedDamagesWithMeta.find((d) => d.id === frontendId);
+            if (!adaptedDamage) {
+              console.warn('⚠️ No se encontró daño adaptado para ID:', frontendId);
+              return null;
+            }
+            // Usar el ID real del backend o generar uno basado en área-subárea
+            const backendId =
+              (adaptedDamage.__originalData as any)._id ||
+              `${adaptedDamage.__originalData.area}-${adaptedDamage.__originalData.subarea}`;
+            console.log(`🔄 Mapeando frontend ID "${frontendId}" → backend ID "${backendId}"`);
+            return backendId;
+          })
+          .filter(Boolean) as string[];
+
+        console.log('🔄 IDs finales para enviar al backend:', backendIds);
+        await confirmDamages(backendIds);
       } else {
         // Fallback para datos mock
         await confirmDamages(selectedDamages);
