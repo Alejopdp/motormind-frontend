@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/atoms/Button';
 import { useWizardV2 } from '../hooks/useWizardV2';
 import { PageShell } from '../components/PageShell';
@@ -18,6 +18,9 @@ const Operations = () => {
   // Obtener daños confirmados del estado del wizard
   const confirmedDamages = state.confirmedDamages || [];
 
+  // Estado local para las operaciones
+  const [operations, setOperations] = useState<FrontendOperation[]>([]);
+
   // Cargar datos del assessment siempre que estemos en el paso de Operations
   useEffect(() => {
     if (state.assessmentId) {
@@ -26,6 +29,23 @@ const Operations = () => {
       });
     }
   }, [state.assessmentId]);
+
+  // Inicializar operaciones cuando se cargan los daños confirmados
+  useEffect(() => {
+    if (confirmedDamages.length > 0 && operations.length === 0) {
+      const initialOperations: FrontendOperation[] = confirmedDamages.map(
+        (damage: BackendDamage, index: number) => ({
+          id: `op-${index + 1}`,
+          partName: damage.area || 'Pieza sin nombre',
+          damageType: damage.description || damage.type || 'Daño detectado',
+          severity: mapSeverity(damage.severity),
+          operation: 'REPARAR' as OperationKind, // Operación por defecto
+          originalDamage: damage, // Mantener referencia al daño original
+        }),
+      );
+      setOperations(initialOperations);
+    }
+  }, [confirmedDamages, operations.length]);
 
   // Función para mapear severidad del backend a formato del frontend
   const mapSeverity = (backendSeverity: DamageSeverity): 'leve' | 'medio' | 'grave' => {
@@ -39,24 +59,13 @@ const Operations = () => {
     return severityMap[backendSeverity] || 'medio';
   };
 
-  // Transformar daños confirmados a formato de operaciones
-  const operations: FrontendOperation[] = confirmedDamages.map((damage: BackendDamage, index: number) => ({
-    id: `op-${index + 1}`,
-    partName: damage.area || 'Pieza sin nombre',
-    damageType: damage.description || damage.type || 'Daño detectado',
-    severity: mapSeverity(damage.severity),
-    operation: 'REPARAR' as OperationKind, // Operación por defecto
-    originalDamage: damage, // Mantener referencia al daño original
-  }));
-
   const updateOperation = (id: string, operation: OperationKind) => {
-    // In a real implementation, this would update the state
-    console.log(`Updated operation ${id} to ${operation}`);
+    setOperations((prev) => prev.map((op) => (op.id === id ? { ...op, operation } : op)));
   };
 
   const goValuation = async () => {
     try {
-      await saveOperations(confirmedDamages);
+      await saveOperations(operations);
       setParams({ step: 'valuation' });
       navigate(`?step=valuation`, { replace: true });
     } catch (error) {

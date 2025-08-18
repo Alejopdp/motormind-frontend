@@ -14,6 +14,7 @@ import {
   prepareConfirmDamagesPayload,
 } from '../api/adapter';
 import { BackendDamagesResponse, BackendDamage } from '../types/backend.types';
+import { FrontendOperation } from '../types';
 import {
   POLLING_INTERVAL,
   MAX_POLLING_ATTEMPTS,
@@ -46,7 +47,7 @@ export interface UseWizardV2Return {
   startIntake: (data: IntakeData) => Promise<string>;
   pollForDamages: (assessmentId: string) => Promise<void>;
   confirmDamages: (confirmedIds: string[]) => Promise<void>;
-  saveOperations: (operations: BackendDamage[]) => Promise<void>;
+  saveOperations: (operations: FrontendOperation[]) => Promise<void>;
   generateValuation: () => Promise<void>;
   finalizeAssessment: () => Promise<void>;
   loadAssessmentData: () => Promise<void>;
@@ -313,7 +314,7 @@ export const useWizardV2 = (): UseWizardV2Return => {
     }
   }, [assessmentId, setLoading, setError, dispatch]);
 
-  const saveOperations = useCallback(async (operations: BackendDamage[]): Promise<void> => {
+  const saveOperations = useCallback(async (operations: FrontendOperation[]): Promise<void> => {
     if (!assessmentId) {
       throw new Error(ERROR_MESSAGES.ASSESSMENT_NOT_FOUND);
     }
@@ -329,8 +330,24 @@ export const useWizardV2 = (): UseWizardV2Return => {
         await damageAssessmentApi.generateOperations(assessmentId);
       }
 
+      // Transformar operaciones del frontend al formato esperado por el backend
+      const backendOperations = operations.map(op => ({
+        gtMotivePartName: op.partName,
+        mainOperation: {
+          operation: op.operation,
+          description: op.damageType,
+          estimatedHours: 0, // Se calculará en el backend
+        },
+        subOperations: [],
+        paint: {
+          apply: op.operation.includes('PINTAR'),
+          paintType: 'MONOCOAT' as const,
+          finishType: 'REPAIRED_PART' as const,
+        }
+      }));
+
       // Luego guardar cambios
-      await damageAssessmentApi.editOperations(assessmentId, operations);
+      await damageAssessmentApi.editOperations(assessmentId, backendOperations);
 
       dispatch({ type: 'SET_OPERATIONS', payload: operations });
 

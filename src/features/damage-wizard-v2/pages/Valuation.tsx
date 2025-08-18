@@ -1,4 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/atoms/Button';
 import { Badge } from '@/components/atoms/Badge';
 import { useWizardV2 } from '../hooks/useWizardV2';
@@ -12,15 +13,34 @@ import valuationMock from '../mocks/valuation.json';
 const Valuation = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
-  const { generateValuation } = useWizardV2();
+  const { state, generateValuation, finalizeAssessment } = useWizardV2();
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const finalize = async () => {
+  // Cargar valoración si no existe
+  useEffect(() => {
+    if (state.assessmentId && !state.valuation && !isGenerating) {
+      handleGenerateValuation();
+    }
+  }, [state.assessmentId, state.valuation, isGenerating]);
+
+  const handleGenerateValuation = async () => {
     try {
+      setIsGenerating(true);
       await generateValuation();
+    } catch (error) {
+      console.error('Error generating valuation:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleFinalize = async () => {
+    try {
+      await finalizeAssessment();
       setParams({ step: 'finalize' });
       navigate(`?step=finalize`, { replace: true });
     } catch (error) {
-      console.error('Error generating valuation:', error);
+      console.error('Error finalizing assessment:', error);
       // Fallback a navegación directa en caso de error
       console.warn('Fallback: navegando a finalize después de error');
       setParams({ step: 'finalize' });
@@ -36,36 +56,93 @@ const Valuation = () => {
     no_data: { color: 'bg-red-100 text-red-800', label: 'No Data' },
   };
 
-  // Transform mock data for tables
-  const laborData = valuationMock.labor.map((item) => ({
-    ...item,
-    source: (
-      <Badge
-        variant="outline"
-        className={sourceConfig[item.source as keyof typeof sourceConfig].color}
-      >
-        {sourceConfig[item.source as keyof typeof sourceConfig].label}
-      </Badge>
-    ),
-    hours: `${item.hours}h`,
-    rate: `€${item.rate}/h`,
-    total: `€${item.total}`,
-  }));
+  // Usar datos del backend si están disponibles, sino usar mock
+  const laborData = state.valuation?.laborOutput
+    ? state.valuation.laborOutput.map((item: any) => ({
+        ...item,
+        source: (
+          <Badge
+            variant="outline"
+            className={
+              sourceConfig[item.source as keyof typeof sourceConfig]?.color ||
+              sourceConfig.no_data.color
+            }
+          >
+            {sourceConfig[item.source as keyof typeof sourceConfig]?.label || 'Unknown'}
+          </Badge>
+        ),
+        hours: `${item.hours || 0}h`,
+        rate: `€${item.rate || 0}/h`,
+        total: `€${item.total || 0}`,
+      }))
+    : valuationMock.labor.map((item) => ({
+        ...item,
+        source: (
+          <Badge
+            variant="outline"
+            className={sourceConfig[item.source as keyof typeof sourceConfig].color}
+          >
+            {sourceConfig[item.source as keyof typeof sourceConfig].label}
+          </Badge>
+        ),
+        hours: `${item.hours}h`,
+        rate: `€${item.rate}/h`,
+        total: `€${item.total}`,
+      }));
 
-  const paintData = valuationMock.paint.map((item) => ({
-    ...item,
-    paintHours: `${item.paintHours}h`,
-    paintLaborTotal: `€${item.paintLaborTotal}`,
-    unitPrice: `€${item.unitPrice}`,
-    materialsTotal: `€${item.materialsTotal}`,
-    total: `€${item.total}`,
-  }));
+  const paintData = state.valuation?.paintWorks
+    ? state.valuation.paintWorks.map((item: any) => ({
+        ...item,
+        paintHours: `${item.paintHours || 0}h`,
+        paintLaborTotal: `€${item.paintLaborTotal || 0}`,
+        unitPrice: `€${item.unitPrice || 0}`,
+        materialsTotal: `€${item.materialsTotal || 0}`,
+        total: `€${item.total || 0}`,
+      }))
+    : valuationMock.paint.map((item) => ({
+        ...item,
+        paintHours: `${item.paintHours}h`,
+        paintLaborTotal: `€${item.paintLaborTotal}`,
+        unitPrice: `€${item.unitPrice}`,
+        materialsTotal: `€${item.materialsTotal}`,
+        total: `€${item.total}`,
+      }));
 
-  const partsData = valuationMock.parts.map((item) => ({
-    ...item,
-    unitPrice: `€${item.unitPrice}`,
-    total: `€${item.total}`,
-  }));
+  const partsData = state.valuation?.parts
+    ? state.valuation.parts.map((item: any) => ({
+        ...item,
+        unitPrice: `€${item.unitPrice || 0}`,
+        total: `€${item.total || 0}`,
+      }))
+    : valuationMock.parts.map((item) => ({
+        ...item,
+        unitPrice: `€${item.unitPrice}`,
+        total: `€${item.total}`,
+      }));
+
+  // Mostrar loading mientras se genera la valoración
+  if (isGenerating) {
+    return (
+      <PageShell
+        header={
+          <WizardStepper
+            currentStep="valuation"
+            completedSteps={['intake', 'damages', 'operations']}
+          />
+        }
+        title="Valoración del peritaje"
+        subtitle="Calculando costes y tiempos..."
+        content={
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+              <p className="mt-4 text-gray-600">Generando valoración...</p>
+            </div>
+          </div>
+        }
+      />
+    );
+  }
 
   return (
     <PageShell
@@ -100,75 +177,70 @@ const Valuation = () => {
               columns={[
                 { key: 'partName', header: 'Pieza' },
                 { key: 'job', header: 'Trabajo' },
-                { key: 'paintHours', header: 'Horas MO Pintura' },
-                { key: 'paintLaborTotal', header: 'Total MO Pintura (€)' },
-                { key: 'units', header: 'Unidades' },
-                { key: 'unitPrice', header: '€/unidad' },
+                { key: 'paintHours', header: 'Horas Pintura' },
+                { key: 'paintLaborTotal', header: 'MO Pintura (€)' },
+                { key: 'unitPrice', header: 'Precio Material' },
                 { key: 'materialsTotal', header: 'Total Materiales (€)' },
-                { key: 'total', header: 'Total Pintura (€)' },
+                { key: 'total', header: 'Total (€)' },
               ]}
               data={paintData}
             />
           </SectionPaper>
 
           {/* Table 3: Recambios */}
-          <SectionPaper title="Recambios">
-            <ValuationTable
-              columns={[
-                { key: 'ref', header: 'Ref' },
-                { key: 'partName', header: 'Pieza' },
-                { key: 'unitPrice', header: 'Precio unitario' },
-                { key: 'qty', header: 'Cantidad' },
-                { key: 'total', header: 'Total' },
-              ]}
-              data={partsData}
-            />
-          </SectionPaper>
+          {partsData.length > 0 && (
+            <SectionPaper title="Recambios">
+              <ValuationTable
+                columns={[
+                  { key: 'ref', header: 'Referencia' },
+                  { key: 'partName', header: 'Pieza' },
+                  { key: 'unitPrice', header: 'Precio Unitario' },
+                  { key: 'qty', header: 'Cantidad' },
+                  { key: 'total', header: 'Total (€)' },
+                ]}
+                data={partsData}
+              />
+            </SectionPaper>
+          )}
 
-          {/* Totals card */}
+          {/* Totales */}
           <SectionPaper title="Resumen de costes">
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-lg bg-blue-50 p-4">
+                <h3 className="text-sm font-medium text-blue-900">Mano de obra</h3>
+                <p className="mt-1 text-2xl font-bold text-blue-600">
                   €{valuationMock.totals.labor}
-                </div>
-                <div className="text-sm text-gray-600">MO</div>
+                </p>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">
-                  €{valuationMock.totals.paintLabor}
-                </div>
-                <div className="text-sm text-gray-600">MO Pintura</div>
+              <div className="rounded-lg bg-green-50 p-4">
+                <h3 className="text-sm font-medium text-green-900">Pintura</h3>
+                <p className="mt-1 text-2xl font-bold text-green-600">
+                  €{valuationMock.totals.paint}
+                </p>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">
-                  €{valuationMock.totals.paintMaterials}
-                </div>
-                <div className="text-sm text-gray-600">Materiales</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">
-                  €{valuationMock.totals.parts}
-                </div>
-                <div className="text-sm text-gray-600">Recambios</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
+              <div className="rounded-lg bg-purple-50 p-4">
+                <h3 className="text-sm font-medium text-purple-900">Total</h3>
+                <p className="mt-1 text-2xl font-bold text-purple-600">
                   €{valuationMock.totals.grandTotal}
-                </div>
-                <div className="text-sm text-gray-600">Total</div>
+                </p>
               </div>
-            </div>
-            <div className="mt-4 text-center text-sm text-gray-500">
-              Moneda: {valuationMock.totals.currency}
             </div>
           </SectionPaper>
         </div>
       }
       footer={
-        <div className="flex justify-end">
-          <Button onClick={finalize} className="px-6">
-            Finalizar
+        <div className="flex justify-between">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setParams({ step: 'operations' });
+              navigate(`?step=operations`, { replace: true });
+            }}
+          >
+            Volver a Operaciones
+          </Button>
+          <Button onClick={handleFinalize} className="px-6">
+            Finalizar Peritaje
           </Button>
         </div>
       }

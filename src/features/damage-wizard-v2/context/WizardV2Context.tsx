@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, ReactNode } from 'react';
 import { BackendDamageAssessment, BackendDamage } from '../types/backend.types';
+import { FrontendOperation } from '../types';
 
 // ============================================================================
 // TIPOS - Estado del Wizard V2
@@ -30,7 +31,7 @@ export interface WizardV2State {
   detectedDamages?: BackendDamageAssessment; // Respuesta completa del backend con imágenes incluidas
   confirmedDamageIds?: string[];
   confirmedDamages?: BackendDamage[]; // Datos completos de los daños confirmados
-  operations?: BackendDamage[]; // Tipo específico del backend, se adaptará
+  operations?: FrontendOperation[]; // Operaciones del frontend
   valuation?: BackendDamageAssessment; // Tipo específico del backend, se adaptará
 
   // Metadatos y flags
@@ -65,7 +66,7 @@ type WizardV2Action =
   | { type: 'INTAKE_SUCCESS'; payload: { assessmentId: string; status: WizardV2Status } }
   | { type: 'SET_DETECTED_DAMAGES'; payload: BackendDamageAssessment }
   | { type: 'CONFIRM_DAMAGES'; payload: { ids: string[]; damages: BackendDamage[] } }
-  | { type: 'SET_OPERATIONS'; payload: BackendDamage[] }
+  | { type: 'SET_OPERATIONS'; payload: FrontendOperation[] }
   | { type: 'SET_VALUATION'; payload: BackendDamageAssessment }
   | { type: 'FINALIZE_SUCCESS' }
   | { type: 'RESET_WIZARD' };
