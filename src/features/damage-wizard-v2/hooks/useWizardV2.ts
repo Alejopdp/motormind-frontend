@@ -375,9 +375,10 @@ export const useWizardV2 = (): UseWizardV2Return => {
       logger.info('Generating valuation');
 
       const response = await damageAssessmentApi.generateValuation(assessmentId);
-      const adaptedValuation = adaptValuationResponse(response);
-
-      dispatch({ type: 'SET_VALUATION', payload: adaptedValuation });
+      
+      // El backend devuelve directamente el DamageAssessment actualizado
+      // No necesitamos adaptación, solo dispatch directo
+      dispatch({ type: 'SET_VALUATION', payload: response });
 
       logger.info(SUCCESS_MESSAGES.VALUATION_GENERATED);
 

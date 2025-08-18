@@ -23,9 +23,16 @@ const Valuation = () => {
       assessmentId: state.assessmentId,
       hasValuation: !!state.valuation,
       isGenerating,
-      hasGenerated: hasGeneratedValuation.current
+      hasGenerated: hasGeneratedValuation.current,
     });
 
+    // Si ya tenemos valoración, no necesitamos generar
+    if (state.valuation) {
+      console.log('✅ Valuation already exists, skipping generation');
+      return;
+    }
+
+    // Solo generar si no existe y no se ha generado antes
     if (state.assessmentId && !state.valuation && !isGenerating && !hasGeneratedValuation.current) {
       console.log('✅ Starting valuation generation...');
       hasGeneratedValuation.current = true;
@@ -73,7 +80,11 @@ const Valuation = () => {
   // Usar datos del backend si están disponibles, sino usar mock
   const laborData = state.valuation?.laborOutput
     ? state.valuation.laborOutput.map((item: any) => ({
-        ...item,
+        partName: item.partName || 'Pieza sin nombre',
+        operation: item.mainOperation?.operation || item.operation || 'Operación',
+        hours: item.mainOperation?.estimatedHours || item.hours || 0,
+        rate: item.rate || 38, // Tarifa por defecto
+        total: (item.mainOperation?.estimatedHours || item.hours || 0) * (item.rate || 38),
         source: (
           <Badge
             variant="outline"
@@ -85,9 +96,6 @@ const Valuation = () => {
             {sourceConfig[item.source as keyof typeof sourceConfig]?.label || 'Unknown'}
           </Badge>
         ),
-        hours: `${item.hours || 0}h`,
-        rate: `€${item.rate || 0}/h`,
-        total: `€${item.total || 0}`,
       }))
     : valuationMock.labor.map((item) => ({
         ...item,
@@ -106,12 +114,13 @@ const Valuation = () => {
 
   const paintData = state.valuation?.paintWorks
     ? state.valuation.paintWorks.map((item: any) => ({
-        ...item,
-        paintHours: `${item.paintHours || 0}h`,
-        paintLaborTotal: `€${item.paintLaborTotal || 0}`,
-        unitPrice: `€${item.unitPrice || 0}`,
-        materialsTotal: `€${item.materialsTotal || 0}`,
-        total: `€${item.total || 0}`,
+        partName: item.partName || 'Pieza sin nombre',
+        job: item.job || 'Trabajo de pintura',
+        paintHours: item.paintHours || 0,
+        paintLaborTotal: item.paintLaborTotal || 0,
+        unitPrice: item.unitPrice || 0,
+        materialsTotal: item.materialsTotal || 0,
+        total: item.total || 0,
       }))
     : valuationMock.paint.map((item) => ({
         ...item,
@@ -124,15 +133,26 @@ const Valuation = () => {
 
   const partsData = state.valuation?.parts
     ? state.valuation.parts.map((item: any) => ({
-        ...item,
-        unitPrice: `€${item.unitPrice || 0}`,
-        total: `€${item.total || 0}`,
+        ref: item.ref || 'REF-001',
+        partName: item.partName || 'Pieza',
+        unitPrice: item.unitPrice || 0,
+        qty: item.qty || 1,
+        total: item.total || 0,
       }))
     : valuationMock.parts.map((item) => ({
         ...item,
         unitPrice: `€${item.unitPrice}`,
         total: `€${item.total}`,
       }));
+
+  // Debug: Log del estado de valoración
+  console.log('🔍 Valuation state:', {
+    hasValuation: !!state.valuation,
+    laborOutput: state.valuation?.laborOutput?.length || 0,
+    paintWorks: state.valuation?.paintWorks?.length || 0,
+    parts: state.valuation?.parts?.length || 0,
+    compact: state.valuation?.compact,
+  });
 
   // Mostrar loading mientras se genera la valoración
   if (isGenerating) {
@@ -223,19 +243,24 @@ const Valuation = () => {
               <div className="rounded-lg bg-blue-50 p-4">
                 <h3 className="text-sm font-medium text-blue-900">Mano de obra</h3>
                 <p className="mt-1 text-2xl font-bold text-blue-600">
-                  €{state.valuation?.compact?.totals?.labor || valuationMock.totals.labor}
+                  €{state.valuation?.compact?.totals?.labor || 
+                    laborData.reduce((sum, item) => sum + (typeof item.total === 'number' ? item.total : 0), 0).toFixed(2)}
                 </p>
               </div>
               <div className="rounded-lg bg-green-50 p-4">
                 <h3 className="text-sm font-medium text-green-900">Pintura</h3>
                 <p className="mt-1 text-2xl font-bold text-green-600">
-                  €{state.valuation?.compact?.totals?.paintLabor || valuationMock.totals.paintLabor}
+                  €{state.valuation?.compact?.totals?.paintLabor || 
+                    paintData.reduce((sum, item) => sum + (typeof item.paintLaborTotal === 'number' ? item.paintLaborTotal : 0), 0).toFixed(2)}
                 </p>
               </div>
               <div className="rounded-lg bg-purple-50 p-4">
                 <h3 className="text-sm font-medium text-purple-900">Total</h3>
                 <p className="mt-1 text-2xl font-bold text-purple-600">
-                  €{state.valuation?.compact?.totals?.grandTotal || valuationMock.totals.grandTotal}
+                  €{state.valuation?.compact?.totals?.grandTotal || 
+                    (laborData.reduce((sum, item) => sum + (typeof item.total === 'number' ? item.total : 0), 0) +
+                     paintData.reduce((sum, item) => sum + (typeof item.total === 'number' ? item.total : 0), 0) +
+                     partsData.reduce((sum, item) => sum + (typeof item.total === 'number' ? item.total : 0), 0)).toFixed(2)}
                 </p>
               </div>
             </div>
