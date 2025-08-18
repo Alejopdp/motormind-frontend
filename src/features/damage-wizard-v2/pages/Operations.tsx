@@ -1,19 +1,12 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, Settings } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '@/components/atoms/Button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/atoms/Select';
-import { Badge } from '@/components/atoms/Badge';
 import { useWizardV2 } from '../hooks/useWizardV2';
 import { PageShell } from '../components/PageShell';
-import { SectionPaper } from '../components/SectionPaper';
 import { WizardStepper } from '../components/WizardStepper';
+import { NoConfirmedDamagesMessage } from '../components/NoConfirmedDamagesMessage';
+import { OperationsInfoAlert } from '../components/OperationsInfoAlert';
+import { OperationCard } from '../components/OperationCard';
 import { OperationKind } from '../types';
 
 const Operations = () => {
@@ -24,36 +17,14 @@ const Operations = () => {
   // Obtener daños confirmados del estado del wizard
   const confirmedDamages = state.confirmedDamages || [];
 
-  console.log('🔍 Operations component state:', {
-    assessmentId: state.assessmentId,
-    confirmedDamagesCount: confirmedDamages.length,
-    status: state.status,
-    currentStep: state.currentStep,
-    confirmedDamages: confirmedDamages, // Log completo para debug
-  });
-
   // Cargar datos del assessment siempre que estemos en el paso de Operations
   useEffect(() => {
-    console.log('🔄 Operations useEffect triggered', {
-      assessmentId: state.assessmentId,
-      confirmedDamagesLength: confirmedDamages.length,
-      status: state.status,
-    });
-
     if (state.assessmentId) {
-      console.log('🔄 Operations: Cargando datos del assessment...', {
-        assessmentId: state.assessmentId,
-        currentConfirmedDamages: confirmedDamages.length,
-        status: state.status,
-      });
-
       loadAssessmentData().catch((error) => {
         console.error('Error cargando datos del assessment:', error);
       });
-    } else {
-      console.log('⚠️ Operations: No hay assessmentId disponible');
     }
-  }, [state.assessmentId]); // Removido loadAssessmentData para evitar bucle infinito
+  }, [state.assessmentId]);
 
   // Función para mapear severidad del backend a formato del frontend
   const mapSeverity = (backendSeverity: string): 'leve' | 'medio' | 'grave' => {
@@ -106,6 +77,11 @@ const Operations = () => {
     grave: { color: 'bg-red-100 text-red-800', label: 'Grave' },
   };
 
+  const handleGoBack = () => {
+    setParams({ step: 'damages' });
+    navigate(`?step=damages`, { replace: true });
+  };
+
   // Mostrar mensaje si no hay daños confirmados
   if (operations.length === 0) {
     return (
@@ -113,28 +89,7 @@ const Operations = () => {
         header={<WizardStepper currentStep="operations" completedSteps={['intake', 'damages']} />}
         title="Operaciones de reparación"
         subtitle="Define las operaciones necesarias para cada daño confirmado"
-        content={
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <AlertTriangle className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No hay daños confirmados</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                No se encontraron daños confirmados para definir operaciones.
-              </p>
-              <div className="mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setParams({ step: 'damages' });
-                    navigate(`?step=damages`, { replace: true });
-                  }}
-                >
-                  Volver a Daños
-                </Button>
-              </div>
-            </div>
-          </div>
-        }
+        content={<NoConfirmedDamagesMessage onGoBack={handleGoBack} />}
       />
     );
   }
@@ -146,71 +101,18 @@ const Operations = () => {
       subtitle="Define las operaciones necesarias para cada daño confirmado"
       content={
         <>
-          {/* Info alert */}
-          <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-blue-600" />
-            <div>
-              <p className="text-sm font-medium text-blue-900">
-                Los tiempos se calcularán automáticamente en 'Valoración'
-              </p>
-              <p className="mt-1 text-sm text-blue-700">
-                Aquí solo defines el tipo de operación. Los costes y horas se mostrarán en el
-                siguiente paso.
-              </p>
-            </div>
-          </div>
+          <OperationsInfoAlert />
 
           {/* Operations list */}
           <div className="space-y-4">
-            {operations.map((op) => {
-              const severityStyle = severityConfig[op.severity];
-              return (
-                <SectionPaper key={op.id}>
-                  <div className="grid grid-cols-1 items-center gap-4 lg:grid-cols-3">
-                    {/* Left column - Part info */}
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-gray-900">{op.partName}</h3>
-                      <p className="text-sm text-gray-600">{op.damageType}</p>
-                      <Badge variant="outline" className={severityStyle.color}>
-                        {severityStyle.label}
-                      </Badge>
-                    </div>
-
-                    {/* Right column - Operation selection */}
-                    <div className="space-y-3 lg:col-span-2">
-                      <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
-                          Operación principal
-                        </label>
-                        <Select
-                          value={op.operation}
-                          onValueChange={(value) => updateOperation(op.id, value as OperationKind)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="PULIR">Pulir</SelectItem>
-                            <SelectItem value="REPARAR">Reparar</SelectItem>
-                            <SelectItem value="PINTAR">Pintar</SelectItem>
-                            <SelectItem value="REPARAR_Y_PINTAR">Reparar y Pintar</SelectItem>
-                            <SelectItem value="SUSTITUIR">Sustituir</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <Button variant="outline" size="sm">
-                          <Settings className="mr-1 h-4 w-4" />
-                          Suplementos
-                        </Button>
-                        <span className="text-xs text-amber-700">Pendiente de valoración</span>
-                      </div>
-                    </div>
-                  </div>
-                </SectionPaper>
-              );
-            })}
+            {operations.map((op) => (
+              <OperationCard
+                key={op.id}
+                operation={op}
+                severityConfig={severityConfig}
+                onUpdateOperation={updateOperation}
+              />
+            ))}
           </div>
         </>
       }

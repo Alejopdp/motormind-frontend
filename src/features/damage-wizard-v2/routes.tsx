@@ -171,23 +171,10 @@ const WizardV2Router = ({ assessmentData }: WizardV2RouterProps) => {
 
   // Cargar los datos del assessment en el contexto si están disponibles
   useEffect(() => {
-    console.log('🔄 WizardV2Router useEffect - Datos disponibles:', {
-      hasAssessmentData: !!assessmentData,
-      hasDetectedDamages: !!state.detectedDamages,
-      step,
-      assessmentDataKeys: assessmentData ? Object.keys(assessmentData as any) : [],
-      assessmentId: assessmentData ? (assessmentData as any)._id : 'NO_ID',
-    });
-
     if (assessmentData) {
-      console.log('📊 Cargando datos del assessment en el contexto');
-
       // Establecer el assessmentId si está disponible
       if ((assessmentData as any)._id) {
-        console.log('🆔 Estableciendo assessmentId en el contexto:', (assessmentData as any)._id);
         dispatch({ type: 'SET_ASSESSMENT_ID', payload: (assessmentData as any)._id });
-      } else {
-        console.warn('⚠️ Router: No se encontró _id en assessmentData');
       }
 
       // Cargar detectedDamages si están disponibles
@@ -200,7 +187,6 @@ const WizardV2Router = ({ assessmentData }: WizardV2RouterProps) => {
         (assessmentData as any).confirmedDamages &&
         (assessmentData as any).confirmedDamages.length > 0
       ) {
-        console.log('✅ Encontrados confirmedDamages en assessmentData, actualizando contexto...');
         dispatch({
           type: 'CONFIRM_DAMAGES',
           payload: {
@@ -215,7 +201,6 @@ const WizardV2Router = ({ assessmentData }: WizardV2RouterProps) => {
       const workflowStatus = (assessmentData as { workflow?: { status?: string } })?.workflow
         ?.status;
       if (workflowStatus) {
-        console.log('🔄 Actualizando status del workflow:', workflowStatus);
         dispatch({ type: 'SET_STATUS', payload: workflowStatus as WorkflowStatus });
       }
     }

@@ -143,11 +143,6 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
       };
 
     case 'CONFIRM_DAMAGES': {
-      console.log('🔄 Reducer: CONFIRM_DAMAGES action', {
-        payload: action.payload,
-        currentConfirmedDamages: state.confirmedDamages?.length || 0,
-      });
-
       const newState = {
         ...state,
         confirmedDamageIds: action.payload.ids,
@@ -155,12 +150,6 @@ function wizardV2Reducer(state: WizardV2State, action: WizardV2Action): WizardV2
         status: 'damages_confirmed' as WizardV2Status,
         canGoNext: action.payload.ids.length > 0,
       };
-
-      console.log('✅ Reducer: New state after CONFIRM_DAMAGES', {
-        confirmedDamagesCount: newState.confirmedDamages?.length || 0,
-        status: newState.status,
-        canGoNext: newState.canGoNext,
-      });
 
       return newState;
     }

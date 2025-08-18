@@ -8,6 +8,7 @@ import { WizardStepper } from '../components/WizardStepper';
 import { DamageCard } from '../components/DamageCard';
 import { ProgressCard } from '../components/ProgressCard';
 import { adaptBackendDamagesResponse, BackendDamagesResponse } from '../adapters/damageAdapter';
+import { mapFrontendIdsToBackendIds } from '../utils/damageMapping';
 
 import damagesMock from '../mocks/damages.json';
 
@@ -35,7 +36,6 @@ const Damages = () => {
       state.detectedDamages.detectedDamages &&
       state.detectedDamages.detectedDamages.length > 0
     ) {
-      console.log('✅ Datos de daños disponibles, ocultando spinner');
       setIsProcessing(false);
       setProgress(100);
       return;
@@ -43,7 +43,6 @@ const Damages = () => {
 
     // Si el estado es 'processing', mostrar spinner
     if (state.status === 'processing') {
-      console.log('⏳ Estado processing, mostrando spinner');
       setIsProcessing(true);
       const interval = setInterval(() => {
         setProgress((prev) => {
@@ -60,7 +59,6 @@ const Damages = () => {
 
     // Si no hay datos y no está procesando, mostrar spinner temporal
     if (!state.detectedDamages) {
-      console.log('❓ No hay datos, mostrando spinner temporal');
       setIsProcessing(true);
       setProgress(0);
     }
@@ -81,23 +79,7 @@ const Damages = () => {
     try {
       // Si tenemos metadatos del backend, usar mapeo correcto
       if (adaptedDamagesWithMeta) {
-        // Mapear IDs del frontend a IDs reales del backend
-        const backendIds = selectedDamages
-          .map((frontendId) => {
-            const adaptedDamage = adaptedDamagesWithMeta.find((d) => d.id === frontendId);
-            if (!adaptedDamage) {
-              console.warn('⚠️ No se encontró daño adaptado para ID:', frontendId);
-              return null;
-            }
-            // Usar el ID real del backend o generar uno basado en área-subárea
-            const backendId =
-              (adaptedDamage.__originalData as any)._id ||
-              `${adaptedDamage.__originalData.area}-${adaptedDamage.__originalData.subarea}`;
-            console.log(`🔄 Mapeando frontend ID "${frontendId}" → backend ID "${backendId}"`);
-            return backendId;
-          })
-          .filter(Boolean) as string[];
-
+        const backendIds = mapFrontendIdsToBackendIds(selectedDamages, adaptedDamagesWithMeta);
         console.log('🔄 IDs finales para enviar al backend:', backendIds);
         await confirmDamages(backendIds);
       } else {
@@ -124,13 +106,9 @@ const Damages = () => {
       state.detectedDamages.detectedDamages &&
       state.detectedDamages.detectedDamages.length > 0
     ) {
-      console.log('🔄 Adaptando datos del backend:', state.detectedDamages);
-
       // state.detectedDamages contiene la respuesta completa del backend
       const backendResponse = state.detectedDamages as BackendDamagesResponse;
       const adaptedDamagesRaw = adaptBackendDamagesResponse(backendResponse);
-
-      console.log('✅ Datos adaptados:', adaptedDamagesRaw);
 
       // Aplicar estados de selección con tipado correcto
       const damagesData = adaptedDamagesRaw.map((damage) => ({
@@ -150,7 +128,6 @@ const Damages = () => {
     }
 
     // Fallback a datos mock
-    console.log('📄 Usando datos mock');
     const damagesData = damagesMock.damages.map((d) => ({
       id: d.id,
       zone: d.title,

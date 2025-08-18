@@ -376,60 +376,40 @@ export const useWizardV2 = (): UseWizardV2Return => {
 
   // Función para cargar los datos completos del assessment (incluyendo confirmedDamages)
   const loadAssessmentData = useCallback(async (): Promise<void> => {
-    console.log('🚀 loadAssessmentData called', { assessmentId });
-
     if (!assessmentId) {
-      console.error('❌ loadAssessmentData: No assessmentId available');
       throw new Error(ERROR_MESSAGES.ASSESSMENT_NOT_FOUND);
     }
 
     try {
-      console.log('🔄 loadAssessmentData: Setting loading state');
       setLoading(true);
       setError(undefined);
 
       logger.info('Loading assessment data', { assessmentId });
 
       // Usar el endpoint que devuelve el assessment completo
-      console.log('📡 loadAssessmentData: Calling API...');
       const response = await damageAssessmentApi.getAssessment(assessmentId);
-
-      console.log('📊 Assessment response:', {
-        id: response._id,
-        confirmedDamagesCount: response.confirmedDamages?.length || 0,
-        detectedDamagesCount: response.detectedDamages?.length || 0,
-        workflowStatus: response.workflow?.status
-      });
 
       // Si hay confirmedDamages, actualizar el contexto
       if (response.confirmedDamages && response.confirmedDamages.length > 0) {
-        console.log('✅ Encontrados confirmedDamages, actualizando contexto...');
         const payload = {
           ids: response.confirmedDamages.map((d: any) => d._id || `${d.area}-${d.subarea}`),
           damages: response.confirmedDamages
         };
-        console.log('📦 Payload para dispatch:', payload);
 
         dispatch({
           type: 'CONFIRM_DAMAGES',
           payload
         });
-
-        console.log('✅ Contexto actualizado con confirmedDamages');
-      } else {
-        console.log('⚠️ No se encontraron confirmedDamages en la respuesta');
       }
 
       logger.info('Assessment data loaded');
 
     } catch (error) {
-      console.error('❌ loadAssessmentData error:', error);
       const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
       logger.error('Assessment data load failed:', errorMessage);
       setError(errorMessage);
       throw error;
     } finally {
-      console.log('🔄 loadAssessmentData: Setting loading to false');
       setLoading(false);
     }
   }, [assessmentId, setLoading, setError, dispatch]);
