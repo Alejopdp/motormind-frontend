@@ -243,24 +243,50 @@ const Valuation = () => {
               <div className="rounded-lg bg-blue-50 p-4">
                 <h3 className="text-sm font-medium text-blue-900">Mano de obra</h3>
                 <p className="mt-1 text-2xl font-bold text-blue-600">
-                  €{state.valuation?.compact?.totals?.labor || 
-                    laborData.reduce((sum, item) => sum + (typeof item.total === 'number' ? item.total : 0), 0).toFixed(2)}
+                  €
+                  {state.valuation?.compact?.totals?.labor ||
+                    laborData
+                      .reduce(
+                        (sum, item) => sum + (typeof item.total === 'number' ? item.total : 0),
+                        0,
+                      )
+                      .toFixed(2)}
                 </p>
               </div>
               <div className="rounded-lg bg-green-50 p-4">
                 <h3 className="text-sm font-medium text-green-900">Pintura</h3>
                 <p className="mt-1 text-2xl font-bold text-green-600">
-                  €{state.valuation?.compact?.totals?.paintLabor || 
-                    paintData.reduce((sum, item) => sum + (typeof item.paintLaborTotal === 'number' ? item.paintLaborTotal : 0), 0).toFixed(2)}
+                  €
+                  {state.valuation?.compact?.totals?.paintLabor ||
+                    paintData
+                      .reduce(
+                        (sum, item) =>
+                          sum +
+                          (typeof item.paintLaborTotal === 'number' ? item.paintLaborTotal : 0),
+                        0,
+                      )
+                      .toFixed(2)}
                 </p>
               </div>
               <div className="rounded-lg bg-purple-50 p-4">
                 <h3 className="text-sm font-medium text-purple-900">Total</h3>
                 <p className="mt-1 text-2xl font-bold text-purple-600">
-                  €{state.valuation?.compact?.totals?.grandTotal || 
-                    (laborData.reduce((sum, item) => sum + (typeof item.total === 'number' ? item.total : 0), 0) +
-                     paintData.reduce((sum, item) => sum + (typeof item.total === 'number' ? item.total : 0), 0) +
-                     partsData.reduce((sum, item) => sum + (typeof item.total === 'number' ? item.total : 0), 0)).toFixed(2)}
+                  €
+                  {state.valuation?.compact?.totals?.grandTotal ||
+                    (
+                      laborData.reduce(
+                        (sum, item) => sum + (typeof item.total === 'number' ? item.total : 0),
+                        0,
+                      ) +
+                      paintData.reduce(
+                        (sum, item) => sum + (typeof item.total === 'number' ? item.total : 0),
+                        0,
+                      ) +
+                      partsData.reduce(
+                        (sum, item) => sum + (typeof item.total === 'number' ? item.total : 0),
+                        0,
+                      )
+                    ).toFixed(2)}
                 </p>
               </div>
             </div>
