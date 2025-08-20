@@ -1,10 +1,9 @@
 import { Check, ArrowRight } from 'lucide-react';
 import { cn } from '@/utils/cn';
-
-export type WizardStep = 'intake' | 'damages' | 'operations' | 'valuation' | 'finalize';
+import { WizardStepKey } from '../types';
 
 interface Step {
-  key: WizardStep;
+  key: WizardStepKey;
   label: string;
   description: string;
 }
@@ -22,9 +21,9 @@ const STEPS: Step[] = [
 ];
 
 interface WizardStepperProps {
-  currentStep: WizardStep;
-  onStepClick?: (step: WizardStep) => void;
-  completedSteps?: WizardStep[];
+  currentStep: WizardStepKey;
+  onStepClick?: (step: WizardStepKey) => void;
+  completedSteps?: WizardStepKey[];
 }
 
 export const WizardStepper = ({
@@ -35,15 +34,19 @@ export const WizardStepper = ({
   const currentStepIndex = STEPS.findIndex((step) => step.key === currentStep);
 
   const getStepStatus = (stepIndex: number) => {
-    if (completedSteps.includes(STEPS[stepIndex].key)) {
+    const stepKey = STEPS[stepIndex].key;
+
+    // Si el paso está completado (según completedSteps o es anterior al actual)
+    if (completedSteps.includes(stepKey) || stepIndex < currentStepIndex) {
       return 'completed';
     }
+
+    // Si es el paso actual
     if (stepIndex === currentStepIndex) {
       return 'current';
     }
-    if (stepIndex < currentStepIndex) {
-      return 'completed';
-    }
+
+    // Si es un paso futuro
     return 'upcoming';
   };
 
@@ -53,7 +56,9 @@ export const WizardStepper = ({
         <div className="flex items-center justify-between">
           {STEPS.map((step, index) => {
             const status = getStepStatus(index);
-            const isClickable = onStepClick && (status === 'completed' || status === 'current');
+            const isClickable =
+              onStepClick &&
+              (status === 'completed' || status === 'current' || index < currentStepIndex);
 
             return (
               <div key={step.key} className="flex flex-1 items-center">
@@ -73,7 +78,8 @@ export const WizardStepper = ({
                       'flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold',
                       status === 'completed' && 'bg-success text-success-foreground',
                       status === 'current' && 'bg-primary text-primary-foreground',
-                      status === 'upcoming' && 'bg-muted text-muted-foreground border-border border',
+                      status === 'upcoming' &&
+                        'bg-muted text-muted-foreground border-border border',
                     )}
                   >
                     {status === 'completed' ? <Check className="h-4 w-4" /> : index + 1}

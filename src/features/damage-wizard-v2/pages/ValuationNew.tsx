@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useWizardV2 } from '../hooks/useWizardV2';
 import { PageShell } from '../components/PageShell';
-import { WizardStepper } from '../components/WizardStepper';
+import { WizardStepperWithNav } from '../components/WizardStepperWithNav';
 import { LaborTable } from '../components/LaborTable';
 import { PaintTable } from '../components/PaintTable';
 import { SparePartsTable } from '../components/SparePartsTable';
@@ -190,7 +190,7 @@ const ValuationNew = () => {
     <>
       <PageShell
         header={
-          <WizardStepper
+          <WizardStepperWithNav
             currentStep="valuation"
             completedSteps={['intake', 'damages', 'operations']}
           />

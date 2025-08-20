@@ -70,6 +70,18 @@ export interface PaintWork {
   price: number;
 }
 
+// Tipos para evidencias de daño (fotos con ROI) - Paridad con backend
+export type DamagePictureROI =
+  | { type: 'bbox'; x: number; y: number; w: number; h: number }   // normalized [0..1]
+  | { type: 'polygon'; points: Array<{ x: number; y: number }> };  // normalized
+
+export interface DamageEvidence {
+  captureId: string;               // id de la foto en TechEck
+  originalUrl: string;             // URL de la foto completa
+  roi?: DamagePictureROI;          // ROI opcional
+  thumbUrl?: string;               // opcional (servidor puede generar thumbnail/crop)
+}
+
 export interface BackendDamage {
   _id?: string;
   area: string;
@@ -84,6 +96,7 @@ export interface BackendDamage {
   additionalActions?: AdditionalAction[];
   paintWorks?: PaintWork[];
   notes?: string;
+  evidences?: DamageEvidence[];    // ✅ NUEVO: evidencias de fotos con ROI
 }
 
 export interface BackendCar {
@@ -183,7 +196,7 @@ export interface BackendDamageAssessment {
   notes?: string;
   insuranceCompany: string;
   claimNumber?: string;
-  
+
   // New staged flow fields
   workflow?: BackendWorkflow;
   tchekId?: string;
@@ -203,7 +216,7 @@ export interface BackendDamageAssessment {
 // Respuesta del endpoint GET /damage-assessments/:id/damages
 export interface BackendDamagesResponse {
   detectedDamages: BackendDamage[];
-  tchekAggregates: BackendTchekAggregate[];
+  tchekAggregates: BackendTchekAggregate[] | Record<string, unknown>;
   images: string[];
   car: BackendCar | null;
   workflow: BackendWorkflow | null;

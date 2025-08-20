@@ -5,7 +5,7 @@ import { Badge } from '@/components/atoms/Badge';
 import { useWizardV2 } from '../hooks/useWizardV2';
 import { PageShell } from '../components/PageShell';
 import { SectionPaper } from '../components/SectionPaper';
-import { WizardStepper } from '../components/WizardStepper';
+import { WizardStepperWithNav } from '../components/WizardStepperWithNav';
 import { ValuationTable } from '../components/ValuationTable';
 
 import valuationMock from '../mocks/valuation.json';
@@ -159,7 +159,7 @@ const Valuation = () => {
     return (
       <PageShell
         header={
-          <WizardStepper
+          <WizardStepperWithNav
             currentStep="valuation"
             completedSteps={['intake', 'damages', 'operations']}
           />
@@ -181,7 +181,7 @@ const Valuation = () => {
   return (
     <PageShell
       header={
-        <WizardStepper
+        <WizardStepperWithNav
           currentStep="valuation"
           completedSteps={['intake', 'damages', 'operations']}
         />

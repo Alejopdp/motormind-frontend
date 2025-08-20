@@ -3,10 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus, Zap, Check, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 import { useWizardV2 } from '../hooks/useWizardV2';
+import { useReadOnlyMode } from '../hooks/useReadOnlyMode';
 import { PageShell } from '../components/PageShell';
-import { WizardStepper } from '../components/WizardStepper';
+import { WizardStepperWithNav } from '../components/WizardStepperWithNav';
 import { DamageCard } from '../components/DamageCard';
 import { ProgressCard } from '../components/ProgressCard';
+import { ReadOnlyBanner } from '../components/ReadOnlyBanner';
 import { adaptBackendDamagesResponse, BackendDamagesResponse } from '../adapters/damageAdapter';
 import { mapFrontendIdsToBackendIds } from '../utils/damageMapping';
 import { BackendDamage } from '../types/backend.types';
@@ -17,6 +19,7 @@ const Damages = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
   const { state, confirmDamages } = useWizardV2();
+  const { isReadOnly, continueFromHere } = useReadOnlyMode();
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [selectedDamages, setSelectedDamages] = useState<string[]>([]);
@@ -66,6 +69,7 @@ const Damages = () => {
   }, [state.detectedDamages, state.status, isProcessing]);
 
   const toggleDamage = (id: string) => {
+    if (isReadOnly) return; // No permitir cambios en modo solo lectura
     setSelectedDamages((prev) =>
       prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id],
     );
@@ -77,6 +81,11 @@ const Damages = () => {
   };
 
   const confirmSelected = async () => {
+    if (isReadOnly) {
+      continueFromHere();
+      return;
+    }
+
     try {
       // Si tenemos metadatos del backend, usar mapeo correcto
       if (adaptedDamagesWithMeta) {
@@ -157,7 +166,7 @@ const Damages = () => {
   if (isProcessing) {
     return (
       <PageShell
-        header={<WizardStepper currentStep="damages" completedSteps={['intake']} />}
+        header={<WizardStepperWithNav currentStep="damages" completedSteps={['intake']} />}
         content={
           <ProgressCard
             title="Detectando daños"
@@ -171,26 +180,30 @@ const Damages = () => {
 
   return (
     <PageShell
-      header={<WizardStepper currentStep="damages" completedSteps={['intake']} />}
+      header={<WizardStepperWithNav currentStep="damages" completedSteps={['intake']} />}
       title="Verificación de Daños"
       subtitle="Seleccioná los daños que se detectaron en las imágenes."
       content={
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredDamages.map((damage) => (
-            <DamageCard
-              key={damage.id}
-              damage={damage}
-              onStatusChange={(id, status) => {
-                if (status === 'confirmed') {
-                  toggleDamage(id);
-                } else {
-                  // Remove from selected if rejected
-                  setSelectedDamages((prev) => prev.filter((selectedId) => selectedId !== id));
-                }
-              }}
-            />
-          ))}
-        </div>
+        <>
+          {isReadOnly && <ReadOnlyBanner />}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredDamages.map((damage) => (
+              <DamageCard
+                key={damage.id}
+                damage={damage}
+                onStatusChange={(id, status) => {
+                  if (isReadOnly) return; // No permitir cambios en modo solo lectura
+                  if (status === 'confirmed') {
+                    toggleDamage(id);
+                  } else {
+                    // Remove from selected if rejected
+                    setSelectedDamages((prev) => prev.filter((selectedId) => selectedId !== id));
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </>
       }
       footer={
         <div className="flex w-full items-center justify-between" role="toolbar">
@@ -202,28 +215,36 @@ const Damages = () => {
 
           {/* Right side - Action buttons */}
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <Plus className="mr-1 h-4 w-4" />+ Añadir daño
-            </Button>
+            {!isReadOnly && (
+              <>
+                <Button variant="outline" size="sm">
+                  <Plus className="mr-1 h-4 w-4" />+ Añadir daño
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowOnlyConfident(!showOnlyConfident)}
+                  className={showOnlyConfident ? 'border-blue-200 bg-blue-50' : ''}
+                >
+                  <Zap className="mr-1 h-4 w-4" />
+                  Solo seguros &gt;85%
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={confirmAll}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Check className="mr-1 h-4 w-4" />
+                  Confirmar Todos
+                </Button>
+              </>
+            )}
             <Button
-              variant="outline"
+              onClick={confirmSelected}
+              disabled={!isReadOnly && selectedDamages.length === 0}
               size="sm"
-              onClick={() => setShowOnlyConfident(!showOnlyConfident)}
-              className={showOnlyConfident ? 'border-blue-200 bg-blue-50' : ''}
             >
-              <Zap className="mr-1 h-4 w-4" />
-              Solo seguros &gt;85%
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={confirmAll}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Check className="mr-1 h-4 w-4" />
-              Confirmar Todos
-            </Button>
-            <Button onClick={confirmSelected} disabled={selectedDamages.length === 0} size="sm">
               Continuar
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>

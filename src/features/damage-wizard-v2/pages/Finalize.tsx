@@ -4,7 +4,7 @@ import { Button } from '@/components/atoms/Button';
 import { useWizardV2 } from '../context/WizardV2Context';
 import { PageShell } from '../components/PageShell';
 import { SectionPaper } from '../components/SectionPaper';
-import { WizardStepper } from '../components/WizardStepper';
+import { WizardStepperWithNav } from '../components/WizardStepperWithNav';
 
 
 const Finalize = () => {
@@ -19,7 +19,7 @@ const Finalize = () => {
 
   return (
     <PageShell
-      header={<WizardStepper currentStep="finalize" completedSteps={['intake', 'damages', 'operations', 'valuation']} />}
+      header={<WizardStepperWithNav currentStep="finalize" completedSteps={['intake', 'damages', 'operations', 'valuation']} />}
       content={
         <div className="flex justify-center">
           <SectionPaper className="max-w-md text-center">

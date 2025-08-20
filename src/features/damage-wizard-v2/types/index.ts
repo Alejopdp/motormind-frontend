@@ -4,6 +4,57 @@ export type DamageStatus = 'pending' | 'confirmed' | 'rejected';
 
 export type OperationKind = 'PULIR' | 'REPARAR' | 'PINTAR' | 'REPARAR_Y_PINTAR' | 'SUSTITUIR';
 
+// Nuevos tipos para el sistema de recomendación de operaciones
+export type DamageAction = 'REPAIR' | 'REPLACE' | 'PAINT' | 'POLISH' | 'REPAIR_AND_PAINT';
+
+export type OperationSource = 'autodata' | 'rule_engine' | 'no_data';
+
+export interface ProposedMainOperation {
+  operation: DamageAction;
+  confidence: number;
+  reason: string;
+  source: OperationSource;
+}
+
+export interface ProposedSubOperation {
+  operation: string;
+  confidence: number;
+  reason: string;
+}
+
+export interface ProposedOperation {
+  main: ProposedMainOperation;
+  subOperations: ProposedSubOperation[];
+}
+
+export interface EditedMainOperation {
+  operation: DamageAction;
+  reason: string;
+}
+
+export interface EditedSubOperation {
+  operation: string;
+  reason: string;
+}
+
+export interface EditedOperation {
+  main: EditedMainOperation;
+  subOperations: EditedSubOperation[];
+}
+
+export interface BackendOperation {
+  mappingId: string;
+  partName: string;
+  partCode?: string;
+  proposedOperation?: ProposedOperation;
+  editedOperation?: EditedOperation;
+  effectiveOperation: ProposedMainOperation | EditedMainOperation;
+  hasUserOverride: boolean;
+}
+
+// Re-export tipos de evidencia del backend para uso en frontend
+export type { DamageEvidence, DamagePictureROI } from './backend.types';
+
 /**
  * Damage interface compatible con el repo de diseño
  * Para uso en DamageCard con paridad 1:1
@@ -17,6 +68,7 @@ export interface Damage {
   confidence: number; // 0-100
   imageUrl: string;
   status: DamageStatus;
+  evidences?: import('./backend.types').DamageEvidence[]; // ✅ NUEVO: evidencias de fotos con ROI
 }
 
 /**

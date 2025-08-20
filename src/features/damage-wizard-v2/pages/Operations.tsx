@@ -1,25 +1,32 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/components/atoms/Button';
 import { useWizardV2 } from '../hooks/useWizardV2';
+import { useOperations } from '../hooks/useOperations';
 import { PageShell } from '../components/PageShell';
-import { WizardStepper } from '../components/WizardStepper';
+import { WizardStepperWithNav } from '../components/WizardStepperWithNav';
 import { NoConfirmedDamagesMessage } from '../components/NoConfirmedDamagesMessage';
 import { OperationsInfoAlert } from '../components/OperationsInfoAlert';
-import { OperationCard } from '../components/OperationCard';
-import { OperationKind, FrontendOperation } from '../types';
-import { BackendDamage, DamageSeverity } from '../types/backend.types';
+import { ProgressCard } from '../components/ProgressCard';
+import { RecommendedOperationCard } from '../components/RecommendedOperationCard';
+import { DamageAction } from '../types';
 
 const Operations = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
-  const { state, saveOperations, loadAssessmentData } = useWizardV2();
+  const { state, loadAssessmentData } = useWizardV2();
+  const { 
+    operations, 
+    isLoading, 
+    error, 
+    recommendOperations, 
+    getOperations, 
+    updateOperations,
+    clearError 
+  } = useOperations();
 
   // Obtener daños confirmados del estado del wizard
   const confirmedDamages = state.confirmedDamages || [];
-
-  // Estado local para las operaciones
-  const [operations, setOperations] = useState<FrontendOperation[]>([]);
 
   // Cargar datos del assessment siempre que estemos en el paso de Operations
   useEffect(() => {
@@ -30,46 +37,56 @@ const Operations = () => {
     }
   }, [state.assessmentId]);
 
-  // Inicializar operaciones cuando se cargan los daños confirmados
+  // Cargar operaciones cuando hay daños confirmados
   useEffect(() => {
-    if (confirmedDamages.length > 0 && operations.length === 0) {
-      const initialOperations: FrontendOperation[] = confirmedDamages.map(
-        (damage: BackendDamage, index: number) => ({
-          id: `op-${index + 1}`,
-          partName: damage.area || 'Pieza sin nombre',
-          damageType: damage.description || damage.type || 'Daño detectado',
-          severity: mapSeverity(damage.severity),
-          operation: 'REPARAR' as OperationKind, // Operación por defecto
-          originalDamage: damage, // Mantener referencia al daño original
-        }),
-      );
-      setOperations(initialOperations);
+    if (state.assessmentId && confirmedDamages.length > 0 && operations.length === 0) {
+      // Intentar obtener operaciones existentes primero
+      getOperations(state.assessmentId).catch(() => {
+              // Si no hay operaciones, generar recomendaciones
+      if (state.assessmentId) {
+        recommendOperations(state.assessmentId).catch((error) => {
+          console.error('Error generando recomendaciones:', error);
+        });
+      }
+      });
     }
-  }, [confirmedDamages, operations.length]);
+  }, [state.assessmentId, confirmedDamages.length, operations.length, getOperations, recommendOperations]);
 
-  // Función para mapear severidad del backend a formato del frontend
-  const mapSeverity = (backendSeverity: DamageSeverity): 'leve' | 'medio' | 'grave' => {
-    const severityMap: Record<DamageSeverity, 'leve' | 'medio' | 'grave'> = {
-      [DamageSeverity.SEV1]: 'leve',
-      [DamageSeverity.SEV2]: 'medio',
-      [DamageSeverity.SEV3]: 'grave',
-      [DamageSeverity.SEV4]: 'grave',
-      [DamageSeverity.SEV5]: 'grave',
-    };
-    return severityMap[backendSeverity] || 'medio';
-  };
+  const handleUpdateOperation = (mappingId: string, newOperation: DamageAction, reason: string) => {
+    if (!state.assessmentId) return;
 
-  const updateOperation = (id: string, operation: OperationKind) => {
-    setOperations((prev) => prev.map((op) => (op.id === id ? { ...op, operation } : op)));
+    const updatedOperations = operations.map(op => {
+      if (op.mappingId === mappingId) {
+        return {
+          ...op,
+          editedOperation: {
+            main: {
+              operation: newOperation,
+              reason,
+            },
+            subOperations: op.proposedOperation?.subOperations || [],
+          },
+          effectiveOperation: {
+            operation: newOperation,
+            reason,
+          },
+          hasUserOverride: true,
+        };
+      }
+      return op;
+    });
+
+    updateOperations(state.assessmentId, updatedOperations).catch((error) => {
+      console.error('Error actualizando operación:', error);
+    });
   };
 
   const goValuation = async () => {
     try {
-      await saveOperations(operations);
       setParams({ step: 'valuation' });
       navigate(`?step=valuation`, { replace: true });
     } catch (error) {
-      console.error('Error saving operations:', error);
+      console.error('Error navegando a valuation:', error);
       // Fallback a navegación directa en caso de error
       console.warn('Fallback: navegando a valuation después de error');
       setParams({ step: 'valuation' });
@@ -77,22 +94,58 @@ const Operations = () => {
     }
   };
 
-  const severityConfig = {
-    leve: { color: 'bg-green-100 text-green-800', label: 'Leve' },
-    medio: { color: 'bg-yellow-100 text-yellow-800', label: 'Medio' },
-    grave: { color: 'bg-red-100 text-red-800', label: 'Grave' },
-  };
-
   const handleGoBack = () => {
     setParams({ step: 'damages' });
     navigate(`?step=damages`, { replace: true });
   };
 
-  // Mostrar mensaje si no hay daños confirmados
-  if (operations.length === 0) {
+  // Mostrar loading mientras se cargan las operaciones
+  if (isLoading) {
     return (
       <PageShell
-        header={<WizardStepper currentStep="operations" completedSteps={['intake', 'damages']} />}
+        header={
+          <WizardStepperWithNav currentStep="operations" completedSteps={['intake', 'damages']} />
+        }
+        title="Operaciones de reparación"
+        subtitle="Generando recomendaciones de operaciones..."
+        content={
+          <div className="flex justify-center items-center min-h-64">
+            <ProgressCard
+              title="Generando recomendaciones"
+              description="Analizando daños confirmados para recomendar las mejores operaciones"
+            />
+          </div>
+        }
+      />
+    );
+  }
+
+  // Mostrar error si hay algún problema
+  if (error) {
+    return (
+      <PageShell
+        header={
+          <WizardStepperWithNav currentStep="operations" completedSteps={['intake', 'damages']} />
+        }
+        title="Operaciones de reparación"
+        subtitle="Error al cargar las operaciones"
+        content={
+          <div className="text-center py-8">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={() => clearError()}>Reintentar</Button>
+          </div>
+        }
+      />
+    );
+  }
+
+  // Mostrar mensaje si no hay daños confirmados
+  if (confirmedDamages.length === 0) {
+    return (
+      <PageShell
+        header={
+          <WizardStepperWithNav currentStep="operations" completedSteps={['intake', 'damages']} />
+        }
         title="Operaciones de reparación"
         subtitle="Define las operaciones necesarias para cada daño confirmado"
         content={<NoConfirmedDamagesMessage onGoBack={handleGoBack} />}
@@ -102,7 +155,9 @@ const Operations = () => {
 
   return (
     <PageShell
-      header={<WizardStepper currentStep="operations" completedSteps={['intake', 'damages']} />}
+      header={
+        <WizardStepperWithNav currentStep="operations" completedSteps={['intake', 'damages']} />
+      }
       title="Operaciones de reparación"
       subtitle="Define las operaciones necesarias para cada daño confirmado"
       content={
@@ -111,12 +166,11 @@ const Operations = () => {
 
           {/* Operations list */}
           <div className="space-y-4">
-            {operations.map((op) => (
-              <OperationCard
-                key={op.id}
-                operation={op}
-                severityConfig={severityConfig}
-                onUpdateOperation={updateOperation}
+            {operations.map((operation) => (
+              <RecommendedOperationCard
+                key={operation.mappingId}
+                operation={operation}
+                onUpdateOperation={handleUpdateOperation}
               />
             ))}
           </div>

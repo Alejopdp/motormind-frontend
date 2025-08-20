@@ -13,7 +13,7 @@ type ProgressCardProps = {
 export const ProgressCard = ({
   title,
   description,
-  progress = 0,
+  progress,
   className,
   asOverlay = false,
 }: ProgressCardProps) => {

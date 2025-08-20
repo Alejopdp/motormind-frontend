@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useParams, Navigate } from 'react-router-dom';
 import { WizardV2Provider, useWizardV2 } from './context/WizardV2Context';
-import { WorkflowStatus } from './types';
+import { StepperNavigationProvider } from './nav';
+import { WorkflowStatus, WizardStepKey } from './types';
 import { BackendDamage, BackendDamageAssessment } from './types/backend.types';
 import damageAssessmentApi from '@/service/damageAssessmentApi.service';
+
 import Intake from './pages/Intake';
 import Damages from './pages/Damages';
 import Operations from './pages/Operations';
@@ -13,7 +15,7 @@ import Finalize from './pages/Finalize';
 const WIZARD_V2_ENABLED = import.meta.env.VITE_WIZARD_V2_ENABLED === 'true';
 
 // Función para extraer el step de los search params
-const extractStepFromUrl = (searchParams: URLSearchParams): string => {
+const extractStepFromUrlLocal = (searchParams: URLSearchParams): string => {
   return searchParams.get('step') || 'damages';
 };
 
@@ -120,15 +122,25 @@ interface WizardV2RouterProps {
 
 const WizardV2Router = ({ assessmentData }: WizardV2RouterProps) => {
   const [searchParams] = useSearchParams();
-  const step = extractStepFromUrl(searchParams);
+  const step = extractStepFromUrlLocal(searchParams) as WizardStepKey;
   const { dispatch } = useWizardV2();
 
-  // Cargar los datos del assessment en el contexto si están disponibles
+  // Cargar los datos del assessment en el contexto SOLO la primera vez
   useEffect(() => {
-    if (assessmentData) {
+    if (assessmentData && assessmentData._id) {
       // Establecer el assessmentId si está disponible
-      if (assessmentData._id) {
-        dispatch({ type: 'SET_ASSESSMENT_ID', payload: assessmentData._id });
+      dispatch({ type: 'SET_ASSESSMENT_ID', payload: assessmentData._id });
+
+      // Cargar datos del intake si están disponibles (solo si no están ya cargados)
+      if (assessmentData.car?.plate || assessmentData.description || assessmentData.images) {
+        dispatch({
+          type: 'START_INTAKE',
+          payload: {
+            plate: assessmentData.car?.plate || '',
+            claimDescription: assessmentData.description || '',
+            images: assessmentData.images || [],
+          },
+        });
       }
 
       // Cargar detectedDamages si están disponibles
@@ -154,7 +166,7 @@ const WizardV2Router = ({ assessmentData }: WizardV2RouterProps) => {
         dispatch({ type: 'SET_STATUS', payload: workflowStatus as WorkflowStatus });
       }
     }
-  }, [assessmentData, step]); // Removido dispatch para evitar bucle infinito
+  }, [assessmentData._id]); // SOLO se ejecuta cuando cambia el assessmentId, NO el step
 
   const Component = useMemo(() => {
     switch (step) {
@@ -173,7 +185,17 @@ const WizardV2Router = ({ assessmentData }: WizardV2RouterProps) => {
     }
   }, [step]);
 
-  return Component;
+  const workflowStatus = (assessmentData.workflow?.status as WorkflowStatus) || 'processing';
+
+  return (
+    <StepperNavigationProvider
+      assessmentId={assessmentData._id || ''}
+      workflowStatus={workflowStatus}
+      currentStep={step}
+    >
+      {Component}
+    </StepperNavigationProvider>
+  );
 };
 
 // ============================================================================
@@ -189,7 +211,13 @@ export const WizardV2NewEntry = () => {
   // Para crear un nuevo assessment, simplemente mostramos el primer paso
   return (
     <WizardV2Provider>
-      <Intake />
+      <StepperNavigationProvider
+        assessmentId="new"
+        workflowStatus="processing"
+        currentStep="intake"
+      >
+        <Intake />
+      </StepperNavigationProvider>
     </WizardV2Provider>
   );
 };

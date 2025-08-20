@@ -3,11 +3,12 @@
  */
 
 import { Damage, Severity } from '../types';
+import { BackendDamage } from '../types/backend.types';
 
 // Mapeo de severidades del backend al frontend
 const severityMap: Record<string, Severity> = {
   'SEV1': 'leve',
-  'SEV2': 'leve', 
+  'SEV2': 'leve',
   'SEV3': 'medio',
   'SEV4': 'grave',
   'SEV5': 'grave',
@@ -25,15 +26,6 @@ const damageTypeMap: Record<string, string> = {
   'corrosion': 'Corrosión',
 };
 
-// Estructura de daño que viene del backend
-export interface BackendDamage {
-  area: string;
-  subarea: string;
-  description?: string;
-  severity: string; // SEV1, SEV2, etc.
-  type: string; // dent, scratch, etc.
-}
-
 // Respuesta completa del endpoint de damages
 export interface BackendDamagesResponse {
   detectedDamages: BackendDamage[];
@@ -47,25 +39,26 @@ export interface BackendDamagesResponse {
  * Transforma un daño del backend al formato del frontend
  */
 export function adaptBackendDamage(
-  backendDamage: BackendDamage, 
+  backendDamage: BackendDamage,
   index: number,
   images: string[]
 ): Damage & { __originalIndex: number; __originalData: BackendDamage } {
   // Generar un ID único basado en los datos del daño
   const id = `damage_${index}_${backendDamage.area}_${backendDamage.subarea}_${backendDamage.type}`.toLowerCase();
-  
+
   // Mapear severidad
   const severity = severityMap[backendDamage.severity] || 'medio';
-  
+
   // Mapear tipo de daño
   const type = damageTypeMap[backendDamage.type] || backendDamage.type;
-  
-  // Asignar imagen (rotar entre las disponibles, o usar la primera)
-  const imageUrl = images[index % images.length] || images[0] || '';
-  
+
+  // ✅ NUEVO: Usar evidencia de foto específica si existe
+  const primaryEvidence = backendDamage.evidences?.[0];
+  const imageUrl = primaryEvidence?.originalUrl || images[index % images.length] || images[0] || '';
+
   // Calcular confidence basado en la severidad (mock para ahora)
   const confidence = getConfidenceFromSeverity(backendDamage.severity);
-  
+
   return {
     id,
     zone: backendDamage.area,
@@ -75,6 +68,8 @@ export function adaptBackendDamage(
     confidence,
     imageUrl,
     status: 'pending',
+    // ✅ NUEVO: preservar evidencias para ROI overlay
+    evidences: backendDamage.evidences || [],
     // Metadatos para mapeo reverso
     __originalIndex: index,
     __originalData: backendDamage
@@ -88,12 +83,12 @@ export function adaptBackendDamagesResponse(
   response: BackendDamagesResponse
 ): (Damage & { __originalIndex: number; __originalData: BackendDamage })[] {
   const { detectedDamages, images } = response;
-  
+
   if (!detectedDamages || detectedDamages.length === 0) {
     return [];
   }
-  
-  return detectedDamages.map((damage, index) => 
+
+  return detectedDamages.map((damage, index) =>
     adaptBackendDamage(damage, index, images)
   );
 }
