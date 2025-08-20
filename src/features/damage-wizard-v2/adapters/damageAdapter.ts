@@ -74,6 +74,7 @@ const damageTypeMap: Record<string, string> = {
   'dent': 'Abolladura',
   'scratch': 'Rayón',
   'broken': 'Rotura',
+  'broken_part': 'Pieza rota', // ✅ NUEVO
   'dislocated': 'Desplazamiento',
   'dislocated_part': 'Pieza desplazada', // ✅ NUEVO
   'crack': 'Grieta',
