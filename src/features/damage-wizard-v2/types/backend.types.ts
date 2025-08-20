@@ -89,6 +89,7 @@ export interface BackendDamage {
   description: string;
   type: DamageType;
   severity: DamageSeverity;
+  confidence?: number; // ✅ NUEVO: confidence de Tchek (0-100)
   resources: DocumentLink[];
   isConfirmed: boolean | null;
   action?: DamageAction;

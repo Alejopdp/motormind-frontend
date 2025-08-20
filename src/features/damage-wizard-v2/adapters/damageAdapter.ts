@@ -121,8 +121,8 @@ export function adaptBackendDamage(
   const primaryEvidence = backendDamage.evidences?.[0];
   const imageUrl = primaryEvidence?.originalUrl || images[index % images.length] || images[0] || '';
 
-  // Calcular confidence basado en la severidad (mock para ahora)
-  const confidence = getConfidenceFromSeverity(backendDamage.severity);
+  // ✅ NUEVO: Usar confidence real del backend (Tchek) en lugar del mock
+  const confidence = backendDamage.confidence || getConfidenceFromSeverity(backendDamage.severity);
 
   return {
     id,
