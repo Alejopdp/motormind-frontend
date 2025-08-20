@@ -3,7 +3,11 @@ import { useSearchParams, useParams, Navigate } from 'react-router-dom';
 import { WizardV2Provider, useWizardV2 } from './context/WizardV2Context';
 import { StepperNavigationProvider } from './nav';
 import { WorkflowStatus, WizardStepKey } from './types';
-import { BackendDamage, BackendDamageAssessment } from './types/backend.types';
+import {
+  BackendDamage,
+  BackendDamageAssessment,
+  BackendDamagesResponse,
+} from './types/backend.types';
 import damageAssessmentApi from '@/service/damageAssessmentApi.service';
 
 import Intake from './pages/Intake';
@@ -145,7 +149,14 @@ const WizardV2Router = ({ assessmentData }: WizardV2RouterProps) => {
 
       // Cargar detectedDamages si están disponibles
       if (assessmentData.detectedDamages) {
-        dispatch({ type: 'SET_DETECTED_DAMAGES', payload: assessmentData });
+        const damagesResponse: BackendDamagesResponse = {
+          detectedDamages: assessmentData.detectedDamages,
+          tchekAggregates: assessmentData.tchekAggregates || [],
+          images: assessmentData.images || [],
+          car: assessmentData.car || null,
+          workflow: assessmentData.workflow || null,
+        };
+        dispatch({ type: 'SET_DETECTED_DAMAGES', payload: damagesResponse });
       }
 
       // Cargar confirmedDamages si están disponibles

@@ -3,7 +3,7 @@
  */
 
 import { Damage, Severity } from '../types';
-import { BackendDamage } from '../types/backend.types';
+import { BackendDamage, BackendCar, BackendWorkflow, BackendTchekAggregate } from '../types/backend.types';
 
 // Mapeo de severidades del backend al frontend
 const severityMap: Record<string, Severity> = {
@@ -14,25 +14,85 @@ const severityMap: Record<string, Severity> = {
   'SEV5': 'grave',
 };
 
-// Mapeo de tipos de daño a descripciones en español
+// ✅ NUEVO: Mapeo de nombres de partes de Tchek a GT Motive
+const partNameMap: Record<string, string> = {
+  // Aletas
+  'AILE Arrière Gauche': 'Aleta tr iz',
+  'AILE Arrière Droite': 'Aleta tr dr',
+  'AILE Avant Gauche': 'Aleta dl iz',
+  'AILE Avant Droite': 'Aleta dl dr',
+
+  // Parachoques
+  'PARE-CHOC Arrière': 'Paragolpes tr',
+  'PARE-CHOC Avant': 'Paragolpes dl',
+
+  // Puertas
+  'PORTE Avant Gauche': 'Puerta dl iz',
+  'PORTE Avant Droite': 'Puerta dl dr',
+  'PORTE Arrière Gauche': 'Puerta tr iz',
+  'PORTE Arrière Droite': 'Puerta tr dr',
+
+  // Ruedas
+  'ROUE Avant Gauche': 'Rueda dl iz',
+  'ROUE Avant Droite': 'Rueda dl dr',
+  'ROUE Arrière Gauche': 'Rueda tr iz',
+  'ROUE Arrière Droite': 'Rueda tr dr',
+
+  // Faros
+  'PHARE Avant Gauche': 'Faro iz',
+  'PHARE Avant Droite': 'Faro dr',
+
+  // Retrovisores
+  'RÉTROVISEUR Gauche': 'Retrovisor iz',
+  'RÉTROVISEUR Droite': 'Retrovisor dr',
+
+  // Fallbacks genéricos
+  'Parte BD C izquierdo': 'Pilar C iz',
+  'Parte BD C derecho': 'Pilar C dr',
+
+  // Otros componentes
+  'ENJOLIVEUR Avant Gauche': 'Enjoliveur dl iz',
+  'ENJOLIVEUR Avant Droite': 'Enjoliveur dl dr',
+  'ENJOLIVEUR Arrière Gauche': 'Enjoliveur tr iz',
+  'ENJOLIVEUR Arrière Droite': 'Enjoliveur tr dr',
+
+  // Manillas
+  'POIGNÉE Avant Gauche': 'Manilla ext puerta dl iz',
+  'POIGNÉE Avant Droite': 'Manilla ext puerta dl dr',
+  'POIGNÉE Arrière Gauche': 'Manilla ext puerta tr iz',
+  'POIGNÉE Arrière Droite': 'Manilla ext puerta tr dr',
+
+  // Sensores
+  'CAPTEUR DE PARKING Avant Gauche': 'Sensor aparcamiento dl iz',
+  'CAPTEUR DE PARKING Avant Droite': 'Sensor aparcamiento dl dr',
+  'CAPTEUR DE PARKING Arrière Gauche': 'Sensor aparcamiento tr iz',
+  'CAPTEUR DE PARKING Arrière Droite': 'Sensor aparcamiento tr dr',
+};
+
+// ✅ EXPANDIDO: Mapeo de tipos de daño a descripciones en español
 const damageTypeMap: Record<string, string> = {
   'dent': 'Abolladura',
   'scratch': 'Rayón',
   'broken': 'Rotura',
   'dislocated': 'Desplazamiento',
+  'dislocated_part': 'Pieza desplazada', // ✅ NUEVO
   'crack': 'Grieta',
   'hole': 'Agujero',
   'burn': 'Quemadura',
   'corrosion': 'Corrosión',
+  'paint_peel': 'Desprendimiento de pintura', // ✅ NUEVO
+  'deformation': 'Deformación', // ✅ NUEVO
+  'impact': 'Impacto', // ✅ NUEVO
+  'rust': 'Óxido', // ✅ NUEVO
 };
 
 // Respuesta completa del endpoint de damages
 export interface BackendDamagesResponse {
   detectedDamages: BackendDamage[];
   images: string[];
-  car: any;
-  workflow: any;
-  tchekAggregates?: any[];
+  car: BackendCar;
+  workflow: BackendWorkflow;
+  tchekAggregates?: BackendTchekAggregate[];
 }
 
 /**
@@ -49,7 +109,11 @@ export function adaptBackendDamage(
   // Mapear severidad
   const severity = severityMap[backendDamage.severity] || 'medio';
 
-  // Mapear tipo de daño
+  // ✅ NUEVO: Mapear nombre de parte usando GT Motive
+  const zone = partNameMap[backendDamage.area] || backendDamage.area;
+  const subzone = backendDamage.subarea ? partNameMap[backendDamage.subarea] || backendDamage.subarea : undefined;
+
+  // ✅ EXPANDIDO: Mapear tipo de daño
   const type = damageTypeMap[backendDamage.type] || backendDamage.type;
 
   // ✅ NUEVO: Usar evidencia de foto específica si existe
@@ -61,9 +125,9 @@ export function adaptBackendDamage(
 
   return {
     id,
-    zone: backendDamage.area,
-    subzone: backendDamage.subarea,
-    type,
+    zone,        // ← Nombre mapeado usando GT Motive
+    subzone,     // ← Subzona mapeada usando GT Motive
+    type,        // ← Tipo mapeado en español
     severity,
     confidence,
     imageUrl,

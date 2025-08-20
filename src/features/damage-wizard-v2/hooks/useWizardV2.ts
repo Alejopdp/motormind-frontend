@@ -9,11 +9,10 @@ import { useWizardV2 as useWizardV2Context } from '../context/WizardV2Context';
 import damageAssessmentApi, { DetectedDamagesResponse } from '@/service/damageAssessmentApi.service';
 import {
   adaptDamagesResponse,
-  adaptValuationResponse,
   prepareIntakePayload,
   prepareConfirmDamagesPayload,
 } from '../api/adapter';
-import { BackendDamagesResponse, BackendDamage } from '../types/backend.types';
+import { BackendDamagesResponse, BackendDamage, BackendTchekAggregate } from '../types/backend.types';
 import { FrontendOperation } from '../types';
 import {
   POLLING_INTERVAL,
@@ -80,7 +79,7 @@ export const useWizardV2 = (): UseWizardV2Return => {
   const convertApiResponse = (response: DetectedDamagesResponse): BackendDamagesResponse => {
     return {
       detectedDamages: response.detectedDamages as any[], // Conversión temporal
-      tchekAggregates: response.tchekAggregates,
+      tchekAggregates: response.tchekAggregates as BackendTchekAggregate[] | Record<string, unknown>,
       images: response.images,
       car: response.car as any,
       workflow: response.workflow as any,

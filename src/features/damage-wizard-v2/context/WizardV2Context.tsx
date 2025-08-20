@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, ReactNode } from 'react';
-import { BackendDamageAssessment, BackendDamage } from '../types/backend.types';
+import { BackendDamage, BackendDamageAssessment, BackendDamagesResponse } from '../types/backend.types';
 import { FrontendOperation } from '../types';
 
 // ============================================================================
@@ -28,7 +28,7 @@ export interface WizardV2State {
   images: string[];
 
   // Datos procesados por el backend
-  detectedDamages?: BackendDamageAssessment; // Respuesta completa del backend con imágenes incluidas
+  detectedDamages?: BackendDamagesResponse; // Respuesta completa del backend con imágenes incluidas
   confirmedDamageIds?: string[];
   confirmedDamages?: BackendDamage[]; // Datos completos de los daños confirmados
   operations?: FrontendOperation[]; // Operaciones del frontend
@@ -64,7 +64,7 @@ type WizardV2Action =
   | { type: 'SET_CAR_ID'; payload: string }
   | { type: 'START_INTAKE'; payload: { plate: string; claimDescription: string; images: string[] } }
   | { type: 'INTAKE_SUCCESS'; payload: { assessmentId: string; status: WizardV2Status } }
-  | { type: 'SET_DETECTED_DAMAGES'; payload: BackendDamageAssessment }
+  | { type: 'SET_DETECTED_DAMAGES'; payload: BackendDamagesResponse }
   | { type: 'CONFIRM_DAMAGES'; payload: { ids: string[]; damages: BackendDamage[] } }
   | { type: 'SET_OPERATIONS'; payload: FrontendOperation[] }
   | { type: 'SET_VALUATION'; payload: BackendDamageAssessment }

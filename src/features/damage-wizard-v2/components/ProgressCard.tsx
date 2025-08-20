@@ -2,18 +2,17 @@ import { ArrowRight } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useEffect } from 'react';
 
-type ProgressCardProps = {
+interface ProgressCardProps {
   title: string;
   description: string;
   progress?: number;
   className?: string;
   asOverlay?: boolean;
-};
+}
 
 export const ProgressCard = ({
   title,
   description,
-  progress,
   className,
   asOverlay = false,
 }: ProgressCardProps) => {

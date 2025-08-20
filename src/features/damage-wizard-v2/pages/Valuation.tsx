@@ -244,7 +244,7 @@ const Valuation = () => {
                 <h3 className="text-sm font-medium text-blue-900">Mano de obra</h3>
                 <p className="mt-1 text-2xl font-bold text-blue-600">
                   €
-                  {state.valuation?.compact?.totals?.labor ||
+                  {(state.valuation?.compact?.totals as any)?.labor ||
                     laborData
                       .reduce(
                         (sum, item) => sum + (typeof item.total === 'number' ? item.total : 0),
@@ -257,7 +257,7 @@ const Valuation = () => {
                 <h3 className="text-sm font-medium text-green-900">Pintura</h3>
                 <p className="mt-1 text-2xl font-bold text-green-600">
                   €
-                  {state.valuation?.compact?.totals?.paintLabor ||
+                  {(state.valuation?.compact?.totals as any)?.paintLabor ||
                     paintData
                       .reduce(
                         (sum, item) =>
@@ -272,7 +272,7 @@ const Valuation = () => {
                 <h3 className="text-sm font-medium text-purple-900">Total</h3>
                 <p className="mt-1 text-2xl font-bold text-purple-600">
                   €
-                  {state.valuation?.compact?.totals?.grandTotal ||
+                  {(state.valuation?.compact?.totals as any)?.grandTotal ||
                     (
                       laborData.reduce(
                         (sum, item) => sum + (typeof item.total === 'number' ? item.total : 0),

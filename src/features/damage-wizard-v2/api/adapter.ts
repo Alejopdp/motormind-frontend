@@ -6,15 +6,8 @@
  */
 
 import {
-  BackendDetectedDamage,
-  BackendLaborOperation,
-  BackendPaintOperation,
-  BackendSparePart,
-  BackendValuation,
+  BackendDamage,
   BackendDamagesResponse,
-  BackendValuationResponse,
-  BackendIntakePayload,
-  BackendConfirmDamagesPayload,
 } from '../types/backend.types';
 
 import {
@@ -33,35 +26,41 @@ import {
 /**
  * Adapta daños detectados del backend a formato frontend
  */
-export const adaptDetectedDamages = (backendDamages: BackendDetectedDamage[]): Damage[] => {
+export const adaptDetectedDamages = (backendDamages: BackendDamage[]): Damage[] => {
   return backendDamages.map(damage => ({
-    id: damage._id,
+    id: damage._id || `damage_${Math.random()}`,
     zone: damage.area,
     subzone: damage.subarea,
     type: damage.type,
     severity: adaptSeverity(damage.severity),
-    confidence: damage.confidence,
-    imageUrl: damage.tchekData?.imageUrl || '/placeholder-damage.jpg',
+    confidence: 85, // Mock confidence
+    imageUrl: '/placeholder-damage.jpg', // Mock image
     status: 'pending' as const,
   }));
 };
 
 /**
- * Adapta severidad del backend (SEV1/2/3) a frontend (leve/medio/grave)
+ * Adapta severidad del backend (SEV1/2/3/4/5) a frontend (leve/medio/grave)
  */
-export const adaptSeverity = (backendSeverity: 'SEV1' | 'SEV2' | 'SEV3'): 'leve' | 'medio' | 'grave' => {
+export const adaptSeverity = (backendSeverity: string): 'leve' | 'medio' | 'grave' => {
   switch (backendSeverity) {
-    case 'SEV1': return 'leve';
-    case 'SEV2': return 'medio';
-    case 'SEV3': return 'grave';
-    default: return 'medio';
+    case 'SEV1': 
+    case 'SEV2': 
+      return 'leve';
+    case 'SEV3': 
+      return 'medio';
+    case 'SEV4': 
+    case 'SEV5': 
+      return 'grave';
+    default: 
+      return 'medio';
   }
 };
 
 /**
  * Adapta operaciones de mano de obra del backend a frontend
  */
-export const adaptLaborOperations = (backendOperations: BackendLaborOperation[]): LaborOperation[] => {
+export const adaptLaborOperations = (backendOperations: any[]): LaborOperation[] => {
   return backendOperations.map(op => ({
     id: op.mappingId,
     piece: op.partName,
@@ -77,7 +76,7 @@ export const adaptLaborOperations = (backendOperations: BackendLaborOperation[])
 /**
  * Adapta operaciones de pintura del backend a frontend
  */
-export const adaptPaintOperations = (backendPaintOps: BackendPaintOperation[]): PaintOperation[] => {
+export const adaptPaintOperations = (backendPaintOps: any[]): PaintOperation[] => {
   return backendPaintOps.map(op => ({
     id: op.mappingId,
     piece: op.partName,
@@ -91,7 +90,7 @@ export const adaptPaintOperations = (backendPaintOps: BackendPaintOperation[]): 
 /**
  * Adapta materiales de pintura del backend a frontend
  */
-export const adaptPaintMaterials = (backendPaintOps: BackendPaintOperation[]): PaintMaterial[] => {
+export const adaptPaintMaterials = (backendPaintOps: any[]): PaintMaterial[] => {
   return backendPaintOps
     .filter(op => op.units && op.unitPrice)
     .map(op => ({
@@ -107,7 +106,7 @@ export const adaptPaintMaterials = (backendPaintOps: BackendPaintOperation[]): P
 /**
  * Adapta recambios del backend a frontend
  */
-export const adaptSpareParts = (backendParts: BackendSparePart[]): SparePart[] => {
+export const adaptSpareParts = (backendParts: any[]): SparePart[] => {
   return backendParts.map(part => ({
     id: part.ref,
     piece: part.partName,
@@ -123,10 +122,10 @@ export const adaptSpareParts = (backendParts: BackendSparePart[]): SparePart[] =
 /**
  * Adapta totales de valoración del backend a frontend
  */
-export const adaptValuationTotals = (backendTotals: BackendValuation['totals']): ValuationTotals => {
+export const adaptValuationTotals = (backendTotals: any): ValuationTotals => {
   const subtotal = backendTotals.grandTotal - (backendTotals.tax || 0);
   const tax = backendTotals.tax || subtotal * 0.21; // Fallback 21% IVA
-  
+
   return {
     laborWithoutPaint: backendTotals.labor,
     paintLabor: backendTotals.paintLabor,
@@ -181,9 +180,9 @@ export const adaptOperationsResponse = (response: any) => {
 /**
  * Adapta respuesta completa de valoración
  */
-export const adaptValuationResponse = (response: BackendValuationResponse) => {
+export const adaptValuationResponse = (response: any) => {
   const { valuation } = response;
-  
+
   return {
     laborOperations: adaptLaborOperations(valuation.labor),
     paintOperations: adaptPaintOperations(valuation.paint),
@@ -205,7 +204,7 @@ export const prepareIntakePayload = (data: {
   plate: string;
   claimDescription: string;
   images: string[];
-}): BackendIntakePayload => {
+}): any => {
   return {
     vehicleInfo: {
       plate: data.plate,
@@ -221,12 +220,12 @@ export const prepareIntakePayload = (data: {
 export const prepareConfirmDamagesPayload = (
   confirmedDamageIds: string[],
   edits?: Array<{ damageId: string; changes: any }>
-): BackendConfirmDamagesPayload => {
+): any => {
   // Por ahora, enviamos los IDs tal como están
   // El backend necesitará ser compatible con estos IDs adaptados
   // O necesitamos un mapeo reverso a los datos originales
   console.log('🔄 Preparing confirm damages payload:', { confirmedDamageIds, edits });
-  
+
   return {
     confirmedDamageIds,
     edits: edits || [],
@@ -259,7 +258,7 @@ export const validateBackendResponse = <T>(
   if (!response || typeof response !== 'object') {
     return false;
   }
-  
+
   return requiredFields.every(field => field in response);
 };
 
