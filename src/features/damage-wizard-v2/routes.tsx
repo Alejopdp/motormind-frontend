@@ -147,11 +147,11 @@ const WizardV2Router = ({ assessmentData }: WizardV2RouterProps) => {
         });
       }
 
-      // Cargar detectedDamages si están disponibles
-      if (assessmentData.detectedDamages) {
+      // Cargar externalDetectedDamages si están disponibles
+      if (assessmentData.externalDetectedDamages) {
         const damagesResponse: BackendDamagesResponse = {
-          detectedDamages: assessmentData.detectedDamages,
-          tchekAggregates: assessmentData.tchekAggregates || [],
+          detectedDamages: assessmentData.externalDetectedDamages,
+          tchekAggregates: assessmentData.externalDamageAggregates || [],
           images: assessmentData.images || [],
           car: assessmentData.car || null,
           workflow: assessmentData.workflow || null,

@@ -200,11 +200,11 @@ export interface BackendDamageAssessment {
 
   // New staged flow fields
   workflow?: BackendWorkflow;
-  tchekId?: string;
-  tchekMeta?: BackendTchekMeta;
-  tchekReport?: BackendTchekReport;
-  tchekAggregates?: BackendTchekAggregate[];
-  detectedDamages?: BackendDamage[];
+  provider?: string;
+  providerInspectionId?: string;
+  providerReportRaw?: unknown;
+  externalDetectedDamages?: BackendDamage[];
+  externalDamageAggregates?: BackendTchekAggregate[];
   confirmedDamages?: BackendDamage[];
   gtMotiveMappings?: BackendGtMotiveMapping[];
   operationsEdited?: BackendOperationEdited[];
