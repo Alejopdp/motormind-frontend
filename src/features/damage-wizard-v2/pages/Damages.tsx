@@ -159,7 +159,7 @@ const Damages = () => {
   })();
 
   const filteredDamages = showOnlyConfident
-    ? damagesData.filter((d) => d.confidence && d.confidence > 85)
+    ? damagesData.filter((d) => d.confidence && (d.confidence * 100) > 85)
     : damagesData;
 
   // Si está procesando, mostrar ProgressCard como contenido del layout

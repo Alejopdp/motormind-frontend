@@ -29,8 +29,9 @@ const severityColors = {
 };
 
 const confidenceColor = (confidence: number): string => {
-  if (confidence >= 90) return 'bg-success text-success-foreground';
-  if (confidence >= 80) return 'bg-warning text-warning-foreground';
+  const confidencePercent = confidence * 100;
+  if (confidencePercent >= 90) return 'bg-success text-success-foreground';
+  if (confidencePercent >= 80) return 'bg-warning text-warning-foreground';
   return 'bg-muted text-muted-foreground';
 };
 
@@ -103,7 +104,7 @@ export const DamageCard = ({ damage, onStatusChange, className }: DamageCardProp
             confidenceColor(damage.confidence),
           )}
         >
-          {damage.confidence}% seguro
+          {(damage.confidence * 100).toFixed(1)}% seguro
         </div>
       </div>
 
