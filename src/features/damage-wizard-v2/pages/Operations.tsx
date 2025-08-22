@@ -1,25 +1,27 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Button } from '@/components/atoms/Button';
 import { useWizardV2 } from '../hooks/useWizardV2';
-import { useOperations } from '../hooks/useOperations';
 import { PageShell } from '../components/PageShell';
 import { WizardStepperWithNav } from '../components/WizardStepperWithNav';
 import { NoConfirmedDamagesMessage } from '../components/NoConfirmedDamagesMessage';
 import { OperationsInfoAlert } from '../components/OperationsInfoAlert';
-import { ProgressCard } from '../components/ProgressCard';
 import { RecommendedOperationCard } from '../components/RecommendedOperationCard';
 import { DamageAction } from '../types';
+import { mapDamagesWithOperations } from '../utils/operationsMapper';
 
 const Operations = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
   const { state, loadAssessmentData } = useWizardV2();
-  const { operations, isLoading, error, loadOperations, generateOperations, clearError } =
-    useOperations();
 
   // Obtener daños confirmados del estado del wizard
   const confirmedDamages = state.confirmedDamages || [];
+  
+  // Mapear operaciones desde confirmedDamages (sin gtMotiveMappings por ahora)
+  const mappedOperations = useMemo(() => {
+    return mapDamagesWithOperations(confirmedDamages, []);
+  }, [confirmedDamages]);
 
   // Cargar datos del assessment siempre que estemos en el paso de Operations
   useEffect(() => {
@@ -30,36 +32,14 @@ const Operations = () => {
     }
   }, [state.assessmentId]);
 
-  // Cargar operaciones existentes o generar nuevas si es necesario
+  // Cargar datos del assessment si es necesario
   useEffect(() => {
-    if (state.assessmentId && confirmedDamages.length > 0 && operations.length === 0) {
-      console.log(
-        '🔄 Operations: Cargando operaciones para',
-        confirmedDamages.length,
-        'daños confirmados',
-      );
-
-      // Primero intentar cargar operaciones existentes
-      loadOperations(state.assessmentId!)
-        .then(() => {
-          // Si se cargaron operaciones exitosamente, continuar
-          console.log('✅ Operations: Operaciones cargadas exitosamente');
-        })
-        .catch((error) => {
-          console.error('❌ Operations: Error cargando operaciones:', error);
-          // Si no hay operaciones existentes, generar nuevas
-          generateOperations(state.assessmentId!).catch((genError) => {
-            console.error('❌ Operations: Error generando operaciones:', genError);
-          });
-        });
+    if (state.assessmentId) {
+      loadAssessmentData().catch((error: Error) => {
+        console.error('Error cargando datos del assessment:', error);
+      });
     }
-  }, [
-    state.assessmentId,
-    confirmedDamages.length,
-    operations.length,
-    loadOperations,
-    generateOperations,
-  ]);
+  }, [state.assessmentId, loadAssessmentData]);
 
   const handleUpdateOperation = (mappingId: string, newOperation: DamageAction, reason: string) => {
     if (!state.assessmentId) return;
@@ -90,45 +70,7 @@ const Operations = () => {
     navigate(`?step=damages`, { replace: true });
   };
 
-  // Mostrar loading mientras se cargan las operaciones
-  if (isLoading) {
-    return (
-      <PageShell
-        header={
-          <WizardStepperWithNav currentStep="operations" completedSteps={['intake', 'damages']} />
-        }
-        title="Operaciones de reparación"
-        subtitle="Generando recomendaciones de operaciones..."
-        content={
-          <div className="flex min-h-64 items-center justify-center">
-            <ProgressCard
-              title="Generando recomendaciones"
-              description="Analizando daños confirmados para recomendar las mejores operaciones"
-            />
-          </div>
-        }
-      />
-    );
-  }
 
-  // Mostrar error si hay algún problema
-  if (error) {
-    return (
-      <PageShell
-        header={
-          <WizardStepperWithNav currentStep="operations" completedSteps={['intake', 'damages']} />
-        }
-        title="Operaciones de reparación"
-        subtitle="Error al cargar las operaciones"
-        content={
-          <div className="py-8 text-center">
-            <p className="mb-4 text-red-600">{error}</p>
-            <Button onClick={() => clearError()}>Reintentar</Button>
-          </div>
-        }
-      />
-    );
-  }
 
   // Mostrar mensaje si no hay daños confirmados
   if (confirmedDamages.length === 0) {
@@ -157,14 +99,14 @@ const Operations = () => {
 
           {/* Operations list */}
           <div className="space-y-4">
-            {operations.map((operation) => {
-              // Intentar encontrar el daño relacionado basándose en el nombre de la parte
+            {mappedOperations.map((operation) => {
+              // Encontrar el daño relacionado basándose en el nombre de la parte
               const relatedDamage = confirmedDamages.find(
                 (damage) =>
-                  damage.subarea?.toLowerCase().includes(operation.partName.toLowerCase()) ||
                   damage.area?.toLowerCase().includes(operation.partName.toLowerCase()) ||
-                  operation.partName.toLowerCase().includes(damage.subarea?.toLowerCase() || '') ||
-                  operation.partName.toLowerCase().includes(damage.area?.toLowerCase() || ''),
+                  damage.subarea?.toLowerCase().includes(operation.partName.toLowerCase()) ||
+                  operation.partName.toLowerCase().includes(damage.area?.toLowerCase() || '') ||
+                  operation.partName.toLowerCase().includes(damage.subarea?.toLowerCase() || '')
               );
 
               return (
