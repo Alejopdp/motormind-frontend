@@ -7,7 +7,6 @@ import { Dropdown } from '@/components/atoms/Dropdown';
 interface RecommendedOperationCardProps {
   operation: BackendOperation;
   onUpdateOperation: (mappingId: string, newOperation: DamageAction, reason: string) => void;
-  // Agregar prop opcional para el daño relacionado
   relatedDamage?: BackendDamage;
 }
 
@@ -55,7 +54,6 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Validar que tenemos una operación efectiva válida
   if (!operation.effectiveOperation) {
     console.error('❌ RecommendedOperationCard: effectiveOperation es undefined', operation);
     return (
@@ -101,13 +99,6 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
             </div>
           )}
         </div>
-
-        {/* Indicador de override de usuario */}
-        {/* {operation.hasUserOverride && (
-          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-            Editado
-          </span>
-        )} */}
       </div>
 
       {/* Información del daño si está disponible
@@ -160,12 +151,12 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
           </label>
           <Dropdown.Root open={isOpen} onOpenChange={setIsOpen}>
             <Dropdown.Trigger asChild>
-              <button className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-left focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              <button className="flex min-w-[200px] items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none">
                 <span>{operationLabels[currentOperation]}</span>
                 <ChevronDown className="h-4 w-4 text-gray-400" />
               </button>
             </Dropdown.Trigger>
-            <Dropdown.Content className="w-full min-w-[200px]">
+            <Dropdown.Content className="mr-auto min-w-[200px]">
               {Object.entries(operationLabels).map(([value, label]) => (
                 <Dropdown.Item
                   key={value}
