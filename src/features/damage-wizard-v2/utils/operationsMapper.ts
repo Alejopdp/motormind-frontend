@@ -30,7 +30,7 @@ export const mapDamagesWithOperations = (
     // Si no hay mapping, crear uno por defecto
     if (!mapping) {
       return {
-        mappingId: damage._id || `damage-${Date.now()}`,
+        mappingId: damage._id || `damage-${damage.area}-${damage.subarea || 'default'}-${Math.random().toString(36).substr(2, 9)}`,
         partName: damage.area + (damage.subarea ? ` - ${damage.subarea}` : ''),
         partCode: undefined,
         proposedOperation: undefined,
@@ -45,7 +45,7 @@ export const mapDamagesWithOperations = (
 
     // Usar el mapping existente
     return {
-      mappingId: mapping.mappingId || mapping._id || `mapping-${Date.now()}`,
+      mappingId: mapping.mappingId || mapping._id || `mapping-${mapping.partName || 'unknown'}-${Math.random().toString(36).substr(2, 9)}`,
       partName: mapping.partName || damage.area,
       partCode: mapping.partCode,
       proposedOperation: mapping.proposedOperation,
