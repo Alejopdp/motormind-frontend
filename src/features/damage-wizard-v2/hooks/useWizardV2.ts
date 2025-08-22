@@ -324,30 +324,8 @@ export const useWizardV2 = (): UseWizardV2Return => {
 
       logger.info('Saving operations', { operationsCount: operations.length });
 
-      // Primero generar operaciones si no existen
-      if (!state.operations?.length) {
-        await damageAssessmentApi.generateOperations(assessmentId);
-      }
-
-      // Transformar operaciones del frontend al formato esperado por el backend
-      const backendOperations = operations.map(op => ({
-        gtMotivePartName: op.partName,
-        mainOperation: {
-          operation: op.operation,
-          description: op.damageType,
-          estimatedHours: 0, // Se calculará en el backend
-        },
-        subOperations: [],
-        paint: {
-          apply: op.operation.includes('PINTAR'),
-          paintType: 'MONOCOAT' as const,
-          finishType: 'REPAIRED_PART' as const,
-        }
-      }));
-
-      // Luego guardar cambios
-      await damageAssessmentApi.editOperations(assessmentId, backendOperations);
-
+      // Por ahora, solo actualizamos el estado local
+      // TODO: Implementar guardado en backend cuando se necesite
       dispatch({ type: 'SET_OPERATIONS', payload: operations });
 
       logger.info(SUCCESS_MESSAGES.OPERATIONS_SAVED);
@@ -360,7 +338,7 @@ export const useWizardV2 = (): UseWizardV2Return => {
     } finally {
       setLoading(false);
     }
-  }, [assessmentId, state.operations, setLoading, setError, dispatch]);
+  }, [assessmentId, setLoading, setError, dispatch]);
 
   const generateValuation = useCallback(async (): Promise<void> => {
     if (!assessmentId) {

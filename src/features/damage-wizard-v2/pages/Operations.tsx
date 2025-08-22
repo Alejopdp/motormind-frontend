@@ -15,15 +15,7 @@ const Operations = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
   const { state, loadAssessmentData } = useWizardV2();
-  const { 
-    operations, 
-    isLoading, 
-    error, 
-    recommendOperations, 
-    getOperations, 
-    updateOperations,
-    clearError 
-  } = useOperations();
+  const { operations, isLoading, error, generateOperations, clearError } = useOperations();
 
   // Obtener daños confirmados del estado del wizard
   const confirmedDamages = state.confirmedDamages || [];
@@ -40,45 +32,31 @@ const Operations = () => {
   // Cargar operaciones cuando hay daños confirmados
   useEffect(() => {
     if (state.assessmentId && confirmedDamages.length > 0 && operations.length === 0) {
-      // Intentar obtener operaciones existentes primero
-      getOperations(state.assessmentId).catch(() => {
-              // Si no hay operaciones, generar recomendaciones
-      if (state.assessmentId) {
-        recommendOperations(state.assessmentId).catch((error) => {
-          console.error('Error generando recomendaciones:', error);
-        });
-      }
+      console.log(
+        '🔄 Operations: Generando operaciones para',
+        confirmedDamages.length,
+        'daños confirmados',
+      );
+
+      // Generar operaciones directamente
+      generateOperations(state.assessmentId).catch((error) => {
+        console.error('❌ Operations: Error generando operaciones:', error);
       });
     }
-  }, [state.assessmentId, confirmedDamages.length, operations.length, getOperations, recommendOperations]);
+  }, [state.assessmentId, confirmedDamages.length, operations.length, generateOperations]);
 
   const handleUpdateOperation = (mappingId: string, newOperation: DamageAction, reason: string) => {
     if (!state.assessmentId) return;
 
-    const updatedOperations = operations.map(op => {
-      if (op.mappingId === mappingId) {
-        return {
-          ...op,
-          editedOperation: {
-            main: {
-              operation: newOperation,
-              reason,
-            },
-            subOperations: op.proposedOperation?.subOperations || [],
-          },
-          effectiveOperation: {
-            operation: newOperation,
-            reason,
-          },
-          hasUserOverride: true,
-        };
-      }
-      return op;
+    // Por ahora, solo logueamos el cambio ya que no tenemos endpoint de actualización
+    console.log('🔄 Operations: Actualización de operación:', {
+      mappingId,
+      newOperation,
+      reason,
     });
 
-    updateOperations(state.assessmentId, updatedOperations).catch((error) => {
-      console.error('Error actualizando operación:', error);
-    });
+    // TODO: Implementar actualización cuando se necesite
+    // Por ahora, las operaciones se generan una vez y no se editan
   };
 
   const goValuation = async () => {
@@ -109,7 +87,7 @@ const Operations = () => {
         title="Operaciones de reparación"
         subtitle="Generando recomendaciones de operaciones..."
         content={
-          <div className="flex justify-center items-center min-h-64">
+          <div className="flex min-h-64 items-center justify-center">
             <ProgressCard
               title="Generando recomendaciones"
               description="Analizando daños confirmados para recomendar las mejores operaciones"
@@ -130,8 +108,8 @@ const Operations = () => {
         title="Operaciones de reparación"
         subtitle="Error al cargar las operaciones"
         content={
-          <div className="text-center py-8">
-            <p className="text-red-600 mb-4">{error}</p>
+          <div className="py-8 text-center">
+            <p className="mb-4 text-red-600">{error}</p>
             <Button onClick={() => clearError()}>Reintentar</Button>
           </div>
         }

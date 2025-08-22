@@ -56,27 +56,6 @@ class DamageAssessmentApiService {
         return data;
     }
 
-    async editOperations(assessmentId: string, operations: Array<Record<string, unknown>>) {
-        const { data } = await this.api.patch(`/damage-assessments/${assessmentId}/operations`, { operations });
-        return data;
-    }
-
-    // Nuevos endpoints para recomendación de operaciones
-    async recommendOperations(assessmentId: string) {
-        const { data } = await this.api.post(`/damage-assessments/${assessmentId}/operations/recommend`, {});
-        return data;
-    }
-
-    async getOperations(assessmentId: string) {
-        const { data } = await this.api.get(`/damage-assessments/${assessmentId}/operations`);
-        return data;
-    }
-
-    async updateOperations(assessmentId: string, operations: Array<Record<string, unknown>>) {
-        const { data } = await this.api.patch(`/damage-assessments/${assessmentId}/operations`, { operations });
-        return data;
-    }
-
     async generateValuation(assessmentId: string) {
         const { data } = await this.api.post(`/damage-assessments/${assessmentId}/valuation/generate`, {});
         return data;

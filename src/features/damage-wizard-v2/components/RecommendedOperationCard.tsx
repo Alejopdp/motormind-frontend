@@ -32,6 +32,21 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
   operation,
   onUpdateOperation,
 }) => {
+  // Validar que tenemos una operación efectiva válida
+  if (!operation.effectiveOperation) {
+    console.error('❌ RecommendedOperationCard: effectiveOperation es undefined', operation);
+    return (
+      <div className="rounded-lg border border-red-200 bg-white p-6 shadow-sm">
+        <div className="text-red-600">
+          <h3 className="mb-2 text-lg font-semibold">Error en operación</h3>
+          <p className="text-sm">
+            No se pudo cargar la información de la operación para: {operation.partName}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const currentOperation = operation.effectiveOperation.operation;
   const currentReason = operation.effectiveOperation.reason;
 
@@ -42,20 +57,18 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-      <div className="flex items-start justify-between mb-4">
+    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="mb-4 flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
-            {operation.partName}
-          </h3>
+          <h3 className="mb-1 text-lg font-semibold text-gray-900">{operation.partName}</h3>
           {operation.partCode && (
-            <p className="text-sm text-gray-500 mb-2">Código: {operation.partCode}</p>
+            <p className="mb-2 text-sm text-gray-500">Código: {operation.partCode}</p>
           )}
         </div>
-        
+
         {/* Indicador de override de usuario */}
         {operation.hasUserOverride && (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
             Editado
           </span>
         )}
@@ -64,14 +77,14 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
       <div className="space-y-4">
         {/* Operación actual */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700">
             Operación recomendada
           </label>
           <div className="flex items-center space-x-3">
             <select
               value={currentOperation}
               onChange={handleOperationChange}
-              className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
             >
               {Object.entries(operationLabels).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -79,8 +92,10 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
                 </option>
               ))}
             </select>
-            
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${operationColors[currentOperation]}`}>
+
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${operationColors[currentOperation]}`}
+            >
               {operationLabels[currentOperation]}
             </span>
           </div>
@@ -91,7 +106,9 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-500">Confianza:</span>
-              <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${confidenceColors(operation.proposedOperation.main.confidence)}`}>
+              <span
+                className={`ml-2 inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${confidenceColors(operation.proposedOperation.main.confidence)}`}
+              >
                 {Math.round(operation.proposedOperation.main.confidence * 100)}%
               </span>
             </div>
@@ -107,25 +124,24 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
         {/* Razón de la operación */}
         <div>
           <span className="text-sm text-gray-500">Razón:</span>
-          <p className="text-sm text-gray-900 mt-1">
-            {currentReason}
-          </p>
+          <p className="mt-1 text-sm text-gray-900">{currentReason}</p>
         </div>
 
         {/* Sub-operaciones */}
-        {operation.proposedOperation?.subOperations && operation.proposedOperation.subOperations.length > 0 && (
-          <div>
-            <span className="text-sm text-gray-500">Sub-operaciones:</span>
-            <ul className="mt-1 space-y-1">
-              {operation.proposedOperation.subOperations.map((subOp, index) => (
-                <li key={index} className="text-sm text-gray-900 flex items-center">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
-                  {subOp.operation}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {operation.proposedOperation?.subOperations &&
+          operation.proposedOperation.subOperations.length > 0 && (
+            <div>
+              <span className="text-sm text-gray-500">Sub-operaciones:</span>
+              <ul className="mt-1 space-y-1">
+                {operation.proposedOperation.subOperations.map((subOp, index) => (
+                  <li key={index} className="flex items-center text-sm text-gray-900">
+                    <span className="mr-2 h-2 w-2 rounded-full bg-gray-400"></span>
+                    {subOp.operation}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
       </div>
     </div>
   );
