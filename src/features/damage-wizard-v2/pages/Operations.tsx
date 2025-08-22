@@ -17,29 +17,20 @@ const Operations = () => {
 
   // Obtener daños confirmados del estado del wizard
   const confirmedDamages = state.confirmedDamages || [];
-  
+
   // Mapear operaciones desde confirmedDamages (sin gtMotiveMappings por ahora)
   const mappedOperations = useMemo(() => {
     return mapDamagesWithOperations(confirmedDamages, []);
   }, [confirmedDamages]);
 
-  // Cargar datos del assessment siempre que estemos en el paso de Operations
+  // Cargar datos del assessment solo una vez al montar el componente
   useEffect(() => {
-    if (state.assessmentId) {
-      loadAssessmentData().catch((error) => {
-        console.error('Error cargando datos del assessment:', error);
-      });
-    }
-  }, [state.assessmentId]);
-
-  // Cargar datos del assessment si es necesario
-  useEffect(() => {
-    if (state.assessmentId) {
+    if (state.assessmentId && !state.confirmedDamages?.length) {
       loadAssessmentData().catch((error: Error) => {
         console.error('Error cargando datos del assessment:', error);
       });
     }
-  }, [state.assessmentId, loadAssessmentData]);
+  }, [state.assessmentId]); // Removemos loadAssessmentData de las dependencias
 
   const handleUpdateOperation = (mappingId: string, newOperation: DamageAction, reason: string) => {
     if (!state.assessmentId) return;
@@ -69,8 +60,6 @@ const Operations = () => {
     setParams({ step: 'damages' });
     navigate(`?step=damages`, { replace: true });
   };
-
-
 
   // Mostrar mensaje si no hay daños confirmados
   if (confirmedDamages.length === 0) {
@@ -106,7 +95,7 @@ const Operations = () => {
                   damage.area?.toLowerCase().includes(operation.partName.toLowerCase()) ||
                   damage.subarea?.toLowerCase().includes(operation.partName.toLowerCase()) ||
                   operation.partName.toLowerCase().includes(damage.area?.toLowerCase() || '') ||
-                  operation.partName.toLowerCase().includes(damage.subarea?.toLowerCase() || '')
+                  operation.partName.toLowerCase().includes(damage.subarea?.toLowerCase() || ''),
               );
 
               return (
