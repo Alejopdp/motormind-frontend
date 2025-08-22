@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { BackendOperation, DamageAction } from '../types';
 import { BackendDamage } from '../types/backend.types';
+import { Dropdown } from '@/components/atoms/Dropdown';
 
 interface RecommendedOperationCardProps {
   operation: BackendOperation;
@@ -51,6 +53,8 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
   onUpdateOperation,
   relatedDamage,
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   // Validar que tenemos una operación efectiva válida
   if (!operation.effectiveOperation) {
     console.error('❌ RecommendedOperationCard: effectiveOperation es undefined', operation);
@@ -69,10 +73,10 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
   const currentOperation = operation.effectiveOperation.operation;
   const currentReason = operation.effectiveOperation.reason;
 
-  const handleOperationChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newOperation = event.target.value as DamageAction;
+  const handleOperationChange = (newOperation: DamageAction) => {
     const reason = operation.hasUserOverride ? 'user_decision' : currentReason;
     onUpdateOperation(operation.mappingId, newOperation, reason);
+    setIsOpen(false);
   };
 
   return (
@@ -83,22 +87,30 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
           {operation.partCode && (
             <p className="mb-2 text-sm text-gray-500">Código: {operation.partCode}</p>
           )}
+
           {relatedDamage && (
-            <span className="ml-2 text-gray-900 capitalize">
-              {damageTypeLabels[relatedDamage.type] || relatedDamage.type}
-            </span>
+            <div className="flex items-center">
+              <span className="text-muted mr-2 text-sm capitalize">
+                {damageTypeLabels[relatedDamage.type] || relatedDamage.type}
+              </span>
+              <span
+                className={`ml-2 inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${severityColors[relatedDamage.severity]}`}
+              >
+                {severityLabels[relatedDamage.severity] || relatedDamage.severity}
+              </span>
+            </div>
           )}
         </div>
 
         {/* Indicador de override de usuario */}
-        {operation.hasUserOverride && (
+        {/* {operation.hasUserOverride && (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
             Editado
           </span>
-        )}
+        )} */}
       </div>
 
-      {/* Información del daño si está disponible */}
+      {/* Información del daño si está disponible
       {relatedDamage && (
         <div className="mb-4 rounded-lg bg-gray-50 p-4">
           <h4 className="mb-3 text-sm font-medium text-gray-700">Información del daño</h4>
@@ -138,7 +150,7 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
             </div>
           )}
         </div>
-      )}
+      )} */}
 
       <div className="space-y-4">
         {/* Operación actual */}
@@ -146,17 +158,25 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
           <label className="mb-2 block text-sm font-medium text-gray-700">
             Operación recomendada
           </label>
-          <select
-            value={currentOperation}
-            onChange={handleOperationChange}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-          >
-            {Object.entries(operationLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <Dropdown.Root open={isOpen} onOpenChange={setIsOpen}>
+            <Dropdown.Trigger asChild>
+              <button className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-left focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                <span>{operationLabels[currentOperation]}</span>
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              </button>
+            </Dropdown.Trigger>
+            <Dropdown.Content className="w-full min-w-[200px]">
+              {Object.entries(operationLabels).map(([value, label]) => (
+                <Dropdown.Item
+                  key={value}
+                  onClick={() => handleOperationChange(value as DamageAction)}
+                  className="cursor-pointer"
+                >
+                  {label}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Content>
+          </Dropdown.Root>
         </div>
 
         {/* Información de confianza y fuente */}
@@ -180,10 +200,10 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
         )}
 
         {/* Razón de la operación */}
-        <div>
+        {/* <div>
           <span className="text-sm text-gray-500">Razón:</span>
           <p className="mt-1 text-sm text-gray-900">{currentReason}</p>
-        </div>
+        </div> */}
 
         {/* Sub-operaciones */}
         {operation.proposedOperation?.subOperations &&
