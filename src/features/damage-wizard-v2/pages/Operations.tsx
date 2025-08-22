@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/atoms/Button';
 import { useWizardV2 } from '../hooks/useWizardV2';
 import { useOperations } from '../hooks/useOperations';
@@ -15,7 +15,8 @@ const Operations = () => {
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
   const { state, loadAssessmentData } = useWizardV2();
-  const { operations, isLoading, error, generateOperations, clearError } = useOperations();
+  const { operations, isLoading, error, loadOperations, generateOperations, clearError } = useOperations();
+  const [showRegenerateButton, setShowRegenerateButton] = useState(false);
 
   // Obtener daños confirmados del estado del wizard
   const confirmedDamages = state.confirmedDamages || [];
@@ -29,21 +30,28 @@ const Operations = () => {
     }
   }, [state.assessmentId]);
 
-  // Cargar operaciones cuando hay daños confirmados
+  // Cargar operaciones existentes o generar nuevas si es necesario
   useEffect(() => {
     if (state.assessmentId && confirmedDamages.length > 0 && operations.length === 0) {
       console.log(
-        '🔄 Operations: Generando operaciones para',
+        '🔄 Operations: Cargando operaciones para',
         confirmedDamages.length,
         'daños confirmados',
       );
 
-      // Generar operaciones directamente
-      generateOperations(state.assessmentId).catch((error) => {
-        console.error('❌ Operations: Error generando operaciones:', error);
+      // Primero intentar cargar operaciones existentes
+      loadOperations(state.assessmentId!).then(() => {
+        // Si se cargaron operaciones exitosamente, mostrar botón de regenerar
+        setShowRegenerateButton(true);
+      }).catch((error) => {
+        console.error('❌ Operations: Error cargando operaciones:', error);
+        // Si no hay operaciones existentes, generar nuevas
+        generateOperations(state.assessmentId!).catch((genError) => {
+          console.error('❌ Operations: Error generando operaciones:', genError);
+        });
       });
     }
-  }, [state.assessmentId, confirmedDamages.length, operations.length, generateOperations]);
+  }, [state.assessmentId, confirmedDamages.length, operations.length, loadOperations, generateOperations]);
 
   const handleUpdateOperation = (mappingId: string, newOperation: DamageAction, reason: string) => {
     if (!state.assessmentId) return;
@@ -57,6 +65,19 @@ const Operations = () => {
 
     // TODO: Implementar actualización cuando se necesite
     // Por ahora, las operaciones se generan una vez y no se editan
+  };
+
+  const handleRegenerateOperations = async () => {
+    if (!state.assessmentId) return;
+    
+    if (window.confirm('¿Estás seguro de que quieres regenerar las operaciones? Esto sobrescribirá las recomendaciones actuales.')) {
+      try {
+        await generateOperations(state.assessmentId, true);
+        setShowRegenerateButton(false);
+      } catch (error) {
+        console.error('❌ Operations: Error regenerando operaciones:', error);
+      }
+    }
   };
 
   const goValuation = async () => {
@@ -142,15 +163,40 @@ const Operations = () => {
         <>
           <OperationsInfoAlert />
 
+          {/* Botón de regenerar operaciones */}
+          {showRegenerateButton && operations.length > 0 && (
+            <div className="mb-4 flex justify-end">
+              <Button
+                onClick={handleRegenerateOperations}
+                variant="outline"
+                className="text-sm"
+              >
+                🔄 Regenerar operaciones
+              </Button>
+            </div>
+          )}
+
           {/* Operations list */}
           <div className="space-y-4">
-            {operations.map((operation) => (
-              <RecommendedOperationCard
-                key={operation.mappingId}
-                operation={operation}
-                onUpdateOperation={handleUpdateOperation}
-              />
-            ))}
+            {operations.map((operation) => {
+              // Intentar encontrar el daño relacionado basándose en el nombre de la parte
+              const relatedDamage = confirmedDamages.find(
+                (damage) =>
+                  damage.subarea?.toLowerCase().includes(operation.partName.toLowerCase()) ||
+                  damage.area?.toLowerCase().includes(operation.partName.toLowerCase()) ||
+                  operation.partName.toLowerCase().includes(damage.subarea?.toLowerCase() || '') ||
+                  operation.partName.toLowerCase().includes(damage.area?.toLowerCase() || ''),
+              );
+
+              return (
+                <RecommendedOperationCard
+                  key={operation.mappingId}
+                  operation={operation}
+                  onUpdateOperation={handleUpdateOperation}
+                  relatedDamage={relatedDamage}
+                />
+              );
+            })}
           </div>
         </>
       }

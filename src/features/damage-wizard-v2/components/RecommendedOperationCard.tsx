@@ -1,9 +1,12 @@
 import React from 'react';
 import { BackendOperation, DamageAction } from '../types';
+import { BackendDamage } from '../types/backend.types';
 
 interface RecommendedOperationCardProps {
   operation: BackendOperation;
   onUpdateOperation: (mappingId: string, newOperation: DamageAction, reason: string) => void;
+  // Agregar prop opcional para el daño relacionado
+  relatedDamage?: BackendDamage;
 }
 
 const operationLabels: Record<DamageAction, string> = {
@@ -14,12 +17,27 @@ const operationLabels: Record<DamageAction, string> = {
   REPAIR_AND_PAINT: 'Reparar y Pintar',
 };
 
-const operationColors: Record<DamageAction, string> = {
-  REPAIR: 'bg-blue-100 text-blue-800',
-  REPLACE: 'bg-red-100 text-red-800',
-  PAINT: 'bg-purple-100 text-purple-800',
-  POLISH: 'bg-green-100 text-green-800',
-  REPAIR_AND_PAINT: 'bg-orange-100 text-orange-800',
+const severityLabels: Record<string, string> = {
+  SEV1: 'Muy Leve',
+  SEV2: 'Leve',
+  SEV3: 'Moderado',
+  SEV4: 'Grave',
+  SEV5: 'Muy Grave',
+};
+
+const severityColors: Record<string, string> = {
+  SEV1: 'bg-green-100 text-green-800',
+  SEV2: 'bg-blue-100 text-blue-800',
+  SEV3: 'bg-yellow-100 text-yellow-800',
+  SEV4: 'bg-orange-100 text-orange-800',
+  SEV5: 'bg-red-100 text-red-800',
+};
+
+const damageTypeLabels: Record<string, string> = {
+  scratch: 'Arañazo',
+  dent: 'Abolladura',
+  crack: 'Grieta',
+  break: 'Rotura',
 };
 
 const confidenceColors = (confidence: number): string => {
@@ -31,6 +49,7 @@ const confidenceColors = (confidence: number): string => {
 export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> = ({
   operation,
   onUpdateOperation,
+  relatedDamage,
 }) => {
   // Validar que tenemos una operación efectiva válida
   if (!operation.effectiveOperation) {
@@ -64,6 +83,11 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
           {operation.partCode && (
             <p className="mb-2 text-sm text-gray-500">Código: {operation.partCode}</p>
           )}
+          {relatedDamage && (
+            <span className="ml-2 text-gray-900 capitalize">
+              {damageTypeLabels[relatedDamage.type] || relatedDamage.type}
+            </span>
+          )}
         </div>
 
         {/* Indicador de override de usuario */}
@@ -74,31 +98,65 @@ export const RecommendedOperationCard: React.FC<RecommendedOperationCardProps> =
         )}
       </div>
 
+      {/* Información del daño si está disponible */}
+      {relatedDamage && (
+        <div className="mb-4 rounded-lg bg-gray-50 p-4">
+          <h4 className="mb-3 text-sm font-medium text-gray-700">Información del daño</h4>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-gray-500">Tipo:</span>
+            </div>
+            <div>
+              <span className="text-gray-500">Severidad:</span>
+              <span
+                className={`ml-2 inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${severityColors[relatedDamage.severity]}`}
+              >
+                {severityLabels[relatedDamage.severity] || relatedDamage.severity}
+              </span>
+            </div>
+            {relatedDamage.confidence && (
+              <div>
+                <span className="text-gray-500">Confianza:</span>
+                <span
+                  className={`ml-2 inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${confidenceColors(relatedDamage.confidence)}`}
+                >
+                  {Math.round(relatedDamage.confidence * 100)}%
+                </span>
+              </div>
+            )}
+            {relatedDamage.area && (
+              <div>
+                <span className="text-gray-500">Área:</span>
+                <span className="ml-2 text-gray-900">{relatedDamage.area}</span>
+              </div>
+            )}
+          </div>
+          {relatedDamage.description && (
+            <div className="mt-3">
+              <span className="text-gray-500">Descripción:</span>
+              <p className="mt-1 text-sm text-gray-900">{relatedDamage.description}</p>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="space-y-4">
         {/* Operación actual */}
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">
             Operación recomendada
           </label>
-          <div className="flex items-center space-x-3">
-            <select
-              value={currentOperation}
-              onChange={handleOperationChange}
-              className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            >
-              {Object.entries(operationLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${operationColors[currentOperation]}`}
-            >
-              {operationLabels[currentOperation]}
-            </span>
-          </div>
+          <select
+            value={currentOperation}
+            onChange={handleOperationChange}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+          >
+            {Object.entries(operationLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Información de confianza y fuente */}
