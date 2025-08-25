@@ -41,3 +41,7 @@ export const ASSESSMENT_STATUS = {
   PENDING_REVIEW: 'PENDING_REVIEW',
   DAMAGES_CONFIRMED: 'DAMAGES_CONFIRMED',
 } as const;
+
+export const FEATURES = {
+  WIZARD_V2_ENABLED: import.meta.env.VITE_WIZARD_V2_ENABLED === 'true',
+} as const;

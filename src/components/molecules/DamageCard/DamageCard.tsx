@@ -31,6 +31,13 @@ const actionLabelMap: Record<DamageAction, string> = {
   [DamageAction.PAINT]: 'Pintura',
   [DamageAction.REPAIR_AND_PAINT]: 'Reparación y pintura',
   [DamageAction.REPLACE]: 'Reemplazo',
+  [DamageAction.REPAIR]: 'Reparación',
+  [DamageAction.DISASSEMBLE_AND_ASSEMBLE]: 'Desmontaje y montaje',
+  [DamageAction.ANTI_CORROSION_TREATMENT]: 'Tratamiento anticorrosión',
+  [DamageAction.VERIFY]: 'Verificación',
+  [DamageAction.ADJUST]: 'Ajuste',
+  [DamageAction.DISASSEMBLE_OR_DISMANTLE]: 'Desmontaje',
+  [DamageAction.REPAIR_BY_HAIL_FORMULA]: 'Reparación por fórmula granizo',
 };
 
 interface DamageCardProps {

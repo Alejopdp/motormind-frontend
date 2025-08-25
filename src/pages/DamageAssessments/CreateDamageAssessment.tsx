@@ -32,6 +32,7 @@ const CreateDamageAssessment = () => {
   const [searchParams] = useSearchParams();
   const carId = searchParams.get('carId');
   const navigate = useNavigate();
+
   const { enqueueSnackbar } = useSnackbar();
   const { data, setImages, setDetails, reset } = useDamageAssessmentCreation();
   // Obtener datos del siniestro desde el contexto

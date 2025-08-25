@@ -34,11 +34,31 @@ const actionLabelMap: Record<DamageAction, string> = {
   [DamageAction.PAINT]: 'Pintura',
   [DamageAction.REPAIR_AND_PAINT]: 'Reparación y pintura',
   [DamageAction.REPLACE]: 'Reemplazo',
+  [DamageAction.REPAIR]: 'Reparación',
+  [DamageAction.DISASSEMBLE_AND_ASSEMBLE]: 'Desmontaje y montaje',
+  [DamageAction.ANTI_CORROSION_TREATMENT]: 'Tratamiento anticorrosión',
+  [DamageAction.VERIFY]: 'Verificación',
+  [DamageAction.ADJUST]: 'Ajuste',
+  [DamageAction.DISASSEMBLE_OR_DISMANTLE]: 'Desmontaje',
+  [DamageAction.REPAIR_BY_HAIL_FORMULA]: 'Reparación por fórmula granizo',
 };
 
 const typeLabelMap: Record<DamageType, string> = {
   [DamageType.SCRATCH]: 'Rayón',
   [DamageType.DENT]: 'Abolladura',
+  [DamageType.CRACK]: 'Grieta',
+  [DamageType.BREAK]: 'Pieza rota',
+  [DamageType.PAINT_PEEL]: 'Desprendimiento de pintura',
+  [DamageType.DEFORMATION]: 'Deformación',
+  [DamageType.IMPACT]: 'Impacto',
+  [DamageType.RUST]: 'Óxido',
+  [DamageType.DISLOCATED_PART]: 'Pieza desplazada',
+  [DamageType.BROKEN_PART]: 'Pieza rota',
+  [DamageType.MISSING_PART]: 'Pieza faltante',
+  [DamageType.DETACHED_PART]: 'Pieza desprendida',
+  [DamageType.HOLE]: 'Agujero',
+  [DamageType.BURN]: 'Quemadura',
+  [DamageType.CORROSION]: 'Corrosión',
 };
 
 export const AddDamageModal = ({ isOpen, onClose, onAddDamage, isAdding }: AddDamageModalProps) => {

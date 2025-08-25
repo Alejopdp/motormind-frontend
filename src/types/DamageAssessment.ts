@@ -1,28 +1,10 @@
 import { Car } from './Car';
 import { DocumentLink } from './Diagnosis';
 import { PaintMaterialType } from './PaintMaterial';
+import { DamageSeverity, DamageType, DamageAction } from './shared/damage.types';
 
-export enum DamageSeverity {
-    SEV1 = 'SEV1',
-    SEV2 = 'SEV2',
-    SEV3 = 'SEV3',
-    SEV4 = 'SEV4',
-    SEV5 = 'SEV5',
-}
-
-export enum DamageAction {
-    POLISH = 'POLISH',
-    RENOVATE = 'RENOVATE',
-    QUICK_REPAIR = 'QUICK_REPAIR',
-    PAINT = 'PAINT',
-    REPAIR_AND_PAINT = 'REPAIR_AND_PAINT',
-    REPLACE = 'REPLACE',
-}
-
-export enum DamageType {
-    SCRATCH = 'scratch',
-    DENT = 'dent',
-}
+// ✅ CENTRALIZADO: Re-exportar enums desde tipos compartidos
+export { DamageSeverity, DamageType, DamageAction };
 
 export interface SparePart {
     description: string;
