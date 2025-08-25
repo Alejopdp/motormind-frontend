@@ -18,7 +18,7 @@ export const mapDamagesWithOperations = (
       const mappingPartName = mapping.partName?.toLowerCase() || '';
       const damageArea = damage.area?.toLowerCase() || '';
       const damageSubarea = damage.subarea?.toLowerCase() || '';
-      
+
       return (
         mappingPartName.includes(damageArea) ||
         mappingPartName.includes(damageSubarea) ||
@@ -51,10 +51,10 @@ export const mapDamagesWithOperations = (
       proposedOperation: mapping.proposedOperation,
       editedOperation: mapping.editedOperation,
       effectiveOperation: {
-        operation: mapping.editedOperation?.main?.operation || 
-                  mapping.proposedOperation?.main?.operation || 
-                  damage.action || 
-                  DamageAction.REPAIR,
+        operation: mapping.editedOperation?.main?.operation ||
+          mapping.proposedOperation?.main?.operation ||
+          damage.action ||
+          DamageAction.REPAIR,
         reason: mapping.editedOperation ? 'user_decision' : 'ai_recommendation'
       },
       hasUserOverride: !!mapping.editedOperation

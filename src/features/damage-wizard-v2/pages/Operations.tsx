@@ -1,14 +1,13 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect, useMemo } from 'react';
 import { Button } from '@/components/atoms/Button';
-import { useWizardV2 } from '../hooks/useWizardV2';
-import { PageShell } from '../components/PageShell';
-import { WizardStepperWithNav } from '../components/WizardStepperWithNav';
+import { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { NoConfirmedDamagesMessage } from '../components/NoConfirmedDamagesMessage';
 import { OperationsInfoAlert } from '../components/OperationsInfoAlert';
+import { PageShell } from '../components/PageShell';
 import { RecommendedOperationCard } from '../components/RecommendedOperationCard';
+import { WizardStepperWithNav } from '../components/WizardStepperWithNav';
+import { useWizardV2 } from '../hooks/useWizardV2';
 import { DamageAction } from '../types';
-import { mapDamagesWithOperations } from '../utils/operationsMapper';
 
 const Operations = () => {
   const navigate = useNavigate();
@@ -17,11 +16,6 @@ const Operations = () => {
 
   // Obtener daños confirmados del estado del wizard
   const confirmedDamages = state.confirmedDamages || [];
-
-  // Mapear operaciones desde confirmedDamages (sin gtMotiveMappings por ahora)
-  const mappedOperations = useMemo(() => {
-    return mapDamagesWithOperations(confirmedDamages, []);
-  }, [confirmedDamages]);
 
   // Cargar datos del assessment solo una vez al montar el componente
   useEffect(() => {
@@ -32,14 +26,13 @@ const Operations = () => {
     }
   }, [state.assessmentId]); // Removemos loadAssessmentData de las dependencias
 
-  const handleUpdateOperation = (mappingId: string, newOperation: DamageAction, reason: string) => {
+  const handleUpdateOperation = (providerDamageId: string, newOperation: DamageAction) => {
     if (!state.assessmentId) return;
 
     // Por ahora, solo logueamos el cambio ya que no tenemos endpoint de actualización
     console.log('🔄 Operations: Actualización de operación:', {
-      mappingId,
+      providerDamageId,
       newOperation,
-      reason,
     });
   };
 
@@ -88,22 +81,15 @@ const Operations = () => {
 
           {/* Operations list */}
           <div className="space-y-4">
-            {mappedOperations.map((operation) => {
+            {confirmedDamages.map((confirmedDamage) => {
               // Encontrar el daño relacionado basándose en el nombre de la parte
-              const relatedDamage = confirmedDamages.find(
-                (damage) =>
-                  damage.area?.toLowerCase().includes(operation.partName.toLowerCase()) ||
-                  damage.subarea?.toLowerCase().includes(operation.partName.toLowerCase()) ||
-                  operation.partName.toLowerCase().includes(damage.area?.toLowerCase() || '') ||
-                  operation.partName.toLowerCase().includes(damage.subarea?.toLowerCase() || ''),
-              );
 
               return (
                 <RecommendedOperationCard
-                  key={operation.mappingId}
-                  operation={operation}
+                  key={confirmedDamage.area}
+                  damage={confirmedDamage}
+                  proposedOperation={confirmedDamage.action as DamageAction}
                   onUpdateOperation={handleUpdateOperation}
-                  relatedDamage={relatedDamage}
                 />
               );
             })}

@@ -3,37 +3,9 @@
  * Mantenemos paridad con los tipos del backend para consistencia
  */
 
-// Enums del backend
-export enum DamageSeverity {
-  SEV1 = 'SEV1',
-  SEV2 = 'SEV2',
-  SEV3 = 'SEV3',
-  SEV4 = 'SEV4',
-  SEV5 = 'SEV5',
-}
-
-export enum DamageType {
-  SCRATCH = 'scratch',
-  DENT = 'dent',
-  CRACK = 'crack',
-  BREAK = 'break',
-}
-
-export enum DamageAction {
-  REPLACE = 'REPLACE',
-  REPAIR = 'REPAIR',
-  DISASSEMBLE_AND_ASSEMBLE = 'DISASSEMBLE_AND_ASSEMBLE',
-  PAINT = 'PAINT',
-  ANTI_CORROSION_TREATMENT = 'ANTI_CORROSION_TREATMENT',
-  VERIFY = 'VERIFY',
-  ADJUST = 'ADJUST',
-  DISASSEMBLE_OR_DISMANTLE = 'DISASSEMBLE_OR_DISMANTLE',
-  POLISH = 'POLISH',
-  REPAIR_BY_HAIL_FORMULA = 'REPAIR_BY_HAIL_FORMULA',
-  RENOVATE = 'RENOVATE',
-  QUICK_REPAIR = 'QUICK_REPAIR',
-  REPAIR_AND_PAINT = 'REPAIR_AND_PAINT',
-}
+// ✅ CENTRALIZADO: Importar enums desde tipos compartidos
+import { DamageSeverity, DamageType, DamageAction } from '@/types/shared/damage.types';
+export { DamageSeverity, DamageType, DamageAction };
 
 export enum PaintMaterialType {
   PRIMER = 'PRIMER',
@@ -97,7 +69,10 @@ export interface BackendDamage {
   additionalActions?: AdditionalAction[];
   paintWorks?: PaintWork[];
   notes?: string;
-  evidences?: DamageEvidence[];    // ✅ NUEVO: evidencias de fotos con ROI
+  evidences?: DamageEvidence[];
+  providerDamageId?: string;
+  partLabel?: string;
+  // ✅ NUEVO: evidencias de fotos con ROI
 }
 
 export interface BackendCar {

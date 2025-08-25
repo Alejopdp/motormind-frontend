@@ -4,6 +4,7 @@
 
 import { Damage, Severity } from '../types';
 import { BackendDamage, BackendCar, BackendWorkflow, BackendTchekAggregate } from '../types/backend.types';
+import { damageTypeMap } from '@/types/shared/damage.types';
 
 // Mapeo de severidades del backend al frontend
 const severityMap: Record<string, Severity> = {
@@ -69,23 +70,6 @@ const partNameMap: Record<string, string> = {
   'CAPTEUR DE PARKING Arrière Droite': 'Sensor aparcamiento tr dr',
 };
 
-// ✅ EXPANDIDO: Mapeo de tipos de daño a descripciones en español
-const damageTypeMap: Record<string, string> = {
-  'dent': 'Abolladura',
-  'scratch': 'Rayón',
-  'broken': 'Rotura',
-  'broken_part': 'Pieza rota', // ✅ NUEVO
-  'dislocated': 'Desplazamiento',
-  'dislocated_part': 'Pieza desplazada', // ✅ NUEVO
-  'crack': 'Grieta',
-  'hole': 'Agujero',
-  'burn': 'Quemadura',
-  'corrosion': 'Corrosión',
-  'paint_peel': 'Desprendimiento de pintura', // ✅ NUEVO
-  'deformation': 'Deformación', // ✅ NUEVO
-  'impact': 'Impacto', // ✅ NUEVO
-  'rust': 'Óxido', // ✅ NUEVO
-};
 
 // Respuesta completa del endpoint de damages
 export interface BackendDamagesResponse {

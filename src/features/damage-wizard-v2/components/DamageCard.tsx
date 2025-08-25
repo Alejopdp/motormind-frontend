@@ -23,15 +23,15 @@ interface DamageCardProps {
  */
 
 const severityColors = {
-  leve: 'text-success border-success-muted bg-success-muted',
-  medio: 'text-warning border-warning-muted bg-warning-muted',
-  grave: 'text-destructive border-destructive bg-destructive/10',
+  leve: 'text-success-foreground bg-success',
+  medio: 'text-warning-foreground bg-warning',
+  grave: 'text-destructive-foreground bg-destructive',
 };
 
 const confidenceColor = (confidence: number): string => {
   const confidencePercent = confidence * 100;
   if (confidencePercent >= 90) return 'bg-success text-success-foreground';
-  if (confidencePercent >= 80) return 'bg-warning text-warning-foreground';
+  if (confidencePercent >= 80) return 'bg-yellow-100 text-yellow-800';
   return 'bg-muted text-muted-foreground';
 };
 
